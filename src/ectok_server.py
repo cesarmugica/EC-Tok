@@ -28,7 +28,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, unquote, urlsplit
 
-APP_VERSION = "1.0.0"
+APP_VERSION = "1.1.0"
 
 try:  # lo genera windows/build.ps1
     from ectok_build import BUILD_DATE  # type: ignore[import-not-found]
@@ -54,6 +54,9 @@ def ectok_home() -> Path:
 
 HOME = ectok_home()
 SOUNDS_DIR = HOME / "sounds"
+ANIM_USER = HOME / "animaciones"     # las tuyas (GIF, WebP, APNG o WebM con transparencia)
+ANIM_DEFAULT = WEB_ROOT / "anim"     # las que trae EC-Tok
+ANIM_EXTS = {".gif": "image/gif", ".webp": "image/webp", ".png": "image/png", ".apng": "image/apng", ".webm": "video/webm"}
 
 
 def _setup_logging() -> None:
@@ -104,6 +107,34 @@ DEFAULT_CONFIG: dict = {
             "follow_text": "Gracias por seguirme, {user}", "share_text": "Gracias por compartir, {user}"},
     "goals": [{"id": "likes", "on": True, "kind": "likes", "target": 10000, "title": "Meta de likes"}],
     "top": {"count": 5, "title": "Top donadores"},
+    "anims": {
+        # trigger: any_gift | gift | min_diamonds | follow | share | likes | subscribe | superfan | envelope |
+        #          battle_start | battle_end | booster
+        "rules": [
+            {"id": "heartme", "on": True, "trigger": "gift", "gift": "Heart Me", "min_diamonds": 1, "every": 1000, "multiplier": 0,
+             "file": "corazones.webp", "seconds": 4, "size": 70},
+            {"id": "follow", "on": True, "trigger": "follow", "gift": "", "min_diamonds": 1, "every": 1000, "multiplier": 0,
+             "file": "gracias.webp", "seconds": 3, "size": 60},
+            {"id": "big", "on": True, "trigger": "min_diamonds", "gift": "", "min_diamonds": 1000, "every": 1000, "multiplier": 0,
+             "file": "fuegos-artificiales.webp", "seconds": 5, "size": 90},
+            {"id": "chest", "on": True, "trigger": "envelope", "gift": "", "min_diamonds": 1, "every": 1000, "multiplier": 0,
+             "file": "confeti.webp", "seconds": 4, "size": 90},
+            {"id": "sub", "on": True, "trigger": "subscribe", "gift": "", "min_diamonds": 1, "every": 1000, "multiplier": 0,
+             "file": "estrellas.webp", "seconds": 4, "size": 80},
+            {"id": "x2", "on": True, "trigger": "booster", "gift": "", "min_diamonds": 1, "every": 1000, "multiplier": 2,
+             "file": "x2.webp", "seconds": 4, "size": 70},
+            {"id": "x3", "on": True, "trigger": "booster", "gift": "", "min_diamonds": 1, "every": 1000, "multiplier": 3,
+             "file": "x3.webp", "seconds": 4, "size": 70},
+        ],
+        "quick": [
+            {"id": "q1", "label": "Corazones", "file": "corazones.webp"}, {"id": "q2", "label": "Confeti", "file": "confeti.webp"},
+            {"id": "q3", "label": "¡Gracias!", "file": "gracias.webp"}, {"id": "q4", "label": "x2", "file": "x2.webp"},
+            {"id": "q5", "label": "x3", "file": "x3.webp"}, {"id": "q6", "label": "Fuegos", "file": "fuegos-artificiales.webp"},
+        ],
+        "quick_seconds": 4,
+        "quick_size": 70,
+        "brb": {"file": "cafe-ya-regreso.webp", "text": "Ya regresamos", "sub": "No te vayas 💖", "dim": True},
+    },
     "language": "es",
 }
 
@@ -220,6 +251,35 @@ def clean_config(data: dict) -> dict:
                               "kind": goal["kind"], "target": int(_num(goal.get("target"), 100, 1, 1_000_000_000)),
                               "title": _text(goal.get("title"), "Meta", 60)})
         cfg["goals"] = goals
+    anims = data.get("anims")
+    if isinstance(anims, dict):
+        a = cfg["anims"]
+        triggers = ("any_gift", "gift", "min_diamonds", "follow", "share", "likes", "subscribe", "superfan", "envelope",
+                    "battle_start", "battle_end", "booster")
+        if isinstance(anims.get("rules"), list):
+            rules = []
+            for r in anims["rules"][:60]:
+                if isinstance(r, dict) and r.get("trigger") in triggers:
+                    rules.append({"id": _text(r.get("id"), uuid.uuid4().hex[:8], 20), "on": r.get("on") is not False,
+                                  "trigger": r["trigger"], "gift": _text(r.get("gift"), "", 60).strip(),
+                                  "min_diamonds": int(_num(r.get("min_diamonds"), 1, 0, 1_000_000)),
+                                  "every": int(_num(r.get("every"), 1000, 10, 10_000_000)),
+                                  "multiplier": int(_num(r.get("multiplier"), 0, 0, 5)),
+                                  "file": Path(str(r.get("file") or "")).name, "seconds": float(_num(r.get("seconds"), 4, 1, 30)),
+                                  "size": int(_num(r.get("size"), 70, 10, 100))})
+            a["rules"] = rules
+        if isinstance(anims.get("quick"), list):
+            a["quick"] = [{"id": _text(q.get("id"), uuid.uuid4().hex[:8], 20), "label": _text(q.get("label"), "Animación", 30),
+                           "file": Path(str(q.get("file") or "")).name} for q in anims["quick"][:12] if isinstance(q, dict)]
+        a["quick_seconds"] = float(_num(anims.get("quick_seconds"), a["quick_seconds"], 1, 30))
+        a["quick_size"] = int(_num(anims.get("quick_size"), a["quick_size"], 10, 100))
+        brb = anims.get("brb")
+        if isinstance(brb, dict):
+            a["brb"]["file"] = Path(str(brb.get("file") or a["brb"]["file"])).name
+            a["brb"]["text"] = _text(brb.get("text"), a["brb"]["text"], 60)
+            a["brb"]["sub"] = _text(brb.get("sub"), a["brb"]["sub"], 80)
+            if isinstance(brb.get("dim"), bool):
+                a["brb"]["dim"] = brb["dim"]
     top = data.get("top")
     if isinstance(top, dict):
         cfg["top"]["count"] = int(_num(top.get("count"), cfg["top"]["count"], 1, 10))
@@ -264,13 +324,84 @@ BUS = Bus()
 
 from ectok_live import Live, new_event, test_event  # noqa: E402
 
-LIVE = Live(emit=BUS.emit, log=log)
+# ---------------------------------------------------------------------------
+# Animaciones: banco (las de EC-Tok + las tuyas), reglas automáticas y «ya regresamos»
+# ---------------------------------------------------------------------------
+BRB = {"on": False}
+LIKE_MARKS: dict[str, int] = {}
+
+
+def list_animations() -> list[dict]:
+    found: dict[str, dict] = {}
+    for folder, source in ((ANIM_DEFAULT, "ec-tok"), (ANIM_USER, "tuya")):
+        if folder.is_dir():
+            for path in sorted(folder.iterdir()):
+                if path.is_file() and path.suffix.lower() in ANIM_EXTS:
+                    found[path.name] = {"file": path.name, "name": path.stem.replace("-", " ").replace("_", " "),
+                                        "source": source, "video": path.suffix.lower() == ".webm"}
+    return sorted(found.values(), key=lambda a: (a["source"] != "tuya", a["name"]))
+
+
+def anim_path(name: str) -> Path | None:
+    name = Path(name).name
+    for folder in (ANIM_USER, ANIM_DEFAULT):
+        target = folder / name
+        if target.is_file() and target.suffix.lower() in ANIM_EXTS:
+            return target
+    return None
+
+
+def anim_event(file: str, seconds: float, size: int, label: str = "", manual: bool = False) -> dict:
+    return new_event("anim", file=file, video=file.lower().endswith(".webm"), seconds=seconds, size=size,
+                     label=label, manual=manual)
+
+
+def anims_for(ev: dict) -> list[dict]:
+    """Qué animación toca con este evento (la regla más específica gana)."""
+    rules = [r for r in CONFIG["anims"]["rules"] if r["on"] and r["file"]]
+    kind, chosen = ev.get("type"), []
+    if kind == "gift":
+        gift = ev["gift"]
+        exact = [r for r in rules if r["trigger"] == "gift" and r["gift"].lower() == gift["name"].lower()]
+        by_min = sorted([r for r in rules if r["trigger"] == "min_diamonds" and gift["total"] >= r["min_diamonds"]],
+                        key=lambda r: r["min_diamonds"], reverse=True)
+        anyg = [r for r in rules if r["trigger"] == "any_gift"]
+        chosen = (exact or by_min or anyg)[:1]
+    elif kind in ("follow", "share", "subscribe", "superfan", "envelope"):
+        chosen = [r for r in rules if r["trigger"] == kind][:1]
+    elif kind == "battle":
+        chosen = [r for r in rules if r["trigger"] == "battle_" + ev.get("phase", "start")][:1]
+    elif kind == "booster":
+        mult = ev.get("multiplier") or 0
+        exact = [r for r in rules if r["trigger"] == "booster" and r["multiplier"] == mult and mult]
+        chosen = (exact or [r for r in rules if r["trigger"] == "booster" and not r["multiplier"]])[:1]
+    elif kind == "like":
+        likes = LIVE.stats.likes
+        for r in rules:
+            if r["trigger"] == "likes":
+                mark = likes // r["every"] * r["every"]
+                if r["id"] not in LIKE_MARKS:
+                    LIKE_MARKS[r["id"]] = mark  # empezar a contar desde donde va el live
+                elif mark > LIKE_MARKS[r["id"]]:
+                    LIKE_MARKS[r["id"]] = mark
+                    chosen.append(r)
+    return [anim_event(r["file"], r["seconds"], r["size"], manual=False) for r in chosen]
+
+
+def live_emit(event: dict) -> None:
+    BUS.emit(event)
+    if event.get("type") in ("gift", "follow", "share", "like", "subscribe", "superfan", "envelope", "battle", "booster"):
+        for anim in anims_for(event):
+            BUS.emit(anim)
+
+
+LIVE = Live(emit=live_emit, log=log)
 
 
 def overlay_payload() -> dict:
     """Lo que necesitan los overlays: estilos, alertas, metas y el estado del live."""
     return {"style": CONFIG["style"], "alerts": CONFIG["alerts"], "goals": CONFIG["goals"], "top": CONFIG["top"],
-            "stats": LIVE.stats.public(CONFIG["top"]["count"])}
+            "stats": LIVE.stats.public(CONFIG["top"]["count"]), "brb": {**CONFIG["anims"]["brb"], **BRB}}
 
 
 # ---------------------------------------------------------------------------
@@ -365,7 +496,7 @@ class Handler(BaseHTTPRequestHandler):
 
     def log_message(self, fmt: str, *args) -> None:  # noqa: ANN002
         text = fmt % args
-        if any(x in text for x in ("/api/ping", "/api/stream", "/sound/", "/img/", '"GET /overlay', "/api/state")):
+        if any(x in text for x in ("/api/ping", "/api/stream", "/sound/", "/img/", "/anim/", '"GET /overlay', "/api/state")):
             return
         log("HTTP " + text)
 
@@ -443,11 +574,20 @@ class Handler(BaseHTTPRequestHandler):
                 self.send_file(target)
             else:
                 self.send_error(404)
+        elif path.startswith("/anim/"):
+            target = anim_path(unquote(path[len("/anim/"):]))
+            if target:
+                self._send_bytes(target, ANIM_EXTS[target.suffix.lower()])
+            else:
+                self.send_error(404)
+        elif path == "/api/animations":
+            self.send_json({"ok": True, "animations": list_animations()})
         elif path.startswith("/sound/"):
             self._send_sound(unquote(path[len("/sound/"):]))
         elif path == "/api/info":
             LAST_PING = time.time()
-            self.send_json({"version": APP_VERSION, "build_date": BUILD_DATE, "config": CONFIG,
+            self.send_json({"version": APP_VERSION, "build_date": BUILD_DATE, "config": CONFIG, "brb": BRB,
+                            "animations": list_animations(),
                             "live": LIVE.public(CONFIG["top"]["count"]), "port": self.port,
                             "recent": list(LIVE.recent)[-60:]})
         elif path == "/api/overlay":
@@ -490,6 +630,14 @@ class Handler(BaseHTTPRequestHandler):
             pass
         finally:
             BUS.unsubscribe(sid)
+
+    def _send_bytes(self, target: Path, ctype: str) -> None:
+        data = target.read_bytes()
+        self.send_response(200)
+        self.send_header("Content-Type", ctype)
+        self.send_header("Content-Length", str(len(data)))
+        self.end_headers()
+        self.wfile.write(data)
 
     def _send_sound(self, name: str) -> None:
         target = SOUNDS_DIR / Path(name).name
@@ -540,6 +688,22 @@ class Handler(BaseHTTPRequestHandler):
             LIVE.stats.reset()
             BUS.emit(new_event("stats_reset"))
             self.send_json({"ok": True, "live": LIVE.public(CONFIG["top"]["count"])})
+        elif path == "/api/anim/play":
+            file = Path(str(data.get("file") or "")).name
+            if not anim_path(file):
+                self.send_json({"ok": False, "error": "No encontré esa animación."}, 404)
+                return
+            a = CONFIG["anims"]
+            BUS.emit(anim_event(file, float(_num(data.get("seconds"), a["quick_seconds"], 1, 30)),
+                                int(_num(data.get("size"), a["quick_size"], 10, 100)), _text(data.get("label"), "", 30), manual=True))
+            self.send_json({"ok": True})
+        elif path == "/api/brb":
+            BRB["on"] = bool(data.get("on"))
+            BUS.emit(new_event("brb", brb={**CONFIG["anims"]["brb"], **BRB}))
+            self.send_json({"ok": True, "brb": BRB})
+        elif path == "/api/anims/open":
+            open_in_explorer(ANIM_USER)
+            self.send_json({"ok": True})
         elif path == "/api/sound/pick":
             chosen = pick_sound()
             if not chosen:
@@ -602,6 +766,15 @@ def main() -> int:
         return 0
     server.daemon_threads = True
     log(f"EC-Tok {APP_VERSION} ({BUILD_DATE or 'desarrollo'}) en {url}")
+    with contextlib.suppress(OSError):
+        ANIM_USER.mkdir(parents=True, exist_ok=True)
+        readme = ANIM_USER / "LEEME.txt"
+        if not readme.exists():
+            readme.write_text(
+                "Pon aquí tus animaciones y aparecerán en EC-Tok (pestaña Animaciones → «Actualizar lista»).\n\n"
+                "Formatos: WebM con transparencia o WebP animado (se ven mejor), APNG o GIF.\n"
+                "Ojo: el GIF solo tiene transparencia de «todo o nada», así que las orillas se ven serruchadas.\n"
+                "Si una tuya se llama igual que una de EC-Tok, se usa la tuya.\n", encoding="utf-8")
     if not args.stay:
         threading.Thread(target=_idle_watch, args=(server,), daemon=True).start()
     if not args.no_browser:

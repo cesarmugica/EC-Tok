@@ -39,6 +39,20 @@
   .confetti { position: fixed; top: -20px; width: 12px; height: 18px; border-radius: 3px; pointer-events: none; animation: fall linear forwards; }
   @keyframes fall { to { transform: translateY(110vh) rotate(720deg); } }
 
+  /* ---------- animaciones ---------- */
+  #anim { position: fixed; inset: 0; pointer-events: none; z-index: 5; }
+  #anim .a { position: absolute; left: 50%; transform: translateX(-50%); object-fit: contain; animation: fade .35s ease both; }
+  #anim .a.top { top: 2vh; } #anim .a.center { top: 50%; transform: translate(-50%, -50%); } #anim .a.bottom { bottom: 2vh; }
+  #anim .a.out { animation: fadeout .4s ease both; }
+  @keyframes fadeout { to { opacity: 0; } }
+  /* ---------- ya regresamos ---------- */
+  #brb { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2vh;
+    z-index: 4; animation: fade .6s ease both; }
+  #brb.dim { background: radial-gradient(circle at 50% 45%, rgba(20,20,30,.55), rgba(10,10,16,.9)); }
+  #brb .pic { height: 46vh; max-width: 80vw; object-fit: contain; }
+  #brb h1 { margin: 0; font-size: max(5vh, 30px); font-weight: 900; text-align: center; }
+  #brb p { margin: 0; font-size: max(2.8vh, 18px); font-weight: 700; color: var(--c2); text-align: center; }
+
   /* ---------- metas ---------- */
   #goal { margin: 12px; display: flex; flex-direction: column; gap: 14px; }
   .goal { padding: 12px 16px; border-radius: 18px; background: rgba(15,15,22,.72); border: 2px solid rgba(255,255,255,.12); }
@@ -64,6 +78,8 @@
 </head>
 <body>
 <div id="alerts" class="top"></div>
+<div id="brb" hidden></div>
+<div id="anim"></div>
 <div id="goal" hidden></div>
 <div id="top" hidden></div>
 <script>
@@ -145,9 +161,38 @@
       `<li class="shadow"><span class="n">${['🥇', '🥈', '🥉'][i] || i + 1}</span>${d.avatar ? `<img src="${esc(d.avatar)}" alt="">` : '<span class="av">👤</span>'}<span class="nm">${esc(d.name)}</span><span>💎 ${d.diamonds.toLocaleString('es-MX')}</span></li>`).join('')}</ol>` : '<div class="empty shadow">Todavía nadie… ¡manda el primer regalo!</div>'}</div>`;
   }
 
+  // ---------- animaciones (una a la vez, en fila) ----------
+  const animQueue = [];
+  let animShowing = false;
+  function playAnim(a) { if (animQueue.length < 30) animQueue.push(a); nextAnim(); }
+  function nextAnim() {
+    if (animShowing || !animQueue.length) return;
+    animShowing = true;
+    const a = animQueue.shift(), src = '/anim/' + encodeURIComponent(a.file) + '?t=' + Date.now();
+    const el = document.createElement(a.video ? 'video' : 'img');
+    el.className = 'a center'; el.src = src; el.style.height = a.size + 'vh'; el.style.maxWidth = '96vw';
+    if (a.video) { el.muted = true; el.loop = true; el.autoplay = true; el.playsInline = true; }
+    let done = false;
+    const finish = () => { if (done) return; done = true; el.className = 'a center out'; setTimeout(() => { el.remove(); animShowing = false; nextAnim(); }, 400); };
+    el.onerror = finish;
+    $('#anim').appendChild(el);
+    setTimeout(finish, a.seconds * 1000);
+  }
+  function showBrb(b) {
+    const box = $('#brb');
+    if (!b || !b.on) { box.hidden = true; box.innerHTML = ''; return; }
+    const src = '/anim/' + encodeURIComponent(b.file);
+    const pic = b.file.toLowerCase().endsWith('.webm') ? `<video class="pic" src="${src}" autoplay muted loop playsinline></video>` : `<img class="pic" src="${src}" alt="">`;
+    box.className = b.dim ? 'dim' : '';
+    box.innerHTML = `${pic}<h1 class="shadow">${esc(b.text)}</h1>${b.sub ? `<p class="shadow">${esc(b.sub)}</p>` : ''}`;
+    box.hidden = false;
+  }
+
   function onEvent(ev) {
+    if (ev.type === 'anim') { if (which.includes('anim')) playAnim(ev); return; }
+    if (ev.type === 'brb') { if (which.includes('anim')) showBrb(ev.brb); return; }
     if (ev.stats) stats = ev.stats;
-    if (ev.type === 'config') { cfg = ev.overlay; stats = ev.overlay.stats; applyStyle(); }
+    if (ev.type === 'config') { cfg = ev.overlay; stats = ev.overlay.stats; applyStyle(); if (which.includes('anim')) showBrb(cfg.brb); }
     if (ev.type === 'stats_reset') { load(); return; }
     if (which.includes('alerts')) {
       const conf = wantAlert(ev); if (conf) { queue.push({ev, conf}); next(); }
@@ -160,6 +205,7 @@
     const data = await (await fetch('/api/overlay')).json();
     cfg = data; stats = data.stats; likeMark = Math.floor(stats.likes / (cfg.alerts.like.every || 1)) * (cfg.alerts.like.every || 1);
     applyStyle();
+    if (which.includes('anim')) showBrb(data.brb);
     $('#goal').hidden = !which.includes('goal'); $('#top').hidden = !which.includes('top'); $('#alerts').hidden = !which.includes('alerts');
     drawGoals(); drawTop();
   }

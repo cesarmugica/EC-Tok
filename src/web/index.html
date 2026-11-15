@@ -89,6 +89,22 @@
       background: repeating-conic-gradient(#20232a 0% 25%, #191b20 0% 50%) 50% / 24px 24px; }
     .preview iframe { width: 100%; height: 100%; border: 0; color-scheme: normal; background: transparent; }
     .update { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between; padding: 10px 14px; border-radius: 12px; background: color-mix(in srgb, var(--accent) 14%, var(--surface)); border: 1px solid var(--accent); }
+    .quickbar { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; margin-top: 10px; }
+    .quickbar button { display: flex; align-items: center; gap: 8px; padding: 6px 10px 6px 6px; background: var(--surface-2); color: var(--text); text-align: left; }
+    .quickbar button:hover { background: var(--surface-3); }
+    .quickbar img, .quickbar video, .bank img, .bank video, td .thumb { width: 44px; height: 44px; object-fit: contain; border-radius: 8px;
+      background: repeating-conic-gradient(#2a2d35 0% 25%, #20232a 0% 50%) 50% / 12px 12px; flex: none; }
+    .quickbar kbd { margin-left: auto; color: var(--muted); font-size: .75rem; }
+    .brbbtn { padding: 12px 20px; font-size: 1rem; }
+    .brbbtn.on { background: var(--ok); color: #0b2a18; }
+    .bank { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; margin-top: 12px; }
+    .bank .it { border: 1px solid var(--border); border-radius: 12px; padding: 8px; display: grid; gap: 6px; justify-items: center; background: var(--bg); }
+    .bank .it img, .bank .it video { width: 96px; height: 96px; }
+    .bank .it span { font-size: .8rem; text-align: center; }
+    .bank .it small { color: var(--muted); font-size: .7rem; }
+    .thumb, td .thumb { width: 36px !important; height: 36px !important; vertical-align: middle; object-fit: contain; border-radius: 8px;
+      background: repeating-conic-gradient(#2a2d35 0% 25%, #20232a 0% 50%) 50% / 12px 12px; flex: none; }
+    table.rules td:nth-child(5) { white-space: nowrap; }
     footer { color: var(--muted); font-size: .76rem; text-align: center; padding-bottom: 20px; }
   </style>
 </head>
@@ -100,6 +116,7 @@
 <nav class="tabs">
   <button type="button" data-tab="live" class="on">🔴 En vivo</button>
   <button type="button" data-tab="alerts">🔔 Alertas</button>
+  <button type="button" data-tab="anims">🎬 Animaciones</button>
   <button type="button" data-tab="sounds">🔊 Sonidos</button>
   <button type="button" data-tab="tts">🗣 Voz (leer chat)</button>
   <button type="button" data-tab="goals">🎯 Metas y top</button>
@@ -152,6 +169,12 @@
       </div>
     </div>
     <div class="panel" style="margin-top:16px">
+      <h2>⚡ Acceso rápido</h2>
+      <p class="help">Clic (o las teclas 1 a 9 cuando no estás escribiendo) y la animación sale en tu live. Se editan en 🎬 Animaciones.</p>
+      <div class="quickbar" id="quickLive"></div>
+      <div class="row"><button type="button" class="brbbtn" id="brbLive">☕ Poner «Ya regresamos»</button></div>
+    </div>
+    <div class="panel" style="margin-top:16px">
       <h2>📺 Poner las alertas en tu live</h2>
       <p class="help">Copia una dirección y agrégala como fuente web: en <b>TikTok LIVE Studio</b> «➕ Agregar fuente → Enlace (Link)», en <b>OBS</b> «Fuente → Navegador». EC-Tok tiene que estar abierto mientras transmites. Los sonidos y la voz suenan en tu PC (asegúrate de que LIVE Studio u OBS capture el audio del escritorio).</p>
       <div id="urls"></div>
@@ -180,6 +203,52 @@
         <button type="button" class="secondary small" data-test="follow">💖 Follow</button>
         <button type="button" class="secondary small" data-test="share">📣 Compartir</button></div>
       <div class="preview"><iframe id="previewAlerts" title="Vista previa"></iframe></div>
+    </div>
+  </section>
+
+  <!-- ===================== ANIMACIONES ===================== -->
+  <section data-page="anims" hidden>
+    <div class="panel">
+      <h2>🎬 Animaciones automáticas</h2>
+      <p class="help">Salen solas en el overlay <b>🎬 Animaciones</b> cuando pasa algo en tu live. Si un regalo cumple varias reglas, gana la más específica (el regalo exacto, luego «N 💎 o más», luego «cualquier regalo»). Si llegan varias juntas, salen en fila.</p>
+      <table class="rules">
+        <thead><tr><th></th><th>Cuándo</th><th>Detalle</th><th>Animación</th><th>Dura</th><th>Tamaño</th><th></th></tr></thead>
+        <tbody id="animRows"></tbody>
+      </table>
+      <div class="row"><button type="button" id="addAnim">➕ Agregar animación automática</button>
+        <span class="field">Probar:</span>
+        <button type="button" class="secondary small" data-test="gift" data-gift="Heart Me">💗 Heart Me</button>
+        <button type="button" class="secondary small" data-test="envelope">🎉 Cofre</button>
+        <button type="button" class="secondary small" data-test="subscribe">⭐ Suscripción</button>
+        <button type="button" class="secondary small" data-test="booster" data-gift="2">x2</button>
+        <button type="button" class="secondary small" data-test="booster" data-gift="3">x3</button>
+        <button type="button" class="secondary small" data-test="battle" data-gift="start">⚔ Batalla</button></div>
+      <p class="help">Las batallas y los potenciadores x2/x3 casi no están documentados por TikTok: EC-Tok intenta reconocerlos solo. Si en tu live no salen, usa los botones de acceso rápido (y mándame tu registro para afinarlos).</p>
+    </div>
+    <div class="panel">
+      <h2>⚡ Botones de acceso rápido</h2>
+      <p class="help">Para lanzar una animación cuando tú quieras (también con las teclas 1 a 9 en la pestaña 🔴 En vivo).</p>
+      <div id="quickRows"></div>
+      <div class="row"><button type="button" id="addQuick">➕ Agregar botón</button>
+        <label class="field">Duran <input type="number" id="quickSeconds" min="1" max="30" style="width:64px"> s</label>
+        <label class="field">Tamaño <input type="range" id="quickSize" min="10" max="100"></label></div>
+    </div>
+    <div class="panel">
+      <h2>☕ «Ya regresamos»</h2>
+      <p class="help">Para cuando te paras un momento: se queda en pantalla (con la animación que elijas) hasta que lo quitas.</p>
+      <div class="row">
+        <label class="field">Animación <select id="brbFile"></select></label>
+        <label class="field">Texto <input type="text" id="brbText" style="width:220px"></label>
+        <label class="field">Abajo <input type="text" id="brbSub" style="width:220px"></label>
+        <label class="check"><input type="checkbox" id="brbDim"> Oscurecer el fondo</label>
+      </div>
+      <div class="row"><button type="button" class="brbbtn" id="brbAnims">☕ Poner «Ya regresamos»</button></div>
+    </div>
+    <div class="panel">
+      <h2>🗂 Banco de animaciones</h2>
+      <p class="help">Las de EC-Tok y las tuyas. Para agregar las tuyas, cópialas a la carpeta de animaciones y dale «Actualizar lista». Mejor <b>WebM con transparencia</b> o <b>WebP animado</b> (orillas lisas); también <b>APNG</b> y <b>GIF</b> (el GIF solo tiene transparencia de «todo o nada»).</p>
+      <div class="row"><button type="button" class="secondary" id="openAnims">📂 Abrir carpeta de animaciones</button><button type="button" class="secondary" id="reloadAnims">🔄 Actualizar lista</button></div>
+      <div class="bank" id="bank"></div>
     </div>
   </section>
 
@@ -316,14 +385,16 @@
   }
 
   // ---------- lista de eventos ----------
-  const ICON = {gift: '🎁', follow: '💖', share: '📣', like: '❤️', comment: '💬', system: 'ℹ️'};
+  const ICON = {gift: '🎁', follow: '💖', share: '📣', like: '❤️', comment: '💬', system: 'ℹ️', subscribe: '⭐', superfan: '🌟', envelope: '🎉', battle: '⚔', booster: '✖'};
   let feedCount = 0;
   function addFeed(ev) {
     if (!ICON[ev.type]) return;
     const u = ev.user ? `<span class="u">${esc(ev.user.name)}</span>` : '';
     const text = ev.type === 'gift' ? `${u} envió <span class="g">${ev.gift.count}× ${esc(ev.gift.name)}</span> (💎 ${fmt(ev.gift.total)})`
       : ev.type === 'follow' ? `${u} te sigue` : ev.type === 'share' ? `${u} compartió el live`
-      : ev.type === 'like' ? `${u} dio ${fmt(ev.count)} likes` : ev.type === 'comment' ? `${u}: ${esc(ev.text)}` : esc(ev.text);
+      : ev.type === 'like' ? `${u} dio ${fmt(ev.count)} likes` : ev.type === 'comment' ? `${u}: ${esc(ev.text)}`
+      : ev.type === 'subscribe' ? `${u} se suscribió` : ev.type === 'superfan' ? `${u} es Super Fan` : ev.type === 'envelope' ? `${u} soltó un cofre (regalo de la comunidad)`
+      : ev.type === 'battle' ? (ev.phase === 'end' ? 'Terminó la batalla' : '¡Empezó una batalla!') : ev.type === 'booster' ? `Potenciador ${ev.multiplier ? 'x' + ev.multiplier : ''} en la batalla` : esc(ev.text);
     const li = document.createElement('li');
     if (ev.test) li.className = 'test';
     li.innerHTML = `<span>${ICON[ev.type]}</span><span>${text}${ev.test ? ' <small style="color:var(--muted)">(prueba)</small>' : ''}</span><span class="t">${new Date(ev.ts * 1000).toLocaleTimeString('es-MX', {hour: '2-digit', minute: '2-digit', second: '2-digit'})}</span>`;
@@ -410,7 +481,8 @@
   // ---------- eventos en vivo ----------
   function onEvent(ev) {
     if (ev.type === 'status') { live.state = ev.state; live.message = ev.message; live.username = ev.username; showLive(); return; }
-    if (ev.type === 'config') return;
+    if (ev.type === 'config' || ev.type === 'anim') return;
+    if (ev.type === 'brb') { brbOn = !!ev.brb.on; showBrb(); return; }
     if (ev.type === 'stats_reset') { refresh(); return; }
     if (ev.stats) showStats(ev.stats);
     addFeed(ev); soundsFor(ev); speakFor(ev);
@@ -514,13 +586,98 @@
 
   function fillUrls() {
     const base = `http://127.0.0.1:${port}/overlay?w=`;
-    const list = [['🔔 Alertas', base + 'alerts'], ['🎯 Metas', base + 'goal'], ['🏆 Top donadores', base + 'top']];
+    const list = [['🔔 Alertas', base + 'alerts'], ['🎬 Animaciones', base + 'anim'], ['🎯 Metas', base + 'goal'], ['🏆 Top donadores', base + 'top']];
     $('#urls').innerHTML = list.map(([n, u]) => `<div class="url"><b>${n}</b><code>${esc(u)}</code><button type="button" class="secondary small" data-copy="${esc(u)}">📋 Copiar</button></div>`).join('');
     $('#previewAlerts').src = '/overlay?w=alerts&size=22'; $('#previewGoal').src = '/overlay?w=goal&size=26'; $('#previewTop').src = '/overlay?w=top&size=26';
   }
   $('#urls').addEventListener('click', async e => {
     const b = e.target.closest('[data-copy]'); if (!b) return;
     try { await navigator.clipboard.writeText(b.dataset.copy); b.textContent = '✅ Copiado'; setTimeout(() => b.textContent = '📋 Copiar', 1500); } catch (_) {}
+  });
+
+  // ---------- animaciones ----------
+  let animations = [], brbOn = false;
+  const animSrc = f => '/anim/' + encodeURIComponent(f);
+  const thumb = (f, cls = '') => !f ? '<span class="thumb"></span>' : f.toLowerCase().endsWith('.webm')
+    ? `<video class="${cls}" src="${animSrc(f)}" autoplay muted loop playsinline></video>` : `<img class="${cls}" src="${animSrc(f)}" alt="" loading="lazy">`;
+  const animOptions = sel => animations.map(a => `<option value="${esc(a.file)}" ${a.file === sel ? 'selected' : ''}>${esc(a.name)}${a.source === 'tuya' ? ' (tuya)' : ''}</option>`).join('');
+  const ANIM_TRIGGERS = {any_gift: '🎁 Cualquier regalo', gift: '🎁 Un regalo en especial', min_diamonds: '💎 Regalo de N 💎 o más', follow: '💖 Follow',
+    share: '📣 Compartir', likes: '❤️ Cada N likes', subscribe: '⭐ Suscripción', superfan: '🌟 Super Fan', envelope: '🎉 Regalo de la comunidad (cofre)',
+    battle_start: '⚔ Empieza una batalla', battle_end: '🏁 Termina la batalla', booster: '✖ Potenciador en batalla (x2/x3)'};
+  function fillAnims() {
+    const a = cfg.anims;
+    $('#animRows').innerHTML = a.rules.length ? a.rules.map((r, i) => `<tr data-i="${i}">
+      <td><input type="checkbox" data-f="on" ${r.on ? 'checked' : ''}></td>
+      <td><select data-f="trigger">${Object.entries(ANIM_TRIGGERS).map(([k, v]) => `<option value="${k}" ${k === r.trigger ? 'selected' : ''}>${v}</option>`).join('')}</select></td>
+      <td>${r.trigger === 'gift' ? `<input type="text" data-f="gift" list="giftNames" value="${esc(r.gift)}" placeholder="Heart Me, Rose…">`
+        : r.trigger === 'min_diamonds' ? `<input type="number" data-f="min_diamonds" min="0" value="${r.min_diamonds}"> 💎`
+        : r.trigger === 'likes' ? `<input type="number" data-f="every" min="10" value="${r.every}"> likes`
+        : r.trigger === 'booster' ? `<select data-f="multiplier"><option value="0" ${!r.multiplier ? 'selected' : ''}>cualquiera</option><option value="2" ${r.multiplier === 2 ? 'selected' : ''}>x2</option><option value="3" ${r.multiplier === 3 ? 'selected' : ''}>x3</option></select>` : ''}</td>
+      <td style="white-space:nowrap">${thumb(r.file, 'thumb')} <select data-f="file">${animOptions(r.file)}</select></td>
+      <td><input type="number" data-f="seconds" min="1" max="30" value="${r.seconds}" style="width:60px"> s</td>
+      <td><input type="range" data-f="size" min="10" max="100" value="${r.size}" style="width:80px"></td>
+      <td style="white-space:nowrap"><button type="button" class="secondary small" data-act="play" title="Ver en el overlay">▶</button> <button type="button" class="secondary small" data-act="del">🗑</button></td></tr>`).join('')
+      : '<tr><td colspan="7" style="color:var(--muted)">Sin animaciones automáticas.</td></tr>';
+    $('#quickRows').innerHTML = a.quick.map((q, i) => `<div class="row" data-i="${i}" style="margin-top:8px">${thumb(q.file, 'thumb')}
+      <input type="text" data-f="label" value="${esc(q.label)}" style="width:180px"> <select data-f="file">${animOptions(q.file)}</select>
+      <span class="field">tecla ${i < 9 ? i + 1 : '—'}</span><button type="button" class="secondary small" data-act="play">▶</button><button type="button" class="secondary small" data-act="del">🗑</button></div>`).join('');
+    $('#quickSeconds').value = a.quick_seconds; $('#quickSize').value = a.quick_size;
+    $('#brbFile').innerHTML = animOptions(a.brb.file); $('#brbText').value = a.brb.text; $('#brbSub').value = a.brb.sub; $('#brbDim').checked = !!a.brb.dim;
+    $('#quickLive').innerHTML = a.quick.length ? a.quick.map((q, i) => `<button type="button" data-quick="${i}">${thumb(q.file)}<span>${esc(q.label)}</span><kbd>${i < 9 ? i + 1 : ''}</kbd></button>`).join('')
+      : '<p class="help">Sin botones todavía.</p>';
+    $('#bank').innerHTML = animations.map(x => `<div class="it">${thumb(x.file)}<span>${esc(x.name)}</span><small>${x.source === 'tuya' ? 'tuya' : 'EC-Tok'}</small>
+      <button type="button" class="secondary small" data-play="${esc(x.file)}">▶ Probar</button></div>`).join('');
+    showBrb();
+  }
+  function showBrb() {
+    for (const b of [$('#brbLive'), $('#brbAnims')]) { b.classList.toggle('on', brbOn); b.textContent = brbOn ? '✅ Ya volví (quitar «Ya regresamos»)' : '☕ Poner «Ya regresamos»'; }
+  }
+  const playAnim = (file, label = '') => api('/api/anim/play', {file, label}).catch(e => { $('#liveMsg').textContent = e.message; });
+  $('#animRows').addEventListener('input', e => {
+    const tr = e.target.closest('tr[data-i]'), f = e.target.dataset.f; if (!tr || !f) return;
+    const r = cfg.anims.rules[+tr.dataset.i];
+    r[f] = e.target.type === 'checkbox' ? e.target.checked : (e.target.type === 'number' || e.target.type === 'range' || f === 'multiplier') ? +e.target.value : e.target.value;
+    if (f === 'trigger' || f === 'file') fillAnims();
+    save();
+  });
+  $('#animRows').addEventListener('click', e => {
+    const b = e.target.closest('button[data-act]'), tr = e.target.closest('tr[data-i]'); if (!b || !tr) return;
+    const r = cfg.anims.rules[+tr.dataset.i];
+    if (b.dataset.act === 'del') { cfg.anims.rules.splice(+tr.dataset.i, 1); fillAnims(); save(); }
+    else api('/api/anim/play', {file: r.file, seconds: r.seconds, size: r.size}).catch(() => {});
+  });
+  $('#addAnim').addEventListener('click', () => {
+    cfg.anims.rules.push({id: Math.random().toString(36).slice(2, 10), on: true, trigger: 'gift', gift: '', min_diamonds: 100, every: 1000, multiplier: 0,
+      file: (animations[0] || {}).file || '', seconds: 4, size: 70});
+    fillAnims(); save();
+  });
+  $('#quickRows').addEventListener('input', e => {
+    const row = e.target.closest('[data-i]'), f = e.target.dataset.f; if (!row || !f) return;
+    cfg.anims.quick[+row.dataset.i][f] = e.target.value; if (f === 'file') fillAnims(); else fillQuickLive(); save();
+  });
+  function fillQuickLive() { const a = cfg.anims; $('#quickLive').innerHTML = a.quick.map((q, i) => `<button type="button" data-quick="${i}">${thumb(q.file)}<span>${esc(q.label)}</span><kbd>${i < 9 ? i + 1 : ''}</kbd></button>`).join(''); }
+  $('#quickRows').addEventListener('click', e => {
+    const b = e.target.closest('button[data-act]'), row = e.target.closest('[data-i]'); if (!b || !row) return;
+    const q = cfg.anims.quick[+row.dataset.i];
+    if (b.dataset.act === 'del') { cfg.anims.quick.splice(+row.dataset.i, 1); fillAnims(); save(); } else playAnim(q.file, q.label);
+  });
+  $('#addQuick').addEventListener('click', () => { if (cfg.anims.quick.length >= 12) return; cfg.anims.quick.push({id: Math.random().toString(36).slice(2, 10), label: 'Animación', file: (animations[0] || {}).file || ''}); fillAnims(); save(); });
+  $('#quickSeconds').addEventListener('input', () => { cfg.anims.quick_seconds = +$('#quickSeconds').value || 4; save(); });
+  $('#quickSize').addEventListener('input', () => { cfg.anims.quick_size = +$('#quickSize').value; save(); });
+  $('#quickLive').addEventListener('click', e => { const b = e.target.closest('[data-quick]'); if (b) { const q = cfg.anims.quick[+b.dataset.quick]; playAnim(q.file, q.label); } });
+  $('#bank').addEventListener('click', e => { const b = e.target.closest('[data-play]'); if (b) playAnim(b.dataset.play); });
+  for (const [sel, key] of [['#brbFile', 'file'], ['#brbText', 'text'], ['#brbSub', 'sub'], ['#brbDim', 'dim']])
+    $(sel).addEventListener('input', () => { cfg.anims.brb[key] = $(sel).type === 'checkbox' ? $(sel).checked : $(sel).value; save(); });
+  for (const b of [$('#brbLive'), $('#brbAnims')]) b.addEventListener('click', async () => {
+    try { const d = await api('/api/brb', {on: !brbOn}); brbOn = d.brb.on; showBrb(); } catch (e) { $('#liveMsg').textContent = e.message; }
+  });
+  $('#openAnims').addEventListener('click', () => api('/api/anims/open', {}).catch(() => {}));
+  async function reloadAnims() { try { animations = (await api('/api/animations')).animations; fillAnims(); } catch (_) {} }
+  $('#reloadAnims').addEventListener('click', reloadAnims);
+  document.addEventListener('keydown', e => {
+    if (e.ctrlKey || e.metaKey || e.altKey || /^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement && document.activeElement.tagName)) return;
+    if ($('section[data-page="live"]').hidden) return;
+    const n = +e.key; if (n >= 1 && n <= 9 && cfg.anims.quick[n - 1]) { e.preventDefault(); const q = cfg.anims.quick[n - 1]; playAnim(q.file, q.label); }
   });
 
   // ---------- conectar ----------
@@ -555,11 +712,11 @@
   // ---------- arrancar ----------
   async function refresh() {
     const info = await api('/api/info');
-    cfg = info.config; live = info.live; port = info.port;
+    cfg = info.config; live = info.live; port = info.port; animations = info.animations || []; brbOn = !!(info.brb && info.brb.on);
     $('#version').textContent = `Versión ${info.version}${info.build_date ? ' · ' + info.build_date : ''}`;
     $('#about').textContent = `EC-Tok ${info.version}. Alertas, sonidos, voz y metas para TikTok LIVE. Gratis y de código abierto.`;
     $('#username').value = cfg.username || ''; $('#autoconnect').checked = !!cfg.autoconnect; $('#eulerKey').value = cfg.euler_key || '';
-    showLive(); showStats(live.stats); fillAlerts(); fillSounds(); fillTts(); fillGoals(); fillUrls(); loadVoices();
+    showLive(); showStats(live.stats); fillAlerts(); fillAnims(); fillSounds(); fillTts(); fillGoals(); fillUrls(); loadVoices();
     if (!feedCount) for (const ev of info.recent || []) addFeed(ev);
   }
   refresh().then(() => {

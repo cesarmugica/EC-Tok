@@ -14,6 +14,7 @@ import asyncio
 import contextlib
 import itertools
 import random
+import re
 import threading
 import time
 from collections import deque
@@ -257,7 +258,85 @@ class Live:
             self.push(new_event("comment", user=_user(getattr(event, "user", None)),
                                 text=str(_get(event, "comment", "content", default="") or "")))
 
+        self._extra_events(client)
         await client.connect()
+
+    # ---------- eventos «especiales» (suscripción, cofre, batallas…) ----------
+    def _extra_events(self, client) -> None:
+        """Estos eventos cambian seguido en TikTok y casi no están documentados: se toman con cuidado
+        (si una versión de la librería no los trae, no pasa nada) y los primeros se guardan en el
+        registro para poder afinarlos."""
+        import TikTokLive.events as ev  # type: ignore[import-not-found]
+
+        seen: dict[str, int] = {}
+        last: dict[str, float] = {}
+
+        def raw(name: str, event) -> str:
+            text = ""
+            with contextlib.suppress(Exception):
+                text = repr(event)
+            if seen.get(name, 0) < 8:  # guardar algunos en el registro (para afinar)
+                seen[name] = seen.get(name, 0) + 1
+                self.log(f"[evento {name}] {text[:1500]}")
+            return text
+
+        def once(key: str, seconds: float) -> bool:
+            now = time.time()
+            if now - last.get(key, 0) < seconds:
+                return False
+            last[key] = now
+            return True
+
+        def on(name: str, handler) -> None:
+            cls = getattr(ev, name, None)
+            if cls is None:
+                return
+            if hasattr(client, "add_listener"):
+                client.add_listener(cls, handler)
+            else:
+                client.on(cls)(handler)
+
+        async def subscribe(event) -> None:
+            raw("SubNotifyEvent", event)
+            self.push(new_event("subscribe", user=_user(getattr(event, "user", None))))
+
+        async def superfan(event) -> None:
+            raw("SuperFan", event)
+            self.push(new_event("superfan", user=_user(getattr(event, "user", None))))
+
+        async def envelope(event) -> None:
+            raw("EnvelopeEvent", event)
+            if once("envelope", 5):
+                self.push(new_event("envelope", user=_user(_get(event, "user", "envelope_info.send_user", default=None))))
+
+        async def battle(event) -> None:
+            text = raw("LinkMicBattleEvent", event)
+            ended = bool(re.search(r"(finish|end|result|winner)", text, re.I)) and not re.search(r"start", text, re.I)
+            phase = "end" if ended else "start"
+            if once("battle_" + phase, 45):
+                self.push(new_event("battle", phase=phase))
+
+        async def battle_end(event) -> None:
+            raw("LinkMicBattlePunishFinishEvent", event)
+            if once("battle_end", 45):
+                self.push(new_event("battle", phase="end"))
+
+        async def booster(event) -> None:
+            text = raw(event.__class__.__name__, event)
+            match = re.search(r"\b[xX]\s?([2-5])\b", text) or re.search(r"multipl\w*\D{0,25}([2-5])\b", text, re.I)
+            mult = int(match.group(1)) if match else 0
+            if once(f"booster_{mult}", 8):
+                self.push(new_event("booster", multiplier=mult, user=_user(getattr(event, "user", None))))
+
+        on("SubNotifyEvent", subscribe)
+        for name in ("SuperFanEvent", "SuperFanJoinEvent"):
+            on(name, superfan)
+        for name in ("EnvelopeEvent", "SuperFanBoxEvent"):
+            on(name, envelope)
+        on("LinkMicBattleEvent", battle)
+        on("LinkMicBattlePunishFinishEvent", battle_end)
+        for name in ("LinkMicBattleItemCardEvent", "BoostCardEvent"):
+            on(name, booster)
 
 
 # ---------------------------------------------------------------------------
@@ -279,6 +358,12 @@ def test_event(kind: str, gift: str = "") -> dict:
                          gift={"name": gname, "count": count, "diamonds": each, "total": each * count, "image": ""})
     if kind == "like":
         return new_event("like", user=user, count=random.choice([15, 30, 50]), total_likes=0, test=True)
+    if kind in ("subscribe", "superfan", "envelope"):
+        return new_event(kind, user=user, test=True)
+    if kind == "battle":
+        return new_event("battle", phase=gift or "start", test=True)
+    if kind == "booster":
+        return new_event("booster", multiplier=int(gift or 3), user=user, test=True)
     if kind == "comment":
         text = random.choice(["¡Hola a todos!", "Saludos desde Monterrey 🔥", "Esa canción está buenísima",
                               "¿Cantas la de Marlboro Rojo?", "Qué bonito live"])
