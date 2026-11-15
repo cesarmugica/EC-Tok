@@ -28,7 +28,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, unquote, urlsplit
 
-APP_VERSION = "1.8.0"
+APP_VERSION = "1.8.1"
 
 try:  # lo genera windows/build.ps1
     from ectok_build import BUILD_DATE  # type: ignore[import-not-found]
@@ -1090,7 +1090,7 @@ class Handler(BaseHTTPRequestHandler):
             sign = sign_text(_text(data.get("text"), "", 120) or (label if data.get("quick") else ""), fake, bool(sample))
             BUS.emit(anim_event(file, float(_num(data.get("seconds"), a["quick_seconds"], 1, 30)),
                                 int(_num(data.get("size"), a["quick_size"], 10, 100)), label, manual=True,
-                                who=sample, caption=_text(data.get("caption"), "", 40), sign=sign))
+                                who=sample, caption=_text(data.get("caption"), "", 40), sign=sign) | {"preview": bool(data.get("preview"))})
             self.send_json({"ok": True})
         elif path == "/api/brb":
             BRB["on"] = bool(data.get("on"))
@@ -1125,7 +1125,7 @@ class Handler(BaseHTTPRequestHandler):
                 self.send_json({"ok": False, "error": "No encontré esa animación."}, 404)
                 return
             BUS.emit(new_event("special", file=sp["file"], video=sp["file"].lower().endswith(VIDEO_EXTS), size=sp["size"],
-                               volume=sp["volume"], seconds=sp["seconds"], label=sp["label"]))
+                               volume=sp["volume"], seconds=sp["seconds"], label=sp["label"], preview=bool(data.get("preview"))))
             self.send_json({"ok": True})
         elif path == "/api/special/stop":
             BUS.emit(new_event("special_stop"))

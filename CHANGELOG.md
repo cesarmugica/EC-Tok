@@ -1,5 +1,11 @@
 # Cambios de EC-Tok
 
+## 1.8.1 — 👁 Vista previa
+- En 🎬 Animaciones hay una **pantallita tipo celular** abajo a la derecha: los botones ▶ (reglas, acceso rápido, especiales y el banco) muestran ahí la animación **sin que salga en tu live** y sin abrir el navegador ni LIVE Studio.
+- Si quieres que también salga en el live, prende «Que también salga en el live». La pantallita se puede minimizar.
+- Las vistas previas de cada pestaña solo se conectan mientras ves esa pestaña (el navegador solo deja unas pocas conexiones a la vez).
+- En los letreros, el texto ya no corta una palabra a la mitad («¡Gracias!» ya no deja el «!» solo).
+
 ## 1.8.0 — Especiales en su propia fuente y convertidas al subir
 - Las **🌟 animaciones especiales** ahora salen en **su propia dirección** (`/overlay?w=special`, en 🔴 En vivo → 🌟 Especiales), para ponerla como fuente aparte encima de las demás. Los botones siguen a la mano en 🔴 En vivo.
 - **Al subir una, EC-Tok la convierte sola** a un formato ligero (viene FFmpeg incluido): video → MP4 (máx. 1920×1080 o 1080×1920, 30 cuadros por segundo, con sonido); video con transparencia → WebM con transparencia; GIF → WebP animado; imagen grande → más chica. Si ya viene bien, se copia tal cual. También acepta MOV, MKV, AVI y JPG.

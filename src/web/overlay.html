@@ -67,7 +67,7 @@
   #anim .sc .part.heart { animation: heartIn .5s cubic-bezier(.3,1.8,.5,1) .45s both, heartBeat 1s ease-in-out 1s infinite; }
   #anim .sc .sign { position: absolute; box-sizing: border-box; }
   #anim .sc .sign .in { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; text-align: center; padding: 2% 5%;
-    box-sizing: border-box; color: #3b2314; font-weight: 900; line-height: 1.08; overflow: hidden; word-break: break-word;
+    box-sizing: border-box; color: #3b2314; font-weight: 900; line-height: 1.08; overflow: hidden; word-break: normal; overflow-wrap: normal;
     animation: signIn .45s cubic-bezier(.3,1.7,.5,1) .55s both; }
   #anim .sc.sprite .body { animation: scIn .75s cubic-bezier(.25,1.55,.45,1) both; }
   #anim .sc .frames { position: absolute; inset: 0; background-repeat: no-repeat; }
@@ -326,7 +326,9 @@
     if (sp.seconds || !sp.video) spTimer = setTimeout(stopSpecial, (sp.seconds || 8) * 1000);
   }
 
+  const isPreview = params.has('preview');
   function onEvent(ev) {
+    if (ev.preview && !isPreview) return;  // pruebas desde la vista previa de EC-Tok: no salen en el live
     if (ev.type === 'special') { if (which.includes('special')) showSpecial(ev); return; }
     if (ev.type === 'special_stop') { if (which.includes('special')) stopSpecial(); return; }
     if (ev.type === 'anim') { if (which.includes('anim')) playAnim(ev); return; }
