@@ -28,7 +28,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, unquote, urlsplit
 
-APP_VERSION = "1.2.0"
+APP_VERSION = "1.2.1"
 
 try:  # lo genera windows/build.ps1
     from ectok_build import BUILD_DATE  # type: ignore[import-not-found]
@@ -39,6 +39,11 @@ ROOT = Path(getattr(sys, "_MEIPASS", Path(__file__).resolve().parent))
 WEB_ROOT = ROOT / "web"
 DEFAULT_PORT = 8795
 LOCAL_HOSTS = {"127.0.0.1", "localhost", "[::1]", "::1"}
+# Nombres con dominio que apuntan a esta misma PC, para programas que no aceptan
+# «localhost» ni «127.0.0.1» (TikTok LIVE Studio). Solo sirven los overlays.
+OVERLAY_HOSTS = {"ectok.localhost", "localtest.me", "ectok.localtest.me", "127.0.0.1.nip.io"}
+OVERLAY_PATHS = ("/overlay", "/overlay.html", "/api/overlay", "/api/stream")
+OVERLAY_PREFIXES = ("/img/", "/anim/", "/sound/")
 IS_WINDOWS = os.name == "nt"
 
 
@@ -603,14 +608,18 @@ class Handler(BaseHTTPRequestHandler):
         self.send_header("Cache-Control", "no-store")
         super().end_headers()
 
-    def _local_request(self) -> bool:
+    def _local_request(self, overlay_ok: bool = False) -> bool:
         try:
             if not ipaddress.ip_address(self.client_address[0]).is_loopback:
                 return False
         except ValueError:
             return False
-        host = urlsplit("//" + (self.headers.get("Host") or "")).hostname or ""
-        return host.lower() in LOCAL_HOSTS
+        host = (urlsplit("//" + (self.headers.get("Host") or "")).hostname or "").lower()
+        return host in LOCAL_HOSTS or (overlay_ok and host in OVERLAY_HOSTS)
+
+    def _overlay_path(self) -> bool:
+        path = urlsplit(self.path).path
+        return path in OVERLAY_PATHS or path.startswith(OVERLAY_PREFIXES)
 
     def _same_origin_post(self) -> bool:
         if not self.headers.get("Content-Type", "").lower().startswith("application/json"):
@@ -656,7 +665,7 @@ class Handler(BaseHTTPRequestHandler):
     # ---------- GET ----------
     def do_GET(self) -> None:  # noqa: N802
         global LAST_PING
-        if not self._local_request():
+        if not self._local_request(overlay_ok=self._overlay_path()):
             self.send_error(403)
             return
         parts = urlsplit(self.path)

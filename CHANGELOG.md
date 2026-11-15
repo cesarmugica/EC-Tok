@@ -1,5 +1,10 @@
 # Cambios de EC-Tok
 
+## 1.2.1 — Overlays en TikTok LIVE Studio
+- TikTok LIVE Studio no aceptaba las direcciones `http://127.0.0.1…` ni `http://localhost…` («Introduce una URL válida»). Ahora los overlays usan `http://ectok.localhost:8795/overlay?w=…`, que LIVE Studio sí acepta y que apunta a tu propia PC.
+- Si alguna vez no carga, cambia `ectok.localhost` por `localtest.me`.
+- Por seguridad, con esos nombres solo se abren los overlays; la ventana de EC-Tok sigue siendo solo para tu PC.
+
 ## 1.2.0 — Español, English, Português (Brasil)
 - La ventana de EC-Tok ahora está en **español, inglés y portugués de Brasil** (🌐 arriba a la derecha). Arranca en el idioma que elijas al instalar; el instalador también viene en los tres.
 - Los textos de fábrica (alertas, lectura de chat, metas, «Ya regresamos», botones rápidos) se cambian al nuevo idioma; los que ya editaste se respetan.

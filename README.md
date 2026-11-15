@@ -37,7 +37,7 @@ y usa el servicio de firma de [Euler Stream](https://www.eulerstream.com) (grati
 una clave propia el límite es más alto — se pone en ⚙ Ajustes). Si TikTok cambia algo, puede dejar de conectar unas horas
 hasta que se actualice la librería.
 
-El programa es un servidor local (solo `127.0.0.1:8795`) con la ventana y los overlays.
+El programa es un servidor local (solo en tu PC, puerto `8795`; los overlays en `http://ectok.localhost:8795/overlay?w=…`) con la ventana y los overlays.
 Los datos se guardan en `%LOCALAPPDATA%\EC-Tok` (ajustes y sonidos).
 
 EC-Tok no es de TikTok ni está afiliado con TikTok. Código abierto (la librería TikTokLive usa una licencia AGPL modificada).
