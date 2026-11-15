@@ -327,8 +327,8 @@
   }
 
   function onEvent(ev) {
-    if (ev.type === 'special') { if (which.includes('anim')) showSpecial(ev); return; }
-    if (ev.type === 'special_stop') { if (which.includes('anim')) stopSpecial(); return; }
+    if (ev.type === 'special') { if (which.includes('special')) showSpecial(ev); return; }
+    if (ev.type === 'special_stop') { if (which.includes('special')) stopSpecial(); return; }
     if (ev.type === 'anim') { if (which.includes('anim')) playAnim(ev); return; }
     if (ev.type === 'brb') { if (which.includes('anim')) showBrb(ev.brb); return; }
     if (ev.stats) stats = ev.stats;

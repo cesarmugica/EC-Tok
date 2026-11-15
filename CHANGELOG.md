@@ -1,5 +1,10 @@
 # Cambios de EC-Tok
 
+## 1.8.0 — Especiales en su propia fuente y convertidas al subir
+- Las **🌟 animaciones especiales** ahora salen en **su propia dirección** (`/overlay?w=special`, en 🔴 En vivo → 🌟 Especiales), para ponerla como fuente aparte encima de las demás. Los botones siguen a la mano en 🔴 En vivo.
+- **Al subir una, EC-Tok la convierte sola** a un formato ligero (viene FFmpeg incluido): video → MP4 (máx. 1920×1080 o 1080×1920, 30 cuadros por segundo, con sonido); video con transparencia → WebM con transparencia; GIF → WebP animado; imagen grande → más chica. Si ya viene bien, se copia tal cual. También acepta MOV, MKV, AVI y JPG.
+- Recomendaciones de cómo deben ser (medidas, duración, formato) en el mismo apartado.
+
 ## 1.7.0 — 🌟 Animaciones especiales
 - Nuevo apartado **🌟 Animaciones especiales** (hasta 10): tus propias animaciones o videos —la intro de batalla estilo guerrero azteca o vikingo, tu logo, un meme— que **no hacen nada solas** y salen **encima de todo, con su sonido**, solo cuando les das clic en 🔴 En vivo. Así EC-Tok es tu gestor de animaciones y no tienes que prender y apagar fuentes en LIVE Studio.
 - Botón **📂 Subir la mía…** para elegir el archivo (MP4, WebM, GIF, WebP o PNG, hasta 300 MB); se copia a tu carpeta de animaciones.

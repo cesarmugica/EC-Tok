@@ -48,6 +48,18 @@ Invoke-Checked 'python' @(
   (Join-Path $srcRoot 'ectok_server.py')
 )
 
+# --- FFmpeg: para convertir las animaciones especiales que sube el streamer ---
+Write-Host 'Descargando FFmpeg...'
+$tmp = Join-Path ([IO.Path]::GetTempPath()) ("ectok-" + [guid]::NewGuid().ToString('N'))
+New-Item -ItemType Directory -Force -Path $tmp | Out-Null
+Invoke-WebRequest -Uri 'https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-essentials.zip' -OutFile (Join-Path $tmp 'f.zip')
+Expand-Archive -Path (Join-Path $tmp 'f.zip') -DestinationPath (Join-Path $tmp 'x') -Force
+$ff = Get-ChildItem -Path (Join-Path $tmp 'x') -Filter 'ffmpeg.exe' -Recurse | Select-Object -First 1
+if (-not $ff) { throw 'No se encontró ffmpeg.exe en el zip de FFmpeg.' }
+New-Item -ItemType Directory -Force -Path (Join-Path $appDir 'bin') | Out-Null
+Copy-Item $ff.FullName (Join-Path $appDir 'bin\ffmpeg.exe') -Force
+& (Join-Path $appDir 'bin\ffmpeg.exe') -hide_banner -encoders | Select-String 'libx264|libwebp_anim|libvpx-vp9' | ForEach-Object { Write-Host $_.Line.Trim() }
+
 # Prueba rápida: que el programa arranque y conteste (sin abrir ventana).
 $exe = Join-Path $appDir 'ectok.exe'
 $p = Start-Process -FilePath $exe -ArgumentList '--no-browser', '--stay', '--port', '8799' -PassThru

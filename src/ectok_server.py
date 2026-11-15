@@ -28,7 +28,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, unquote, urlsplit
 
-APP_VERSION = "1.7.0"
+APP_VERSION = "1.8.0"
 
 try:  # lo genera windows/build.ps1
     from ectok_build import BUILD_DATE  # type: ignore[import-not-found]
@@ -64,6 +64,7 @@ ANIM_DEFAULT = WEB_ROOT / "anim"     # las que trae EC-Tok
 ANIM_EXTS = {".gif": "image/gif", ".webp": "image/webp", ".png": "image/png", ".apng": "image/apng", ".webm": "video/webm",
              ".mp4": "video/mp4"}
 VIDEO_EXTS = (".webm", ".mp4")
+IMPORT_EXTS = {*ANIM_EXTS, ".mov", ".mkv", ".avi", ".m4v", ".jpg", ".jpeg"}  # al subir se convierten a algo que el overlay maneje bien
 SPECIAL_MAX = 10
 
 
@@ -643,10 +644,112 @@ def pick_sound() -> str | None:
                       {"en": "Sounds", "pt": "Sons"}.get(CONFIG["language"], "Sonidos"), SOUND_EXTS, Path.home() / "Music")
 
 
+def find_ffmpeg() -> str | None:
+    """FFmpeg viene con el instalador (carpeta bin junto a ectok.exe)."""
+    exe_dir = Path(sys.executable).resolve().parent if getattr(sys, "frozen", False) else Path(__file__).resolve().parent
+    name = "ffmpeg.exe" if IS_WINDOWS else "ffmpeg"
+    for candidate in (exe_dir / "bin" / name, exe_dir / name):
+        if candidate.is_file():
+            return str(candidate)
+    return shutil.which("ffmpeg")
+
+
+FFMPEG = find_ffmpeg()
+
+
+def _probe(path: Path) -> dict:
+    """Lo básico del archivo (FFmpeg lo dice al abrirlo): tamaño, códec, si trae transparencia y audio."""
+    info = {"w": 0, "h": 0, "codec": "", "alpha": False, "audio": False, "fps": 0.0}
+    if not FFMPEG:
+        return info
+    out = subprocess.run([FFMPEG, "-hide_banner", "-i", str(path)], capture_output=True, text=True, encoding="utf-8",
+                         errors="replace", creationflags=_no_window_flags(), timeout=60).stderr
+    video = re.search(r"Stream #\S+.*?Video: (\w+)([^\n]*)", out)
+    if video:
+        info["codec"] = video.group(1)
+        size = re.search(r", (\d{2,5})x(\d{2,5})", video.group(2))
+        if size:
+            info["w"], info["h"] = int(size.group(1)), int(size.group(2))
+        fps = re.search(r"([\d.]+) fps", video.group(2))
+        info["fps"] = float(fps.group(1)) if fps else 0.0
+        info["alpha"] = "yuva" in video.group(2) or "rgba" in video.group(2) or "pal8" in video.group(2)
+    info["alpha"] = info["alpha"] or bool(re.search(r"alpha_mode\s*:\s*1", out, re.I))
+    info["audio"] = "Audio:" in out
+    return info
+
+
+def _fit(w: int, h: int, long_side: int = 1920, short_side: int = 1080) -> str:
+    """Filtro de escala para que no pase de 1920×1080 (o 1080×1920 en vertical), sin agrandar."""
+    if w >= h:
+        return f"scale='min({long_side},iw)':'min({short_side},ih)':force_original_aspect_ratio=decrease:force_divisible_by=2"
+    return f"scale='min({short_side},iw)':'min({long_side},ih)':force_original_aspect_ratio=decrease:force_divisible_by=2"
+
+
+def convert_anim(src: Path, target_dir: Path, stem: str) -> Path:
+    """Dejar la animación del streamer en el formato que ya usa EC-Tok:
+    - video normal → MP4 H.264 (máx. 1920×1080 o 1080×1920, 30 fps), con su sonido;
+    - video con transparencia → WebM VP9 con transparencia;
+    - GIF/APNG → WebP animado (mismo look, mucho más ligero);
+    - imagen fija grande → PNG/WebP más chica.
+    Si ya viene bien (MP4 H.264 o WebM chico, WebP), se copia tal cual."""
+    ext = src.suffix.lower()
+    info = _probe(src)
+    big = max(info["w"], info["h"]) > 1920 or min(info["w"], info["h"]) > 1080
+    heavy = src.stat().st_size > 60 * 1024 * 1024
+    if ext == ".webp" or not FFMPEG:
+        return _copy_unique(src, target_dir, stem, ext)
+    if ext == ".mp4" and info["codec"] == "h264" and not big and not heavy and info["fps"] <= 61:
+        return _copy_unique(src, target_dir, stem, ext)
+    if ext == ".webm" and not big and not heavy:
+        return _copy_unique(src, target_dir, stem, ext)
+    vf = _fit(info["w"] or 1080, info["h"] or 1920)
+    if ext in (".gif", ".apng") or (ext == ".png" and info["codec"] == "apng"):
+        out, args = ".webp", ["-vf", f"{vf},fps='min(25,source_fps)'", "-c:v", "libwebp_anim", "-lossless", "0", "-q:v", "82",
+                              "-loop", "0", "-an"]
+    elif ext in (".png", ".jpg", ".jpeg"):
+        out, args = ".png", ["-vf", vf, "-frames:v", "1"]
+    elif info["alpha"]:
+        out, args = ".webm", ["-vf", f"{vf},fps='min(30,source_fps)'", "-c:v", "libvpx-vp9", "-pix_fmt", "yuva420p", "-b:v", "0",
+                              "-crf", "32", "-deadline", "realtime", "-cpu-used", "8", "-c:a", "libopus", "-b:a", "128k"]
+    else:
+        out, args = ".mp4", ["-vf", f"{vf},fps='min(30,source_fps)'", "-c:v", "libx264", "-preset", "veryfast", "-crf", "23",
+                             "-pix_fmt", "yuv420p", "-c:a", "aac", "-b:a", "160k", "-movflags", "+faststart"]
+    target = _unique(target_dir, stem, out)
+    tmp = target.with_name(target.stem + ".tmp" + out)
+    dec = ["-c:v", "libvpx-vp9"] if ext == ".webm" and info["alpha"] and info["codec"] == "vp9" else \
+          ["-c:v", "libvpx"] if ext == ".webm" and info["alpha"] else []
+    cmd = [FFMPEG, "-hide_banner", "-loglevel", "error", "-y", *dec, "-i", str(src), *args, str(tmp)]
+    result = subprocess.run(cmd, capture_output=True, text=True, encoding="utf-8", errors="replace",
+                            creationflags=_no_window_flags(), timeout=1800)
+    if result.returncode != 0 or not tmp.is_file() or tmp.stat().st_size == 0:
+        tmp.unlink(missing_ok=True)
+        log(f"Convertir animación: {result.stderr.strip()[-400:]}")
+        raise ValueError("No pude convertir esa animación. Prueba con otro archivo (MP4, WebM, GIF o WebP).")
+    tmp.replace(target)
+    return target
+
+
+def _unique(folder: Path, stem: str, ext: str) -> Path:
+    target, n = folder / f"{stem}{ext}", 2
+    while target.exists():
+        target = folder / f"{stem} ({n}){ext}"
+        n += 1
+    return target
+
+
+def _copy_unique(src: Path, folder: Path, stem: str, ext: str) -> Path:
+    same = folder / f"{stem}{ext}"
+    if same.exists() and same.stat().st_size == src.stat().st_size:
+        return same
+    target = _unique(folder, stem, ext)
+    shutil.copy2(src, target)
+    return target
+
+
 def pick_anim() -> str | None:
     return _pick_file({"en": "Choose your animation", "pt": "Escolha sua animação"}.get(CONFIG["language"], "Elige tu animación"),
                       {"en": "Animations and videos", "pt": "Animações e vídeos"}.get(CONFIG["language"], "Animaciones y videos"),
-                      ANIM_EXTS, Path.home() / "Videos")
+                      IMPORT_EXTS, Path.home() / "Videos")
 
 
 def _pick_file(title: str, kind: str, exts, folder: Path) -> str | None:
@@ -671,24 +774,17 @@ def _pick_file(title: str, kind: str, exts, folder: Path) -> str | None:
 
 
 def import_anim(path: Path) -> str:
-    """Copiar una animación o video del streamer a su carpeta de animaciones."""
+    """Traer una animación o video del streamer a su carpeta de animaciones, ya convertida."""
     ext = path.suffix.lower()
-    if ext not in ANIM_EXTS:
+    if ext not in IMPORT_EXTS:
         raise ValueError("Ese archivo no es una animación compatible (GIF, WebP, PNG, WebM, MP4).")
-    if path.stat().st_size > 300 * 1024 * 1024:
-        raise ValueError("La animación pesa más de 300 MB; usa una más corta o más ligera.")
+    if path.stat().st_size > 500 * 1024 * 1024:
+        raise ValueError("La animación pesa más de 500 MB; usa una más corta o más ligera.")
     ANIM_USER.mkdir(parents=True, exist_ok=True)
-    if path.parent.resolve() == ANIM_USER.resolve():
+    if path.parent.resolve() == ANIM_USER.resolve() and ext in ANIM_EXTS:
         return path.name
-    safe = re.sub(r"[^\w\-. ()]+", "_", path.stem)[:60].replace("-parte-", "-") or "animacion"
-    target = ANIM_USER / f"{safe}{ext}"
-    n = 2
-    while target.exists() and target.stat().st_size != path.stat().st_size:
-        target = ANIM_USER / f"{safe} ({n}){ext}"
-        n += 1
-    if not target.exists():
-        shutil.copy2(path, target)
-    return target.name
+    safe = re.sub(r"[^\w\-. ()]+", "_", path.stem)[:60].replace("-parte-", "-").strip() or "animacion"
+    return convert_anim(path, ANIM_USER, safe).name
 
 
 def import_sound(path: Path) -> dict:
