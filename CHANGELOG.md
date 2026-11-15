@@ -1,5 +1,8 @@
 # Cambios de EC-Tok
 
+## 1.5.2 — La chica también se anima
+- La escena de la chica ahora es animada (brinca, levanta el puño, se ríe), con el letrero siguiéndola cuadro por cuadro.
+
 ## 1.5.1 — El chico ahora sí se anima
 - La escena del chico es animación de verdad (brinca, levanta el puño, se ríe) y **el texto del letrero lo sigue cuadro por cuadro**, aunque el letrero se mueva o se incline.
 - Las escenas aceptan tiras de cuadros con el letrero ubicado en cada cuadro (para los personajes animados que vengan).
