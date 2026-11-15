@@ -1,5 +1,10 @@
 # Cambios de EC-Tok
 
+## 1.3.0 — El nombre de quien lo mandó
+- Las animaciones automáticas ahora pueden mostrar **la foto y el nombre de quien mandó el regalo** (o quien te siguió, abrió el cofre o se suscribió), en una tarjeta que aparece con un rebote debajo de la animación. En regalos también dice cuál y cuántos («Heart Me ×5»).
+- Se prende o apaga por animación con la nueva columna **Nombre** (🎬 Animaciones). Viene prendida en Heart Me, follow, regalos grandes, cofre y suscripción.
+- El botón ▶ de cada regla muestra cómo se ve, con tu @usuario de ejemplo.
+
 ## 1.2.6 — «Ya regresamos» se quita completo
 - Al quitar la pantalla «☕ Ya regresamos», el fondo oscuro semitransparente ya no se queda encima del live.
 

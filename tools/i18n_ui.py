@@ -1,5 +1,8 @@
 """Traducciones de la ventana de EC-Tok (llave = texto en español)."""
 T = {
+'Nombre': ('Name', 'Nome'),
+'Mostrar la foto y el nombre de quien lo mandó': ('Show the photo and name of who sent it', 'Mostrar a foto e o nome de quem mandou'),
+'Usuario de prueba': ('Test user', 'Usuário de teste'),
 "De código abierto. No es de TikTok ni está afiliado con TikTok.": ("Open source. Not made by or affiliated with TikTok.", "Código aberto. Não é do TikTok nem afiliado ao TikTok."),
 "💜 EC-Tok es gratis y siempre lo será.": ("💜 EC-Tok is free and always will be.", "💜 O EC-Tok é grátis e sempre será."),
 "Sigue la cuenta": ("Follow", "Siga a conta"),

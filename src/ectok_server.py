@@ -28,7 +28,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, unquote, urlsplit
 
-APP_VERSION = "1.2.6"
+APP_VERSION = "1.3.0"
 
 try:  # lo genera windows/build.ps1
     from ectok_build import BUILD_DATE  # type: ignore[import-not-found]
@@ -117,19 +117,19 @@ DEFAULT_CONFIG: dict = {
         #          battle_start | battle_end | booster
         "rules": [
             {"id": "heartme", "on": True, "trigger": "gift", "gift": "Heart Me", "min_diamonds": 1, "every": 1000, "multiplier": 0,
-             "file": "globo-corazon.webp", "seconds": 2, "size": 80},
+             "file": "globo-corazon.webp", "seconds": 2, "name": True, "size": 80},
             {"id": "follow", "on": True, "trigger": "follow", "gift": "", "min_diamonds": 1, "every": 1000, "multiplier": 0,
-             "file": "gracias.webp", "seconds": 3, "size": 60},
+             "file": "gracias.webp", "seconds": 3, "name": True, "size": 60},
             {"id": "big", "on": True, "trigger": "min_diamonds", "gift": "", "min_diamonds": 1000, "every": 1000, "multiplier": 0,
-             "file": "fuegos-artificiales.webp", "seconds": 5, "size": 90},
+             "file": "fuegos-artificiales.webp", "seconds": 5, "name": True, "size": 90},
             {"id": "chest", "on": True, "trigger": "envelope", "gift": "", "min_diamonds": 1, "every": 1000, "multiplier": 0,
-             "file": "confeti.webp", "seconds": 4, "size": 90},
+             "file": "confeti.webp", "seconds": 4, "name": True, "size": 90},
             {"id": "sub", "on": True, "trigger": "subscribe", "gift": "", "min_diamonds": 1, "every": 1000, "multiplier": 0,
-             "file": "estrellas.webp", "seconds": 4, "size": 80},
+             "file": "estrellas.webp", "seconds": 4, "name": True, "size": 80},
             {"id": "x2", "on": True, "trigger": "booster", "gift": "", "min_diamonds": 1, "every": 1000, "multiplier": 2,
-             "file": "x2.webp", "seconds": 4, "size": 70},
+             "file": "x2.webp", "seconds": 4, "name": False, "size": 70},
             {"id": "x3", "on": True, "trigger": "booster", "gift": "", "min_diamonds": 1, "every": 1000, "multiplier": 3,
-             "file": "x3.webp", "seconds": 4, "size": 70},
+             "file": "x3.webp", "seconds": 4, "name": False, "size": 70},
         ],
         "quick": [
             {"id": "q1", "label": "Corazones", "file": "corazones.webp"}, {"id": "q2", "label": "Confeti", "file": "confeti.webp"},
@@ -164,6 +164,8 @@ def load_config() -> dict:
             for rule in cfg["anims"]["rules"]:  # 1.1.2: el Heart Me de fábrica ahora es el globo corazón
                 if rule.get("id") == "heartme" and rule.get("file") == "corazones.webp":
                     rule.update(file="globo-corazon.webp", seconds=2, size=80)
+                if "name" not in rule:  # 1.3.0: mostrar el nombre de quien lo mandó
+                    rule["name"] = rule.get("id") in ("heartme", "follow", "big", "chest", "sub")
             return cfg
     return _merge(DEFAULT_CONFIG, {})
 
@@ -336,7 +338,7 @@ def clean_config(data: dict) -> dict:
                                   "every": int(_num(r.get("every"), 1000, 10, 10_000_000)),
                                   "multiplier": int(_num(r.get("multiplier"), 0, 0, 5)),
                                   "file": Path(str(r.get("file") or "")).name, "seconds": float(_num(r.get("seconds"), 4, 1, 30)),
-                                  "size": int(_num(r.get("size"), 70, 10, 100))})
+                                  "size": int(_num(r.get("size"), 70, 10, 100)), "name": bool(r.get("name"))})
             a["rules"] = rules
         if isinstance(anims.get("quick"), list):
             a["quick"] = [{"id": _text(q.get("id"), uuid.uuid4().hex[:8], 20), "label": _text(q.get("label"), "Animación", 30),
@@ -421,9 +423,19 @@ def anim_path(name: str) -> Path | None:
     return None
 
 
-def anim_event(file: str, seconds: float, size: int, label: str = "", manual: bool = False) -> dict:
+def anim_event(file: str, seconds: float, size: int, label: str = "", manual: bool = False,
+               who: dict | None = None, caption: str = "") -> dict:
     return new_event("anim", file=file, video=file.lower().endswith(".webm"), seconds=seconds, size=size,
-                     label=label, manual=manual)
+                     label=label, manual=manual, who=who, caption=caption)
+
+
+def anim_caption(ev: dict) -> str:
+    """Lo que va junto al nombre: «Heart Me ×5», etc."""
+    if ev.get("type") == "gift":
+        g = ev.get("gift") or {}
+        count = g.get("count") or g.get("repeat") or 1
+        return f"{g.get('name', '')}{f' ×{count}' if count and count > 1 else ''}"
+    return ""
 
 
 # Regalos que pueden llegar con su nombre en inglés o en español (según el idioma de TikTok).
@@ -479,7 +491,11 @@ def anims_for(ev: dict) -> list[dict]:
                 elif mark > LIKE_MARKS[r["id"]]:
                     LIKE_MARKS[r["id"]] = mark
                     chosen.append(r)
-    return [anim_event(r["file"], r["seconds"], r["size"], manual=False) for r in chosen]
+    user = ev.get("user") or {}
+    who = {"name": user.get("name", ""), "avatar": user.get("avatar", "")} if user.get("name") else None
+    return [anim_event(r["file"], r["seconds"], r["size"], manual=False,
+                       who=who if r.get("name") else None, caption=anim_caption(ev) if r.get("name") else "")
+            for r in chosen]
 
 
 def live_emit(event: dict) -> None:
@@ -802,8 +818,10 @@ class Handler(BaseHTTPRequestHandler):
                 self.send_json({"ok": False, "error": "No encontré esa animación."}, 404)
                 return
             a = CONFIG["anims"]
+            sample = {"name": _text(data.get("who"), "", 40), "avatar": ""} if data.get("who") else None
             BUS.emit(anim_event(file, float(_num(data.get("seconds"), a["quick_seconds"], 1, 30)),
-                                int(_num(data.get("size"), a["quick_size"], 10, 100)), _text(data.get("label"), "", 30), manual=True))
+                                int(_num(data.get("size"), a["quick_size"], 10, 100)), _text(data.get("label"), "", 30), manual=True,
+                                who=sample, caption=_text(data.get("caption"), "", 40)))
             self.send_json({"ok": True})
         elif path == "/api/brb":
             BRB["on"] = bool(data.get("on"))

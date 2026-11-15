@@ -44,6 +44,20 @@
   #anim .a { position: absolute; left: 50%; transform: translateX(-50%); object-fit: contain; animation: fade .35s ease both; }
   #anim .a.top { top: 2vh; } #anim .a.center { top: 50%; transform: translate(-50%, -50%); } #anim .a.bottom { bottom: 2vh; }
   #anim .a.out { animation: fadeout .4s ease both; }
+  /* animación con el nombre de quien la mandó */
+  #anim .w { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); display: flex; flex-direction: column;
+    align-items: center; animation: fade .35s ease both; }
+  #anim .w.out { animation: fadeout .4s ease both; }
+  #anim .w .a { position: static; transform: none; animation: none; }
+  #anim .who { margin-top: -3vh; display: flex; align-items: center; gap: 1.2vh; padding: .9vh 2.6vh .9vh .9vh; border-radius: 99px;
+    background: linear-gradient(90deg, var(--c1), #8c28ff); box-shadow: 0 .6vh 2.4vh rgba(0,0,0,.45), 0 0 0 .35vh rgba(255,255,255,.85);
+    color: #fff; max-width: 92vw; animation: whoPop .55s cubic-bezier(.2,1.6,.4,1) .15s both; }
+  #anim .who img, #anim .who .av { width: 6.4vh; height: 6.4vh; border-radius: 50%; object-fit: cover; flex: none; background: rgba(255,255,255,.25);
+    display: grid; place-items: center; font-size: 3.6vh; box-shadow: 0 0 0 .3vh #fff; }
+  #anim .who .t { display: flex; flex-direction: column; line-height: 1.1; min-width: 0; }
+  #anim .who b { font-size: max(3.6vh, 20px); font-weight: 900; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-shadow: 0 .2vh .6vh rgba(0,0,0,.4); }
+  #anim .who small { font-size: max(2.2vh, 13px); font-weight: 700; opacity: .92; white-space: nowrap; }
+  @keyframes whoPop { from { opacity: 0; transform: translateY(2vh) scale(.6); } to { opacity: 1; transform: none; } }
   @keyframes fadeout { to { opacity: 0; } }
   [hidden] { display: none !important; }
   /* ---------- ya regresamos ---------- */
@@ -171,12 +185,26 @@
     if (animShowing || !animQueue.length) return;
     animShowing = true;
     const a = animQueue.shift(), src = '/anim/' + encodeURIComponent(a.file) + '?t=' + Date.now();
-    const el = document.createElement(a.video ? 'video' : 'img');
-    el.className = 'a center'; el.src = src; el.style.height = a.size + 'vh'; el.style.maxWidth = '96vw';
-    if (a.video) { el.muted = true; el.loop = true; el.autoplay = true; el.playsInline = true; }
+    const media = document.createElement(a.video ? 'video' : 'img');
+    media.src = src; media.style.maxWidth = '96vw';
+    if (a.video) { media.muted = true; media.loop = true; media.autoplay = true; media.playsInline = true; }
+    let el;
+    if (a.who && a.who.name) {
+      // Con nombre: la animación y abajo la tarjeta con la foto y el nombre.
+      media.className = 'a'; media.style.height = Math.min(a.size, 82) + 'vh';
+      el = document.createElement('div'); el.className = 'w'; el.appendChild(media);
+      const who = document.createElement('div'); who.className = 'who';
+      who.innerHTML = `${a.who.avatar ? `<img src="${esc(a.who.avatar)}" alt="" referrerpolicy="no-referrer">` : '<span class="av">💜</span>'}<span class="t"><b>${esc(a.who.name)}</b>${a.caption ? `<small>${esc(a.caption)}</small>` : ''}</span>`;
+      const pic = who.querySelector('img');
+      if (pic) pic.onerror = () => { const av = document.createElement('span'); av.className = 'av'; av.textContent = '💜'; pic.replaceWith(av); };
+      el.appendChild(who);
+    } else {
+      el = media; el.className = 'a center'; el.style.height = a.size + 'vh';
+    }
+    const outClass = el === media ? 'a center out' : 'w out';
     let done = false;
-    const finish = () => { if (done) return; done = true; el.className = 'a center out'; setTimeout(() => { el.remove(); animShowing = false; nextAnim(); }, 400); };
-    el.onerror = finish;
+    const finish = () => { if (done) return; done = true; el.className = outClass; setTimeout(() => { el.remove(); animShowing = false; nextAnim(); }, 400); };
+    media.onerror = finish;
     $('#anim').appendChild(el);
     setTimeout(finish, a.seconds * 1000);
   }
