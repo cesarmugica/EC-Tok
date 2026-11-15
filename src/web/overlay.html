@@ -123,6 +123,7 @@
 <script>
   const params = new URLSearchParams(location.search);
   const which = (params.get('w') || 'alerts').split(',');
+  let OV_VERSION = '';
   const $ = s => document.querySelector(s);
   const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[c]));
   let cfg = null, stats = null, likeMark = 0, LOC = 'es-MX';
@@ -312,6 +313,9 @@
 
   async function load() {
     const data = await (await fetch('/api/overlay')).json();
+    // Si EC-Tok se actualizó, recargar este overlay para usar la versión nueva (LIVE Studio/OBS lo dejan abierto).
+    if (OV_VERSION && data.version && data.version !== OV_VERSION) { location.reload(); return; }
+    OV_VERSION = data.version || OV_VERSION;
     cfg = data; stats = data.stats; LOC = {en: 'en-US', pt: 'pt-BR'}[data.lang] || 'es-MX'; likeMark = Math.floor(stats.likes / (cfg.alerts.like.every || 1)) * (cfg.alerts.like.every || 1);
     applyStyle();
     if (which.includes('anim')) showBrb(data.brb);

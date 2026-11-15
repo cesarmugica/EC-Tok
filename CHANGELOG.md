@@ -1,5 +1,9 @@
 # Cambios de EC-Tok
 
+## 1.5.3
+- Nueva animación automática de fábrica: **cada 1000 likes** sale la chica con «¡Ya somos {likes} likes!» (cámbiale el número, la animación o el texto en 🎬 Animaciones). Se agrega sola si todavía no tenías una regla de likes.
+- Los overlays en LIVE Studio u OBS **se recargan solos cuando actualizas EC-Tok**, para que usen las animaciones nuevas sin tener que quitar y volver a poner la fuente.
+
 ## 1.5.2 — La chica también se anima
 - La escena de la chica ahora es animada (brinca, levanta el puño, se ríe), con el letrero siguiéndola cuadro por cuadro.
 

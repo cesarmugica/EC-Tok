@@ -28,7 +28,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, unquote, urlsplit
 
-APP_VERSION = "1.5.2"
+APP_VERSION = "1.5.3"
 
 try:  # lo genera windows/build.ps1
     from ectok_build import BUILD_DATE  # type: ignore[import-not-found]
@@ -113,6 +113,7 @@ DEFAULT_CONFIG: dict = {
     "goals": [{"id": "likes", "on": True, "kind": "likes", "target": 10000, "title": "Meta de likes"}],
     "top": {"count": 5, "title": "Top donadores"},
     "likers": {"count": 5, "title": "Top likes"},
+    "likes_rule_added": True,
     "anims": {
         # trigger: any_gift | gift | min_diamonds | follow | share | likes | subscribe | superfan | envelope |
         #          battle_start | battle_end | booster
@@ -127,6 +128,8 @@ DEFAULT_CONFIG: dict = {
              "file": "confeti.webp", "seconds": 4, "name": True, "size": 90},
             {"id": "sub", "on": True, "trigger": "subscribe", "gift": "", "min_diamonds": 1, "every": 1000, "multiplier": 0,
              "file": "estrellas.webp", "seconds": 4, "name": True, "size": 80},
+            {"id": "likes", "on": True, "trigger": "likes", "gift": "", "min_diamonds": 1, "every": 1000, "multiplier": 0,
+             "file": "escena-chica.webp", "seconds": 5, "name": False, "size": 70, "text": ""},
             {"id": "x2", "on": True, "trigger": "booster", "gift": "", "min_diamonds": 1, "every": 1000, "multiplier": 2,
              "file": "x2.webp", "seconds": 4, "name": False, "size": 70},
             {"id": "x3", "on": True, "trigger": "booster", "gift": "", "min_diamonds": 1, "every": 1000, "multiplier": 3,
@@ -165,6 +168,13 @@ def load_config() -> dict:
             for rule in cfg["anims"]["rules"]:  # 1.1.2: el Heart Me de fábrica ahora es el globo corazón
                 if rule.get("id") == "heartme" and rule.get("file") == "corazones.webp":
                     rule.update(file="globo-corazon.webp", seconds=2, size=80)
+            if not saved.get("likes_rule_added"):  # 1.5.3: animación de fábrica cada 1000 likes
+                cfg["likes_rule_added"] = True
+                if not any(r.get("trigger") == "likes" for r in cfg["anims"]["rules"]):
+                    cfg["anims"]["rules"].append({"id": "likes", "on": True, "trigger": "likes", "gift": "", "min_diamonds": 1,
+                                                  "every": 1000, "multiplier": 0, "file": "escena-chica.webp", "seconds": 5,
+                                                  "name": False, "size": 70, "text": ""})
+            for rule in cfg["anims"]["rules"]:
                 if "name" not in rule:  # 1.3.0: mostrar el nombre de quien lo mandó
                     rule["name"] = rule.get("id") in ("heartme", "follow", "big", "chest", "sub")
             return cfg
@@ -574,7 +584,7 @@ def overlay_payload() -> dict:
     """Lo que necesitan los overlays: estilos, alertas, metas y el estado del live."""
     return {"style": CONFIG["style"], "alerts": CONFIG["alerts"], "goals": CONFIG["goals"], "top": CONFIG["top"], "likers": CONFIG["likers"],
             "stats": LIVE.stats.public(CONFIG["top"]["count"]), "brb": {**CONFIG["anims"]["brb"], **BRB},
-            "lang": CONFIG["language"]}
+            "lang": CONFIG["language"], "version": APP_VERSION}
 
 
 def aliases_payload() -> list[list[str]]:
