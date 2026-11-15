@@ -1,5 +1,10 @@
 # Cambios de EC-Tok
 
+## 1.4.0 — ❤️ Top likes
+- Nuevo ranking de **quién te da más likes** (tap a la pantalla): en 🔴 En vivo junto al top de donadores, y como overlay para tu live: `http://localtest.me:8795/overlay?w=likes`.
+- Título y cuántos mostrar en 🎯 Metas y top.
+- Arreglado: el top de donadores vacío mostraba un texto raro en vez de «Todavía nadie… ¡manda el primer regalo!».
+
 ## 1.3.1
 - En el modo prueba, el Heart Me llega de uno en uno (TikTok solo deja mandar uno al día por persona), sin «×10».
 

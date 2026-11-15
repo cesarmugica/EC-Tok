@@ -1,5 +1,8 @@
 """Traducciones de la ventana de EC-Tok (llave = texto en español)."""
 T = {
+'❤️ Top likes': ('❤️ Top likers', '❤️ Top curtidas'),
+'Todavía nadie ha dado likes.': ('Nobody has liked yet.', 'Ninguém curtiu ainda.'),
+'Quién te ha dado más likes (tap a la pantalla) en este live.': ('Who has given you the most likes (screen taps) in this LIVE.', 'Quem mais te deu curtidas (toques na tela) nesta live.'),
 'Nombre': ('Name', 'Nome'),
 'Mostrar la foto y el nombre de quien lo mandó': ('Show the photo and name of who sent it', 'Mostrar a foto e o nome de quem mandou'),
 'Usuario de prueba': ('Test user', 'Usuário de teste'),

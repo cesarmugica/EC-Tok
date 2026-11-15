@@ -28,7 +28,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, unquote, urlsplit
 
-APP_VERSION = "1.3.1"
+APP_VERSION = "1.4.0"
 
 try:  # lo genera windows/build.ps1
     from ectok_build import BUILD_DATE  # type: ignore[import-not-found]
@@ -112,6 +112,7 @@ DEFAULT_CONFIG: dict = {
             "follow_text": "Gracias por seguirme, {user}", "share_text": "Gracias por compartir, {user}"},
     "goals": [{"id": "likes", "on": True, "kind": "likes", "target": 10000, "title": "Meta de likes"}],
     "top": {"count": 5, "title": "Top donadores"},
+    "likers": {"count": 5, "title": "Top likes"},
     "anims": {
         # trigger: any_gift | gift | min_diamonds | follow | share | likes | subscribe | superfan | envelope |
         #          battle_start | battle_end | booster
@@ -190,6 +191,7 @@ DEFAULT_TEXTS: dict[tuple, dict[str, str]] = {
     ("tts", "follow_text"): {"es": "Gracias por seguirme, {user}", "en": "Thanks for following, {user}", "pt": "Obrigado por me seguir, {user}"},
     ("tts", "share_text"): {"es": "Gracias por compartir, {user}", "en": "Thanks for sharing, {user}", "pt": "Obrigado por compartilhar, {user}"},
     ("top", "title"): {"es": "Top donadores", "en": "Top gifters", "pt": "Top doadores"},
+    ("likers", "title"): {"es": "Top likes", "en": "Top likers", "pt": "Top curtidas"},
     ("anims", "brb", "text"): {"es": "Ya regresamos", "en": "Be right back", "pt": "Já voltamos"},
     ("anims", "brb", "sub"): {"es": "No te vayas 💖", "en": "Don't go anywhere 💖", "pt": "Não vá embora 💖"},
 }
@@ -356,6 +358,10 @@ def clean_config(data: dict) -> dict:
     if isinstance(top, dict):
         cfg["top"]["count"] = int(_num(top.get("count"), cfg["top"]["count"], 1, 10))
         cfg["top"]["title"] = _text(top.get("title"), cfg["top"]["title"], 60)
+    likers = data.get("likers")
+    if isinstance(likers, dict):
+        cfg["likers"]["count"] = int(_num(likers.get("count"), cfg["likers"]["count"], 1, 10))
+        cfg["likers"]["title"] = _text(likers.get("title"), cfg["likers"]["title"], 60)
     return cfg
 
 
@@ -513,7 +519,7 @@ ectok_live.LANG["value"] = CONFIG["language"]
 
 def overlay_payload() -> dict:
     """Lo que necesitan los overlays: estilos, alertas, metas y el estado del live."""
-    return {"style": CONFIG["style"], "alerts": CONFIG["alerts"], "goals": CONFIG["goals"], "top": CONFIG["top"],
+    return {"style": CONFIG["style"], "alerts": CONFIG["alerts"], "goals": CONFIG["goals"], "top": CONFIG["top"], "likers": CONFIG["likers"],
             "stats": LIVE.stats.public(CONFIG["top"]["count"]), "brb": {**CONFIG["anims"]["brb"], **BRB},
             "lang": CONFIG["language"]}
 

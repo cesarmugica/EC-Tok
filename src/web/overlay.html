@@ -78,7 +78,7 @@
   .goal.done .head span:last-child::after { content: "  🎉"; }
 
   /* ---------- top donadores ---------- */
-  #top { margin: 12px; }
+  #top, #likers { margin: 12px; }
   .topbox { padding: 12px 14px; border-radius: 18px; background: rgba(15,15,22,.72); border: 2px solid rgba(255,255,255,.12); }
   .topbox h1 { margin: 0 0 8px; font-size: calc(var(--fs) * .66); color: var(--c2); }
   .topbox ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
@@ -97,6 +97,7 @@
 <div id="anim"></div>
 <div id="goal" hidden></div>
 <div id="top" hidden></div>
+<div id="likers" hidden></div>
 <script>
   const params = new URLSearchParams(location.search);
   const which = (params.get('w') || 'alerts').split(',');
@@ -104,6 +105,7 @@
   const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[c]));
   let cfg = null, stats = null, likeMark = 0, LOC = 'es-MX';
   const EMPTY_TOP = {es: 'Todavía nadie… ¡manda el primer regalo!', en: 'Nobody yet… send the first gift!', pt: 'Ninguém ainda… mande o primeiro presente!'};
+  const EMPTY_LIKES = {es: 'Todavía nadie… ¡dale tap a la pantalla!', en: 'Nobody yet… tap the screen!', pt: 'Ninguém ainda… toque na tela!'};
   const EMOJI = {gift: '🎁', follow: '💖', share: '📣', like: '❤️'};
 
   function applyStyle() {
@@ -171,10 +173,13 @@
 
   // ---------- top donadores ----------
   function drawTop() {
-    if (!which.includes('top') || !stats) return;
-    const list = stats.top.slice(0, cfg.top.count);
-    $('#top').innerHTML = `<div class="topbox"><h1 class="shadow">🏆 ${esc(cfg.top.title)}</h1>${list.length ? `<ol>${list.map((d, i) =>
-      `<li class="shadow"><span class="n">${['🥇', '🥈', '🥉'][i] || i + 1}</span>${d.avatar ? `<img src="${esc(d.avatar)}" alt="">` : '<span class="av">👤</span>'}<span class="nm">${esc(d.name)}</span><span>💎 ${d.diamonds.toLocaleString(LOC)}</span></li>`).join('')}</ol>` : '<div class="empty shadow">${EMPTY_TOP[cfg.lang] || EMPTY_TOP.es}</div>'}</div>`;
+    if (!stats) return;
+    const board = (box, title, list, unit, value, empty) => {
+      box.innerHTML = `<div class="topbox"><h1 class="shadow">${title}</h1>${list.length ? `<ol>${list.map((d, i) =>
+        `<li class="shadow"><span class="n">${['🥇', '🥈', '🥉'][i] || i + 1}</span>${d.avatar ? `<img src="${esc(d.avatar)}" alt="">` : '<span class="av">👤</span>'}<span class="nm">${esc(d.name)}</span><span>${unit} ${value(d).toLocaleString(LOC)}</span></li>`).join('')}</ol>` : `<div class="empty shadow">${empty[cfg.lang] || empty.es}</div>`}</div>`;
+    };
+    if (which.includes('top')) board($('#top'), '🏆 ' + esc(cfg.top.title), stats.top.slice(0, cfg.top.count), '💎', d => d.diamonds, EMPTY_TOP);
+    if (which.includes('likes') && cfg.likers) board($('#likers'), '❤️ ' + esc(cfg.likers.title), (stats.likers || []).slice(0, cfg.likers.count), '❤️', d => d.likes, EMPTY_LIKES);
   }
 
   // ---------- animaciones (una a la vez, en fila) ----------
@@ -236,7 +241,7 @@
     cfg = data; stats = data.stats; LOC = {en: 'en-US', pt: 'pt-BR'}[data.lang] || 'es-MX'; likeMark = Math.floor(stats.likes / (cfg.alerts.like.every || 1)) * (cfg.alerts.like.every || 1);
     applyStyle();
     if (which.includes('anim')) showBrb(data.brb);
-    $('#goal').hidden = !which.includes('goal'); $('#top').hidden = !which.includes('top'); $('#alerts').hidden = !which.includes('alerts');
+    $('#goal').hidden = !which.includes('goal'); $('#top').hidden = !which.includes('top'); $('#likers').hidden = !which.includes('likes'); $('#alerts').hidden = !which.includes('alerts');
     drawGoals(); drawTop();
   }
   load().then(() => {

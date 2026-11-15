@@ -24,7 +24,7 @@ Alertas, sonidos, lectura de chat y metas para tus **lives de TikTok** — grati
 
 1. Descarga `EC-Tok-Setup-x.y.z.exe` de la [última versión](https://github.com/cesarmugica/EC-Tok/releases/latest) y ejecútalo (no pide permisos de administrador). Si SmartScreen avisa, elige *Más información → Ejecutar de todas formas*.
 2. En **🔴 En vivo** escribe tu @usuario y dale **Conectar** (si todavía no estás en vivo, EC-Tok espera y se conecta solo).
-3. Copia la dirección del overlay (alertas, metas o top) y agrégala como fuente web:
+3. Copia la dirección del overlay (alertas, animaciones, metas, top donadores o top likes) y agrégala como fuente web:
    - **TikTok LIVE Studio**: ➕ Agregar fuente → Enlace (Link).
    - **OBS**: Fuente → Navegador.
 4. Los sonidos y la voz suenan en tu PC: que LIVE Studio u OBS capture el audio del escritorio.

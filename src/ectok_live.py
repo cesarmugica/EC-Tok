@@ -92,6 +92,7 @@ class Stats:
         self.started = time.time()
         self.likes = self.diamonds = self.follows = self.shares = self.gifts = self.comments = 0
         self.donors: dict[str, dict] = {}
+        self.likers: dict[str, dict] = {}
         self.gift_names: set[str] = set()
 
     def add(self, event: dict) -> None:
@@ -110,6 +111,12 @@ class Stats:
             elif kind == "like":
                 total = event.get("total_likes") or 0
                 self.likes = max(self.likes + event.get("count", 0), total)
+                user = event.get("user") or {}
+                key = user.get("id") or user.get("name")
+                if key and user.get("name") != "Alguien":
+                    liker = self.likers.setdefault(key, {"name": user["name"], "avatar": user.get("avatar", ""), "likes": 0})
+                    liker["likes"] += int(event.get("count") or 0)
+                    liker["name"], liker["avatar"] = user["name"], user.get("avatar") or liker["avatar"]
             elif kind == "follow":
                 self.follows += 1
             elif kind == "share":
@@ -120,8 +127,9 @@ class Stats:
     def public(self, top: int = 10) -> dict:
         with self.lock:
             donors = sorted(self.donors.values(), key=lambda d: d["diamonds"], reverse=True)[:top]
+            likers = sorted(self.likers.values(), key=lambda d: d["likes"], reverse=True)[:10]
             return {"likes": self.likes, "diamonds": self.diamonds, "follows": self.follows, "shares": self.shares,
-                    "gifts": self.gifts, "comments": self.comments, "top": donors, "started": self.started,
+                    "gifts": self.gifts, "comments": self.comments, "top": donors, "likers": likers, "started": self.started,
                     "gift_names": sorted(self.gift_names)}
 
 
