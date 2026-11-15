@@ -28,7 +28,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, unquote, urlsplit
 
-APP_VERSION = "1.2.1"
+APP_VERSION = "1.2.2"
 
 try:  # lo genera windows/build.ps1
     from ectok_build import BUILD_DATE  # type: ignore[import-not-found]
@@ -861,6 +861,7 @@ def main() -> int:
     parser.add_argument("--port", type=int, help=f"puerto (por defecto {DEFAULT_PORT})")
     parser.add_argument("--no-browser", action="store_true", help="no abrir la ventana")
     parser.add_argument("--stay", action="store_true", help="no cerrarse al cerrar la ventana")
+    parser.add_argument("--after-update", action="store_true", help=argparse.SUPPRESS)
     parser.add_argument("--version", action="version", version=f"EC-Tok {APP_VERSION} {BUILD_DATE}".strip())
     args = parser.parse_args()
 
@@ -886,7 +887,12 @@ def main() -> int:
                 "Si una tuya se llama igual que una de EC-Tok, se usa la tuya.\n", encoding="utf-8")
     if not args.stay:
         threading.Thread(target=_idle_watch, args=(server,), daemon=True).start()
-    if not args.no_browser:
+    if not args.no_browser and args.after_update:
+        # Tras actualizar, la ventana vieja se recarga sola con la versión nueva:
+        # solo abrir otra si en unos segundos ninguna se reporta.
+        started = time.time()
+        threading.Timer(7, lambda: None if LAST_PING > started else open_app_window(url)).start()
+    elif not args.no_browser:
         threading.Timer(0.6, open_app_window, args=(url,)).start()
     if CONFIG.get("autoconnect") and CONFIG.get("username"):
         threading.Timer(1.5, lambda: LIVE.connect(CONFIG["username"], CONFIG.get("euler_key") or "")).start()

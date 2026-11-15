@@ -1,5 +1,9 @@
 # Cambios de EC-Tok
 
+## 1.2.2 — Actualizar sin dejar la versión vieja abierta
+- Al darle **Actualizar**, la versión vieja ahora se cierra sola en cuanto arranca el instalador (antes a veces se quedaba en memoria junto a la nueva).
+- La ventana de EC-Tok que tenías abierta se recarga sola con la versión nueva, en lugar de abrirse una segunda ventana.
+
 ## 1.2.1 — Overlays en TikTok LIVE Studio
 - TikTok LIVE Studio no aceptaba las direcciones `http://127.0.0.1…` ni `http://localhost…` («Introduce una URL válida»). Ahora los overlays usan `http://ectok.localhost:8795/overlay?w=…`, que LIVE Studio sí acepta y que apunta a tu propia PC.
 - Si alguna vez no carga, cambia `ectok.localhost` por `localtest.me`.

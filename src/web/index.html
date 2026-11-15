@@ -736,8 +736,23 @@
       $('#updateText').textContent = u.state === 'downloading' ? tf('Bajando EC-Tok {0}… {1}%', u.latest, u.percent ?? '') : u.state === 'installing' ? t('Instalando… EC-Tok se va a cerrar y abrir solo.') : tf('Hay una versión nueva: EC-Tok {0}', u.latest);
       $('#updateBtn').hidden = u.state !== 'available';
       $('#updateMsg').textContent = t(u.error) || (u.state === 'uptodate' ? t('✓ Estás al día.') : '');
-      if (u.state === 'downloading' || u.state === 'installing' || u.state === 'checking') setTimeout(checkUpdate, 1000);
+      if (u.state === 'installing') { waitNewVersion(u.current); return; }
+      if (u.state === 'downloading' || u.state === 'checking') setTimeout(checkUpdate, 1000);
     } catch (_) {}
+  }
+  // Mientras se instala, esta misma ventana espera a la versión nueva y se recarga con ella.
+  let waitingNew = false;
+  function waitNewVersion(old) {
+    if (waitingNew) return; waitingNew = true;
+    const t0 = Date.now();
+    const tick = async () => {
+      try {
+        const r = await fetch('/api/info', {cache: 'no-store'});
+        if (r.ok && (await r.json()).version !== old) { location.reload(); return; }
+      } catch (_) {}
+      if (Date.now() - t0 < 180000) setTimeout(tick, 1500);
+    };
+    setTimeout(tick, 3000);
   }
   $('#updateBtn').addEventListener('click', async () => { try { await api('/api/update/install', {}); checkUpdate(); } catch (e) { $('#updateText').textContent = t(e.message); } });
   $('#checkUpdate').addEventListener('click', async () => { await api('/api/update/check', {}).catch(() => {}); setTimeout(checkUpdate, 1500); });
