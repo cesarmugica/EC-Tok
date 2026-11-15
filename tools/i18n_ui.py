@@ -1,5 +1,7 @@
 """Traducciones de la ventana de EC-Tok (llave = texto en español)."""
 T = {
+'📂 Elige el archivo…': ('📂 Choose the file…', '📂 Escolha o arquivo…'),
+'⏳ Convirtiendo {0} archivos…': ('⏳ Converting {0} files…', '⏳ Convertendo {0} arquivos…'),
 '🎧 Banco de sonidos': ('🎧 Sound library', '🎧 Banco de sons'),
 'Sonidos cortos de fábrica, libres de uso (dominio público, CC0). ▶ para escucharlo aquí; ➕ para crear una regla con ese sonido. También los eliges en cada regla, en la lista «Sonido». Para usar los tuyos: «📂 Mío…» en la regla.': ('Short built-in sounds, free to use (public domain, CC0). ▶ to listen here; ➕ to create a rule with that sound. You can also pick them in each rule, in the “Sound” list. To use your own: “📂 Mine…” in the rule.', 'Sons curtos de fábrica, livres para usar (domínio público, CC0). ▶ para ouvir aqui; ➕ para criar uma regra com esse som. Você também os escolhe em cada regra, na lista «Som». Para usar os seus: «📂 Meu…» na regra.'),
 '🎉 Festejo': ('🎉 Celebration', '🎉 Comemoração'),

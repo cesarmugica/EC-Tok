@@ -28,7 +28,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, unquote, urlsplit
 
-APP_VERSION = "1.10.0"
+APP_VERSION = "2.0.0"
 
 try:  # lo genera windows/build.ps1
     from ectok_build import BUILD_DATE  # type: ignore[import-not-found]
@@ -788,6 +788,9 @@ def import_anim(path: Path) -> str:
     return convert_anim(path, ANIM_USER, safe).name
 
 
+PICKED: dict[str, list[str]] = {}  # archivos elegidos en el explorador, esperando convertirse
+
+
 def sound_bank() -> list[dict]:
     with contextlib.suppress(OSError, ValueError):
         return json.loads((SOUND_BANK / "sonidos.json").read_text(encoding="utf-8"))
@@ -1118,7 +1121,14 @@ class Handler(BaseHTTPRequestHandler):
             except (ValueError, OSError) as exc:
                 self.send_json({"ok": False, "error": str(exc)}, 400)
         elif path == "/api/anim/pick":
+            # Paso 1: solo elegir (la ventana dice «elige el archivo»); paso 2: /api/anim/import convierte.
             chosen = pick_anim(multi=bool(data.get("multi")))[:20]
+            ticket = uuid.uuid4().hex
+            if chosen:
+                PICKED[ticket] = chosen
+            self.send_json({"ok": True, "ticket": ticket if chosen else None, "names": [Path(c).name for c in chosen]})
+        elif path == "/api/anim/import":
+            chosen = PICKED.pop(_text(data.get("ticket"), "", 40), [])  # solo lo que se eligió en el explorador
             files, errors = [], []
             for item in chosen:
                 try:

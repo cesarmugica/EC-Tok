@@ -1,5 +1,9 @@
 # Cambios de EC-Tok
 
+## 2.0.0
+- «➕ Agregar animaciones» y «📂 Subir la mía…»: mientras está abierto el explorador el botón dice **«📂 Elige el archivo…»**, y solo después de elegir dice **«⏳ Convirtiendo…»** (antes decía «Convirtiendo» sin haber elegido nada).
+- Numeración: de aquí en adelante cada número va de 0 a 9 (después de 1.9.x sigue 2.0.0).
+
 ## 1.10.0 — 🎧 Banco de sonidos
 - **63 sonidos cortos de fábrica (máx. 5 s), libres de uso (CC0 / dominio público)**, en 🔊 Sonidos: festejo (aplausos, ovación, redoble y platillo, corneta, ¡ta-dá!, fanfarrias, fuegos artificiales…), voces en inglés («Congratulations!», «You win!», «Winner!», «Fight!»…), risas y chistosos, y efectos (subir de nivel, monedas, magia, campanitas…).
 - ▶ para escucharlos ahí mismo y ➕ para crear una regla con ese sonido. En cada regla el sonido se elige de una lista; con «📂 Mío…» usas uno de tu PC.
