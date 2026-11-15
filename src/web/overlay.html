@@ -45,6 +45,7 @@
   #anim .a.top { top: 2vh; } #anim .a.center { top: 50%; transform: translate(-50%, -50%); } #anim .a.bottom { bottom: 2vh; }
   #anim .a.out { animation: fadeout .4s ease both; }
   @keyframes fadeout { to { opacity: 0; } }
+  [hidden] { display: none !important; }
   /* ---------- ya regresamos ---------- */
   #brb { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2vh;
     z-index: 4; animation: fade .6s ease both; }
@@ -181,7 +182,7 @@
   }
   function showBrb(b) {
     const box = $('#brb');
-    if (!b || !b.on) { box.hidden = true; box.innerHTML = ''; return; }
+    if (!b || !b.on) { box.hidden = true; box.className = ''; box.innerHTML = ''; return; }
     const src = '/anim/' + encodeURIComponent(b.file);
     const pic = b.file.toLowerCase().endsWith('.webm') ? `<video class="pic" src="${src}" autoplay muted loop playsinline></video>` : `<img class="pic" src="${src}" alt="">`;
     box.className = b.dim ? 'dim' : '';

@@ -1,5 +1,8 @@
 # Cambios de EC-Tok
 
+## 1.2.6 — «Ya regresamos» se quita completo
+- Al quitar la pantalla «☕ Ya regresamos», el fondo oscuro semitransparente ya no se queda encima del live.
+
 ## 1.2.5 — Créditos
 - Abajo de la ventana: «💜 EC-Tok es gratis y siempre lo será. Sigue la cuenta @imuxoficial en TikTok (Colab Claude AI)», en los tres idiomas.
 
