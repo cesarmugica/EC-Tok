@@ -65,9 +65,12 @@
   #anim .sc .char { position: absolute; inset: 0; width: 100%; height: 100%; }
   #anim .sc .part { position: absolute; }
   #anim .sc .part.heart { animation: heartIn .5s cubic-bezier(.3,1.8,.5,1) .45s both, heartBeat 1s ease-in-out 1s infinite; }
-  #anim .sc .sign { position: absolute; display: flex; align-items: center; justify-content: center; text-align: center; padding: 2% 4%;
+  #anim .sc .sign { position: absolute; box-sizing: border-box; }
+  #anim .sc .sign .in { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; text-align: center; padding: 2% 5%;
     box-sizing: border-box; color: #3b2314; font-weight: 900; line-height: 1.08; overflow: hidden; word-break: break-word;
     animation: signIn .45s cubic-bezier(.3,1.7,.5,1) .55s both; }
+  #anim .sc.sprite .body { animation: scIn .75s cubic-bezier(.25,1.55,.45,1) both; }
+  #anim .sc .frames { position: absolute; inset: 0; background-repeat: no-repeat; }
   #anim .sc .sign .u { color: var(--c1); white-space: nowrap; }
   @keyframes scIn { from { transform: translateY(105%) scale(.9); } to { transform: none; } }
   @keyframes scIdle { 0%, 100% { transform: rotate(0) scale(1, 1); } 20% { transform: rotate(-2.2deg) scale(1.02, .98); }
@@ -220,18 +223,43 @@
       el = document.createElement('div'); el.className = 'sc';
       el.style.height = hPx + 'px'; el.style.width = hPx * ratio + 'px';
       const body = document.createElement('div'); body.className = 'body'; el.appendChild(body);
-      media.className = 'char'; body.appendChild(media);
+      let frames = null;
+      if (sc.sprite) {
+        // Personaje animado cuadro por cuadro: una tira de cuadros que vamos cambiando aquí, para que el letrero lo siga.
+        el.classList.add('sprite');
+        frames = document.createElement('div'); frames.className = 'frames';
+        frames.style.backgroundImage = `url("/anim/${encodeURIComponent(sc.sprite.file)}")`;
+        frames.style.backgroundSize = `${sc.sprite.n * 100}% 100%`;
+        body.appendChild(frames);
+      } else { media.className = 'char'; body.appendChild(media); }
       for (const part of sc.parts || []) {
         const p = document.createElement('img'); p.className = 'part ' + (part.anim || ''); p.src = '/anim/' + encodeURIComponent(part.file);
         const [x, y, pw, ph] = part.box; Object.assign(p.style, {left: x + '%', top: y + '%', width: pw + '%', height: ph + '%'});
         body.appendChild(p);
       }
-      const [x, y, sw, sh] = sc.sign;
       const sign = document.createElement('div'); sign.className = 'sign';
-      Object.assign(sign.style, {left: x + '%', top: y + '%', width: sw + '%', height: sh + '%'});
+      const place = box => {  // box: [x, y, w, h] (esquina) o [cx, cy, w, h, grados] (centro, de la tira de cuadros)
+        if (box.length > 4) Object.assign(sign.style, {left: box[0] - box[2] / 2 + '%', top: box[1] - box[3] / 2 + '%', width: box[2] + '%', height: box[3] + '%', transform: `rotate(${box[4]}deg)`});
+        else Object.assign(sign.style, {left: box[0] + '%', top: box[1] + '%', width: box[2] + '%', height: box[3] + '%'});
+      };
+      const signBox = sc.track ? [sc.track[0][0], sc.track[0][1], Math.min(...sc.track.map(b => b[2])), Math.min(...sc.track.map(b => b[3])), 0] : sc.sign, sw = signBox[2], sh = signBox[3];
+      place(signBox);
+      const inner = document.createElement('div'); inner.className = 'in';
       const span = document.createElement('span');
       span.innerHTML = esc(a.sign || '').split('{user}').join(a.user ? `<span class="u">${esc(a.user)}</span>` : '');
-      sign.appendChild(span); body.appendChild(sign);
+      inner.appendChild(span); sign.appendChild(inner); body.appendChild(sign);
+      if (frames) {
+        let i = 0;
+        const step = () => {
+          if (!el.isConnected) return;
+          frames.style.backgroundPosition = `${sc.sprite.n > 1 ? i * 100 / (sc.sprite.n - 1) : 0}% 0`;
+          place(sc.track[i] || sc.track[0]);
+          const wait = sc.sprite.durs[i] || 120;
+          i = (i + 1) % sc.sprite.n;
+          setTimeout(step, wait);
+        };
+        setTimeout(step, 0);
+      }
       $('#anim').appendChild(el);
       // Que el texto quepa en el letrero: empezar grande e ir bajando.
       const sH = hPx * sh / 100 * 0.88;
@@ -239,6 +267,7 @@
       span.style.fontSize = fs + 'px';
       span.style.width = '100%';
       while (fs > 8 && (span.scrollWidth > span.clientWidth + 1 || span.offsetHeight > sH)) { fs *= 0.93; span.style.fontSize = fs + 'px'; }
+      span.style.width = span.clientWidth + 'px'; span.style.flex = 'none';  // que no se reacomode cuando el letrero cambia de tamaño
     } else if (a.who && a.who.name) {
       // Con nombre: la animación y abajo la tarjeta con la foto y el nombre.
       media.className = 'a'; media.style.height = Math.min(a.size, 82) + 'vh';

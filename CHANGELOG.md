@@ -1,5 +1,9 @@
 # Cambios de EC-Tok
 
+## 1.5.1 — El chico ahora sí se anima
+- La escena del chico es animación de verdad (brinca, levanta el puño, se ríe) y **el texto del letrero lo sigue cuadro por cuadro**, aunque el letrero se mueva o se incline.
+- Las escenas aceptan tiras de cuadros con el letrero ubicado en cada cuadro (para los personajes animados que vengan).
+
 ## 1.5.0 — Escenas con letrero 🧒👧
 - Nuevas animaciones tipo Pixar: **un chico y una chica que entran brincando, se mecen, con un corazón que late y un letrero** donde EC-Tok escribe lo que tú quieras.
 - **Cada regla tiene su propio texto** para el letrero, con comodines: `{user}` (sale resaltado), `{gift}`, `{count}`, `{likes}`, `{diamonds}`. Ej.: «¡Gracias por seguirme, {user}!» o «¡Gracias por tus {likes} likes!». Si lo dejas vacío, pone uno según lo que pasó y en tu idioma. El texto se acomoda solo al tamaño del letrero.
