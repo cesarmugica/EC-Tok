@@ -1,0 +1,44 @@
+{
+ "escena-chico.webp": {
+  "parts": [
+   {
+    "file": "escena-chico-parte-corazon.webp",
+    "box": [
+     71.88,
+     15.34,
+     24.97,
+     14.52
+    ],
+    "anim": "heart"
+   }
+  ],
+  "sign": [
+   6.94,
+   36.92,
+   86.13,
+   23.05
+  ],
+  "ratio": 0.6505
+ },
+ "escena-chica.webp": {
+  "parts": [
+   {
+    "file": "escena-chica-parte-corazon.webp",
+    "box": [
+     73.91,
+     14.02,
+     26.34,
+     15.24
+    ],
+    "anim": "heart"
+   }
+  ],
+  "sign": [
+   6.99,
+   38.09,
+   83.65,
+   22.04
+  ],
+  "ratio": 0.6491
+ }
+}

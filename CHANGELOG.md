@@ -1,5 +1,13 @@
 # Cambios de EC-Tok
 
+## 1.5.0 — Escenas con letrero 🧒👧
+- Nuevas animaciones tipo Pixar: **un chico y una chica que entran brincando, se mecen, con un corazón que late y un letrero** donde EC-Tok escribe lo que tú quieras.
+- **Cada regla tiene su propio texto** para el letrero, con comodines: `{user}` (sale resaltado), `{gift}`, `{count}`, `{likes}`, `{diamonds}`. Ej.: «¡Gracias por seguirme, {user}!» o «¡Gracias por tus {likes} likes!». Si lo dejas vacío, pone uno según lo que pasó y en tu idioma. El texto se acomoda solo al tamaño del letrero.
+- En español, los regalos comunes salen con su nombre en español en el letrero (Heart Me → Quiéreme, Rose → Rosa…).
+- En los botones rápidos, el letrero dice el nombre del botón.
+- Las pestañas de arriba (En vivo, Alertas, Animaciones…) se quedan fijas aunque bajes en la página.
+- En instalaciones nuevas, el follow sale con el chico y su letrero.
+
 ## 1.4.0 — ❤️ Top likes
 - Nuevo ranking de **quién te da más likes** (tap a la pantalla): en 🔴 En vivo junto al top de donadores, y como overlay para tu live: `http://localtest.me:8795/overlay?w=likes`.
 - Título y cuántos mostrar en 🎯 Metas y top.

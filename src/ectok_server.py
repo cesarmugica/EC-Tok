@@ -28,7 +28,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, unquote, urlsplit
 
-APP_VERSION = "1.4.0"
+APP_VERSION = "1.5.0"
 
 try:  # lo genera windows/build.ps1
     from ectok_build import BUILD_DATE  # type: ignore[import-not-found]
@@ -120,7 +120,7 @@ DEFAULT_CONFIG: dict = {
             {"id": "heartme", "on": True, "trigger": "gift", "gift": "Heart Me", "min_diamonds": 1, "every": 1000, "multiplier": 0,
              "file": "globo-corazon.webp", "seconds": 2, "name": True, "size": 80},
             {"id": "follow", "on": True, "trigger": "follow", "gift": "", "min_diamonds": 1, "every": 1000, "multiplier": 0,
-             "file": "gracias.webp", "seconds": 3, "name": True, "size": 60},
+             "file": "escena-chico.webp", "seconds": 5, "name": True, "size": 70, "text": ""},
             {"id": "big", "on": True, "trigger": "min_diamonds", "gift": "", "min_diamonds": 1000, "every": 1000, "multiplier": 0,
              "file": "fuegos-artificiales.webp", "seconds": 5, "name": True, "size": 90},
             {"id": "chest", "on": True, "trigger": "envelope", "gift": "", "min_diamonds": 1, "every": 1000, "multiplier": 0,
@@ -340,7 +340,8 @@ def clean_config(data: dict) -> dict:
                                   "every": int(_num(r.get("every"), 1000, 10, 10_000_000)),
                                   "multiplier": int(_num(r.get("multiplier"), 0, 0, 5)),
                                   "file": Path(str(r.get("file") or "")).name, "seconds": float(_num(r.get("seconds"), 4, 1, 30)),
-                                  "size": int(_num(r.get("size"), 70, 10, 100)), "name": bool(r.get("name"))})
+                                  "size": int(_num(r.get("size"), 70, 10, 100)), "name": bool(r.get("name")),
+                                  "text": _text(r.get("text"), "", 120)})
             a["rules"] = rules
         if isinstance(anims.get("quick"), list):
             a["quick"] = [{"id": _text(q.get("id"), uuid.uuid4().hex[:8], 20), "label": _text(q.get("label"), "Animación", 30),
@@ -414,10 +415,57 @@ def list_animations() -> list[dict]:
     for folder, source in ((ANIM_DEFAULT, "ec-tok"), (ANIM_USER, "tuya")):
         if folder.is_dir():
             for path in sorted(folder.iterdir()):
-                if path.is_file() and path.suffix.lower() in ANIM_EXTS:
+                if path.is_file() and path.suffix.lower() in ANIM_EXTS and "-parte-" not in path.name:
                     found[path.name] = {"file": path.name, "name": path.stem.replace("-", " ").replace("_", " "),
-                                        "source": source, "video": path.suffix.lower() == ".webm"}
+                                        "source": source, "video": path.suffix.lower() == ".webm",
+                                        "scene": path.name in SCENES}
     return sorted(found.values(), key=lambda a: (a["source"] != "tuya", a["name"]))
+
+
+def _load_scenes() -> dict:
+    """Escenas: un personaje con letrero (el texto lo pone EC-Tok) y partes que se mueven aparte."""
+    with contextlib.suppress(OSError, ValueError):
+        data = json.loads((ANIM_DEFAULT / "escenas.json").read_text(encoding="utf-8"))
+        if isinstance(data, dict):
+            return data
+    return {}
+
+
+SCENES = _load_scenes()
+
+# Texto de fábrica del letrero, según lo que pasó (cada regla puede poner el suyo).
+SIGN_DEFAULTS = {
+    "gift": {"es": "¡Gracias por tu {gift}, {user}!", "en": "Thanks for the {gift}, {user}!", "pt": "Obrigado pelo {gift}, {user}!"},
+    "follow": {"es": "¡Gracias por seguirme, {user}!", "en": "Thanks for following, {user}!", "pt": "Obrigado por me seguir, {user}!"},
+    "share": {"es": "¡Gracias por compartir, {user}!", "en": "Thanks for sharing, {user}!", "pt": "Obrigado por compartilhar, {user}!"},
+    "like": {"es": "¡Ya somos {likes} likes!", "en": "We hit {likes} likes!", "pt": "Já são {likes} curtidas!"},
+    "subscribe": {"es": "¡Gracias por suscribirte, {user}!", "en": "Thanks for subscribing, {user}!", "pt": "Obrigado por se inscrever, {user}!"},
+    "superfan": {"es": "¡Gracias, súper fan {user}!", "en": "Thank you, super fan {user}!", "pt": "Obrigado, super fã {user}!"},
+    "envelope": {"es": "¡Gracias por el cofre, {user}!", "en": "Thanks for the treasure chest, {user}!", "pt": "Obrigado pelo baú, {user}!"},
+    "": {"es": "¡Gracias!", "en": "Thank you!", "pt": "Obrigado!"},
+}
+GIFT_NAMES_ES = {"heart me": "Quiéreme", "rose": "Rosa", "lion": "León", "universe": "Universo", "galaxy": "Galaxia",
+                 "finger heart": "Corazón con los dedos", "ice cream cone": "Helado", "doughnut": "Dona", "perfume": "Perfume",
+                 "money gun": "Pistola de dinero", "tiktok": "TikTok"}
+
+
+def sign_text(template: str, ev: dict | None, show_name: bool = True) -> str:
+    """El texto del letrero con los comodines llenos. {user} se deja para que el overlay lo resalte."""
+    lang = CONFIG["language"]
+    ev = ev or {}
+    kind = ev.get("type", "")
+    text = template.strip() or SIGN_DEFAULTS.get(kind if kind in SIGN_DEFAULTS else "", SIGN_DEFAULTS[""])[lang]
+    gift = ev.get("gift") or {}
+    gname = gift.get("name", "")
+    if lang == "es":
+        gname = GIFT_NAMES_ES.get(_norm(gname), gname)
+    values = {"{gift}": gname, "{count}": str(gift.get("count") or ""), "{likes}": f"{LIVE.stats.likes:,}",
+              "{diamonds}": str(gift.get("total") or "")}
+    for key, value in values.items():
+        text = text.replace(key, value)
+    if not show_name or not (ev.get("user") or {}).get("name"):
+        text = re.sub(r",?\s*\{user\}", "", text).replace("{user}", "")
+    return text
 
 
 def anim_path(name: str) -> Path | None:
@@ -430,7 +478,11 @@ def anim_path(name: str) -> Path | None:
 
 
 def anim_event(file: str, seconds: float, size: int, label: str = "", manual: bool = False,
-               who: dict | None = None, caption: str = "") -> dict:
+               who: dict | None = None, caption: str = "", sign: str = "") -> dict:
+    scene = SCENES.get(file)
+    if scene:  # en las escenas el nombre va en el letrero, no en la tarjeta de abajo
+        return new_event("anim", file=file, video=False, seconds=seconds, size=size, label=label, manual=manual,
+                         scene=scene, sign=sign, user=(who or {}).get("name", ""))
     return new_event("anim", file=file, video=file.lower().endswith(".webm"), seconds=seconds, size=size,
                      label=label, manual=manual, who=who, caption=caption)
 
@@ -500,7 +552,8 @@ def anims_for(ev: dict) -> list[dict]:
     user = ev.get("user") or {}
     who = {"name": user.get("name", ""), "avatar": user.get("avatar", "")} if user.get("name") else None
     return [anim_event(r["file"], r["seconds"], r["size"], manual=False,
-                       who=who if r.get("name") else None, caption=anim_caption(ev) if r.get("name") else "")
+                       who=who if r.get("name") else None, caption=anim_caption(ev) if r.get("name") else "",
+                       sign=sign_text(r.get("text", ""), ev, bool(r.get("name"))) if r["file"] in SCENES else "")
             for r in chosen]
 
 
@@ -825,9 +878,13 @@ class Handler(BaseHTTPRequestHandler):
                 return
             a = CONFIG["anims"]
             sample = {"name": _text(data.get("who"), "", 40), "avatar": ""} if data.get("who") else None
+            fake = {"type": _text(data.get("trigger"), "", 20).replace("any_gift", "gift").replace("min_diamonds", "gift").replace("likes", "like"),
+                    "user": sample or {}, "gift": {"name": _text(data.get("caption"), "", 40) or "Heart Me", "count": 1, "total": 1}}
+            label = _text(data.get("label"), "", 30)
+            sign = sign_text(_text(data.get("text"), "", 120) or (label if data.get("quick") else ""), fake, bool(sample))
             BUS.emit(anim_event(file, float(_num(data.get("seconds"), a["quick_seconds"], 1, 30)),
-                                int(_num(data.get("size"), a["quick_size"], 10, 100)), _text(data.get("label"), "", 30), manual=True,
-                                who=sample, caption=_text(data.get("caption"), "", 40)))
+                                int(_num(data.get("size"), a["quick_size"], 10, 100)), label, manual=True,
+                                who=sample, caption=_text(data.get("caption"), "", 40), sign=sign))
             self.send_json({"ok": True})
         elif path == "/api/brb":
             BRB["on"] = bool(data.get("on"))
