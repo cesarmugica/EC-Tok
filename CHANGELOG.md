@@ -1,5 +1,8 @@
 # Cambios de EC-Tok
 
+## 1.1.1 — Globo de corazón
+- Nueva animación en el banco: **globo corazón** (un globo metálico rojo que sube flotando), hecha por Cesar con IA y suavizada a 25 cuadros por segundo.
+
 ## 1.1.0 — 🎬 Animaciones
 - Nueva pestaña **🎬 Animaciones** y nuevo overlay **🎬 Animaciones** (`/overlay?w=anim`).
 - **Automáticas**, cada una con su casilla sí/no, animación, duración y tamaño: cualquier regalo, un regalo en especial (p. ej. Heart Me), regalos de N 💎 o más, follow, compartir, cada N likes, suscripción, Super Fan, regalo de la comunidad (cofre), empieza/termina una batalla y potenciadores x2/x3. Si llegan varias juntas, salen en fila.
