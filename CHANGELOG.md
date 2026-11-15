@@ -1,5 +1,8 @@
 # Cambios de EC-Tok
 
+## 1.1.3 — Regalos en inglés o español
+- Las reglas de animaciones y sonidos reconocen los regalos comunes con su nombre en inglés o en español: «Heart Me» = «Quiéreme», «Rose» = «Rosa», «Lion» = «León», «Universe» = «Universo», etc. (y sin importar acentos o mayúsculas).
+
 ## 1.1.2 — El Heart Me sale con el globo
 - La animación de fábrica del **Heart Me** ahora es el **globo corazón** (si no la habías cambiado, se cambia sola).
 

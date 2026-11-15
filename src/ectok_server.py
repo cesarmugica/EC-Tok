@@ -28,7 +28,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, unquote, urlsplit
 
-APP_VERSION = "1.1.2"
+APP_VERSION = "1.1.3"
 
 try:  # lo genera windows/build.ps1
     from ectok_build import BUILD_DATE  # type: ignore[import-not-found]
@@ -360,13 +360,37 @@ def anim_event(file: str, seconds: float, size: int, label: str = "", manual: bo
                      label=label, manual=manual)
 
 
+# Regalos que pueden llegar con su nombre en inglés o en español (según el idioma de TikTok).
+GIFT_ALIASES = [
+    {"heart me", "quiereme", "quiéreme"}, {"rose", "rosa"}, {"lion", "leon", "león"}, {"universe", "universo"},
+    {"galaxy", "galaxia"}, {"finger heart", "corazon con los dedos", "corazón con los dedos", "corazon de dedos"},
+    {"hand hearts", "corazones con las manos", "corazon con las manos"}, {"ice cream cone", "cono de helado", "helado"},
+    {"doughnut", "dona", "donut"}, {"perfume"}, {"money gun", "pistola de dinero"}, {"corgi"},
+    {"tiktok universe", "universo tiktok", "universo de tiktok"}, {"interstellar", "interestelar"},
+]
+
+
+def _norm(name: str) -> str:
+    import unicodedata
+
+    text = unicodedata.normalize("NFKD", name.strip().lower())
+    return "".join(c for c in text if not unicodedata.combining(c))
+
+
+def same_gift(a: str, b: str) -> bool:
+    a, b = _norm(a), _norm(b)
+    if a == b:
+        return True
+    return any(a in {_norm(x) for x in group} and b in {_norm(x) for x in group} for group in GIFT_ALIASES)
+
+
 def anims_for(ev: dict) -> list[dict]:
     """Qué animación toca con este evento (la regla más específica gana)."""
     rules = [r for r in CONFIG["anims"]["rules"] if r["on"] and r["file"]]
     kind, chosen = ev.get("type"), []
     if kind == "gift":
         gift = ev["gift"]
-        exact = [r for r in rules if r["trigger"] == "gift" and r["gift"].lower() == gift["name"].lower()]
+        exact = [r for r in rules if r["trigger"] == "gift" and r["gift"] and same_gift(r["gift"], gift["name"])]
         by_min = sorted([r for r in rules if r["trigger"] == "min_diamonds" and gift["total"] >= r["min_diamonds"]],
                         key=lambda r: r["min_diamonds"], reverse=True)
         anyg = [r for r in rules if r["trigger"] == "any_gift"]
@@ -406,6 +430,10 @@ def overlay_payload() -> dict:
     """Lo que necesitan los overlays: estilos, alertas, metas y el estado del live."""
     return {"style": CONFIG["style"], "alerts": CONFIG["alerts"], "goals": CONFIG["goals"], "top": CONFIG["top"],
             "stats": LIVE.stats.public(CONFIG["top"]["count"]), "brb": {**CONFIG["anims"]["brb"], **BRB}}
+
+
+def aliases_payload() -> list[list[str]]:
+    return [sorted(group) for group in GIFT_ALIASES]
 
 
 # ---------------------------------------------------------------------------
@@ -590,7 +618,7 @@ class Handler(BaseHTTPRequestHandler):
             self._send_sound(unquote(path[len("/sound/"):]))
         elif path == "/api/info":
             LAST_PING = time.time()
-            self.send_json({"version": APP_VERSION, "build_date": BUILD_DATE, "config": CONFIG, "brb": BRB,
+            self.send_json({"version": APP_VERSION, "build_date": BUILD_DATE, "config": CONFIG, "brb": BRB, "aliases": aliases_payload(),
                             "animations": list_animations(),
                             "live": LIVE.public(CONFIG["top"]["count"]), "port": self.port,
                             "recent": list(LIVE.recent)[-60:]})

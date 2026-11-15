@@ -407,10 +407,14 @@
   // ---------- sonidos ----------
   const soundQueue = [];
   let soundPlaying = false;
+  // Regalos con nombre en inglés o español («Heart Me» = «Quiéreme»): mismo sonido.
+  let aliases = [];
+  const norm = t => String(t || '').trim().toLowerCase().normalize('NFKD').replace(/[\u0300-\u036f]/g, '');
+  const sameGift = (a, b) => { a = norm(a); b = norm(b); return a === b || aliases.some(g => g.map(norm).includes(a) && g.map(norm).includes(b)); };
   function pickRule(ev) {
     const rules = (cfg.sounds || []).filter(r => r.on && r.file);
     if (ev.type === 'gift') {
-      const exact = rules.find(r => r.trigger === 'gift' && r.gift && r.gift.toLowerCase() === ev.gift.name.toLowerCase());
+      const exact = rules.find(r => r.trigger === 'gift' && r.gift && sameGift(r.gift, ev.gift.name));
       if (exact) return exact;
       const byMin = rules.filter(r => r.trigger === 'min_diamonds' && ev.gift.total >= r.min_diamonds).sort((a, b) => b.min_diamonds - a.min_diamonds)[0];
       return byMin || rules.find(r => r.trigger === 'any_gift');
@@ -712,7 +716,7 @@
   // ---------- arrancar ----------
   async function refresh() {
     const info = await api('/api/info');
-    cfg = info.config; live = info.live; port = info.port; animations = info.animations || []; brbOn = !!(info.brb && info.brb.on);
+    cfg = info.config; live = info.live; port = info.port; animations = info.animations || []; aliases = info.aliases || []; brbOn = !!(info.brb && info.brb.on);
     $('#version').textContent = `Versión ${info.version}${info.build_date ? ' · ' + info.build_date : ''}`;
     $('#about').textContent = `EC-Tok ${info.version}. Alertas, sonidos, voz y metas para TikTok LIVE. Gratis y de código abierto.`;
     $('#username').value = cfg.username || ''; $('#autoconnect').checked = !!cfg.autoconnect; $('#eulerKey').value = cfg.euler_key || '';
