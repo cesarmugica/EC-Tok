@@ -1,5 +1,6 @@
 """Traducciones de la ventana de EC-Tok (llave = texto en español)."""
 T = {
+"Instalando la versión nueva… se abrirá una ventana nueva. Esta se cierra sola.": ("Installing the new version… a new window will open. This one closes by itself.", "Instalando a nova versão… uma janela nova vai abrir. Esta fecha sozinha."),
 'Si tu programa no carga la dirección, cambia <code>ectok.localhost</code> por <code>localtest.me</code> (las dos apuntan a tu propia PC).': ("If your app doesn't load the address, change <code>ectok.localhost</code> to <code>localtest.me</code> (both point to your own PC).", "Se o seu programa não carregar o endereço, troque <code>ectok.localhost</code> por <code>localtest.me</code> (os dois apontam para o seu próprio PC)."),
 # ---- textos fijos ----
 "Abajo": ("Below", "Abaixo"),

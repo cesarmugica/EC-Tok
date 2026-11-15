@@ -1,5 +1,8 @@
 # Cambios de EC-Tok
 
+## 1.2.3 — La ventana vieja se cierra al actualizar
+- Al darle **Actualizar**, la ventana vieja de EC-Tok se cierra sola y queda solo la nueva (igual que en EC-Tube). El programa viejo también se cierra en cuanto arranca el instalador.
+
 ## 1.2.2 — Actualizar sin dejar la versión vieja abierta
 - Al darle **Actualizar**, la versión vieja ahora se cierra sola en cuanto arranca el instalador (antes a veces se quedaba en memoria junto a la nueva).
 - La ventana de EC-Tok que tenías abierta se recarga sola con la versión nueva, en lugar de abrirse una segunda ventana.
