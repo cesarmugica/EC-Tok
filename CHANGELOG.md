@@ -1,5 +1,8 @@
 # Cambios de EC-Tok
 
+## 1.2.4 — Direcciones listas para LIVE Studio
+- Las direcciones de los overlays (pestaña 🔴 En vivo → 📋 Copiar) ahora son `http://localtest.me:8795/overlay?w=…`, que TikTok LIVE Studio acepta tal cual.
+
 ## 1.2.3 — La ventana vieja se cierra al actualizar
 - Al darle **Actualizar**, la ventana vieja de EC-Tok se cierra sola y queda solo la nueva (igual que en EC-Tube). El programa viejo también se cierra en cuanto arranca el instalador.
 

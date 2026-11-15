@@ -1,7 +1,7 @@
 """Traducciones de la ventana de EC-Tok (llave = texto en español)."""
 T = {
 "Instalando la versión nueva… se abrirá una ventana nueva. Esta se cierra sola.": ("Installing the new version… a new window will open. This one closes by itself.", "Instalando a nova versão… uma janela nova vai abrir. Esta fecha sozinha."),
-'Si tu programa no carga la dirección, cambia <code>ectok.localhost</code> por <code>localtest.me</code> (las dos apuntan a tu propia PC).': ("If your app doesn't load the address, change <code>ectok.localhost</code> to <code>localtest.me</code> (both point to your own PC).", "Se o seu programa não carregar o endereço, troque <code>ectok.localhost</code> por <code>localtest.me</code> (os dois apontam para o seu próprio PC)."),
+'<code>localtest.me</code> apunta a tu propia PC (TikTok LIVE Studio pide una dirección con .com, .me…). Si tu programa no la carga, cambia <code>localtest.me</code> por <code>127.0.0.1</code>.': ("<code>localtest.me</code> points to your own PC (TikTok LIVE Studio requires an address with .com, .me…). If your app doesn't load it, change <code>localtest.me</code> to <code>127.0.0.1</code>.", "<code>localtest.me</code> aponta para o seu próprio PC (o TikTok LIVE Studio pede um endereço com .com, .me…). Se o seu programa não carregar, troque <code>localtest.me</code> por <code>127.0.0.1</code>."),
 # ---- textos fijos ----
 "Abajo": ("Below", "Abaixo"),
 "Acento": ("Accent", "Destaque"),
