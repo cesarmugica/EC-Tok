@@ -28,7 +28,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, unquote, urlsplit
 
-APP_VERSION = "1.1.1"
+APP_VERSION = "1.1.2"
 
 try:  # lo genera windows/build.ps1
     from ectok_build import BUILD_DATE  # type: ignore[import-not-found]
@@ -112,7 +112,7 @@ DEFAULT_CONFIG: dict = {
         #          battle_start | battle_end | booster
         "rules": [
             {"id": "heartme", "on": True, "trigger": "gift", "gift": "Heart Me", "min_diamonds": 1, "every": 1000, "multiplier": 0,
-             "file": "corazones.webp", "seconds": 4, "size": 70},
+             "file": "globo-corazon.webp", "seconds": 2, "size": 80},
             {"id": "follow", "on": True, "trigger": "follow", "gift": "", "min_diamonds": 1, "every": 1000, "multiplier": 0,
              "file": "gracias.webp", "seconds": 3, "size": 60},
             {"id": "big", "on": True, "trigger": "min_diamonds", "gift": "", "min_diamonds": 1000, "every": 1000, "multiplier": 0,
@@ -155,7 +155,11 @@ def load_config() -> dict:
     with contextlib.suppress(OSError, json.JSONDecodeError):
         saved = json.loads(CONFIG_PATH.read_text(encoding="utf-8"))
         if isinstance(saved, dict):
-            return _merge(DEFAULT_CONFIG, saved)
+            cfg = _merge(DEFAULT_CONFIG, saved)
+            for rule in cfg["anims"]["rules"]:  # 1.1.2: el Heart Me de fábrica ahora es el globo corazón
+                if rule.get("id") == "heartme" and rule.get("file") == "corazones.webp":
+                    rule.update(file="globo-corazon.webp", seconds=2, size=80)
+            return cfg
     return _merge(DEFAULT_CONFIG, {})
 
 

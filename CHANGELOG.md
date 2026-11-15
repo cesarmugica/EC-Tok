@@ -1,5 +1,8 @@
 # Cambios de EC-Tok
 
+## 1.1.2 — El Heart Me sale con el globo
+- La animación de fábrica del **Heart Me** ahora es el **globo corazón** (si no la habías cambiado, se cambia sola).
+
 ## 1.1.1 — Globo de corazón
 - Nueva animación en el banco: **globo corazón** (un globo metálico rojo que sube flotando), hecha por Cesar con IA y suavizada a 25 cuadros por segundo.
 
