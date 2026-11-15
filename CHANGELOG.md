@@ -1,5 +1,11 @@
 # Cambios de EC-Tok
 
+## 1.7.0 — 🌟 Animaciones especiales
+- Nuevo apartado **🌟 Animaciones especiales** (hasta 10): tus propias animaciones o videos —la intro de batalla estilo guerrero azteca o vikingo, tu logo, un meme— que **no hacen nada solas** y salen **encima de todo, con su sonido**, solo cuando les das clic en 🔴 En vivo. Así EC-Tok es tu gestor de animaciones y no tienes que prender y apagar fuentes en LIVE Studio.
+- Botón **📂 Subir la mía…** para elegir el archivo (MP4, WebM, GIF, WebP o PNG, hasta 300 MB); se copia a tu carpeta de animaciones.
+- Por cada una: nombre, tamaño, volumen y cuánto dura (0 = hasta que termine el video). Botón ⏹ para quitarla antes.
+- Los videos ahora se mandan por pedazos, para que los largos arranquen rápido.
+
 ## 1.6.0 — Reto de likes por persona ❤️
 - Nuevo tipo de animación automática: **«Cada N likes de una persona»**. Cada espectador junta sus propios likes y cuando llega a 1000, 2000, 3000… (o lo que pongas) sale la animación con su nombre: «¡Gracias por tus 2000 likes, Ana!». Así cada quien se anima a seguir tapeando.
 - La regla de likes de fábrica ahora es por persona (cada 1000, con la chica). La de «likes de todo el live» sigue disponible.

@@ -28,7 +28,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, unquote, urlsplit
 
-APP_VERSION = "1.6.0"
+APP_VERSION = "1.7.0"
 
 try:  # lo genera windows/build.ps1
     from ectok_build import BUILD_DATE  # type: ignore[import-not-found]
@@ -61,7 +61,10 @@ HOME = ectok_home()
 SOUNDS_DIR = HOME / "sounds"
 ANIM_USER = HOME / "animaciones"     # las tuyas (GIF, WebP, APNG o WebM con transparencia)
 ANIM_DEFAULT = WEB_ROOT / "anim"     # las que trae EC-Tok
-ANIM_EXTS = {".gif": "image/gif", ".webp": "image/webp", ".png": "image/png", ".apng": "image/apng", ".webm": "video/webm"}
+ANIM_EXTS = {".gif": "image/gif", ".webp": "image/webp", ".png": "image/png", ".apng": "image/apng", ".webm": "video/webm",
+             ".mp4": "video/mp4"}
+VIDEO_EXTS = (".webm", ".mp4")
+SPECIAL_MAX = 10
 
 
 def _setup_logging() -> None:
@@ -144,6 +147,8 @@ DEFAULT_CONFIG: dict = {
         "quick_seconds": 4,
         "quick_size": 70,
         "brb": {"file": "cafe-ya-regreso.webp", "text": "Ya regresamos", "sub": "No te vayas 💖", "dim": True},
+        # Animaciones especiales: las del streamer (intro de batalla, etc.); solo se muestran cuando él las lanza.
+        "special": [],
     },
     "language": "es",
 }
@@ -363,6 +368,11 @@ def clean_config(data: dict) -> dict:
                            "file": Path(str(q.get("file") or "")).name} for q in anims["quick"][:12] if isinstance(q, dict)]
         a["quick_seconds"] = float(_num(anims.get("quick_seconds"), a["quick_seconds"], 1, 30))
         a["quick_size"] = int(_num(anims.get("quick_size"), a["quick_size"], 10, 100))
+        if isinstance(anims.get("special"), list):
+            a["special"] = [{"id": _text(q.get("id"), uuid.uuid4().hex[:8], 20), "label": _text(q.get("label"), "Especial", 30),
+                             "file": Path(str(q.get("file") or "")).name, "size": int(_num(q.get("size"), 100, 10, 100)),
+                             "volume": int(_num(q.get("volume"), 100, 0, 100)), "seconds": float(_num(q.get("seconds"), 0, 0, 120))}
+                            for q in anims["special"][:SPECIAL_MAX] if isinstance(q, dict)]
         brb = anims.get("brb")
         if isinstance(brb, dict):
             a["brb"]["file"] = Path(str(brb.get("file") or a["brb"]["file"])).name
@@ -433,7 +443,7 @@ def list_animations() -> list[dict]:
             for path in sorted(folder.iterdir()):
                 if path.is_file() and path.suffix.lower() in ANIM_EXTS and "-parte-" not in path.name:
                     found[path.name] = {"file": path.name, "name": path.stem.replace("-", " ").replace("_", " "),
-                                        "source": source, "video": path.suffix.lower() == ".webm",
+                                        "source": source, "video": path.suffix.lower() in VIDEO_EXTS,
                                         "scene": path.name in SCENES}
     return sorted(found.values(), key=lambda a: (a["source"] != "tuya", a["name"]))
 
@@ -501,7 +511,7 @@ def anim_event(file: str, seconds: float, size: int, label: str = "", manual: bo
     if scene:  # en las escenas el nombre va en el letrero, no en la tarjeta de abajo
         return new_event("anim", file=file, video=False, seconds=seconds, size=size, label=label, manual=manual,
                          scene=scene, sign=sign, user=(who or {}).get("name", ""))
-    return new_event("anim", file=file, video=file.lower().endswith(".webm"), seconds=seconds, size=size,
+    return new_event("anim", file=file, video=file.lower().endswith(VIDEO_EXTS), seconds=seconds, size=size,
                      label=label, manual=manual, who=who, caption=caption)
 
 
@@ -629,16 +639,28 @@ PICK_LOCK = threading.Lock()
 
 
 def pick_sound() -> str | None:
+    return _pick_file({"en": "Choose the sound", "pt": "Escolha o som"}.get(CONFIG["language"], "Elige el sonido"),
+                      {"en": "Sounds", "pt": "Sons"}.get(CONFIG["language"], "Sonidos"), SOUND_EXTS, Path.home() / "Music")
+
+
+def pick_anim() -> str | None:
+    return _pick_file({"en": "Choose your animation", "pt": "Escolha sua animação"}.get(CONFIG["language"], "Elige tu animación"),
+                      {"en": "Animations and videos", "pt": "Animações e vídeos"}.get(CONFIG["language"], "Animaciones y videos"),
+                      ANIM_EXTS, Path.home() / "Videos")
+
+
+def _pick_file(title: str, kind: str, exts, folder: Path) -> str | None:
     if not IS_WINDOWS:
         return None
-    patterns = ";".join("*" + ext for ext in sorted(SOUND_EXTS))
+    patterns = ";".join("*" + ext for ext in sorted(exts))
+    q = lambda text: str(text).replace(chr(39), chr(39) * 2)  # noqa: E731
     script = (
         "Add-Type -AssemblyName System.Windows.Forms;"
         "$owner = New-Object System.Windows.Forms.Form -Property @{TopMost=$true; ShowInTaskbar=$false; Opacity=0; StartPosition='CenterScreen'}; $owner.Show(); $owner.Activate();"
         "$d = New-Object System.Windows.Forms.OpenFileDialog;"
-        f"$d.Title = '{ {'en': 'Choose the sound', 'pt': 'Escolha o som'}.get(CONFIG['language'], 'Elige el sonido') }';"
-        f"$d.Filter = '{ {'en': 'Sounds', 'pt': 'Sons'}.get(CONFIG['language'], 'Sonidos') }|{patterns}|*.*|*.*';"
-        f"$d.InitialDirectory = '{str(Path.home() / 'Music').replace(chr(39), chr(39) * 2)}';"
+        f"$d.Title = '{q(title)}';"
+        f"$d.Filter = '{q(kind)}|{patterns}|*.*|*.*';"
+        f"$d.InitialDirectory = '{q(folder)}';"
         "if ($d.ShowDialog($owner) -eq 'OK') { [Console]::OutputEncoding = [Text.Encoding]::UTF8; $d.FileName }"
     )
     with PICK_LOCK:
@@ -646,6 +668,27 @@ def pick_sound() -> str | None:
                                 encoding="utf-8", errors="replace", creationflags=_no_window_flags(), timeout=600)
     chosen = result.stdout.strip().splitlines()[-1].strip() if result.stdout.strip() else ""
     return chosen or None
+
+
+def import_anim(path: Path) -> str:
+    """Copiar una animación o video del streamer a su carpeta de animaciones."""
+    ext = path.suffix.lower()
+    if ext not in ANIM_EXTS:
+        raise ValueError("Ese archivo no es una animación compatible (GIF, WebP, PNG, WebM, MP4).")
+    if path.stat().st_size > 300 * 1024 * 1024:
+        raise ValueError("La animación pesa más de 300 MB; usa una más corta o más ligera.")
+    ANIM_USER.mkdir(parents=True, exist_ok=True)
+    if path.parent.resolve() == ANIM_USER.resolve():
+        return path.name
+    safe = re.sub(r"[^\w\-. ()]+", "_", path.stem)[:60].replace("-parte-", "-") or "animacion"
+    target = ANIM_USER / f"{safe}{ext}"
+    n = 2
+    while target.exists() and target.stat().st_size != path.stat().st_size:
+        target = ANIM_USER / f"{safe} ({n}){ext}"
+        n += 1
+    if not target.exists():
+        shutil.copy2(path, target)
+    return target.name
 
 
 def import_sound(path: Path) -> dict:
@@ -854,12 +897,37 @@ class Handler(BaseHTTPRequestHandler):
             BUS.unsubscribe(sid)
 
     def _send_bytes(self, target: Path, ctype: str) -> None:
-        data = target.read_bytes()
-        self.send_response(200)
+        size = target.stat().st_size
+        start, end = 0, size - 1
+        rng = re.fullmatch(r"bytes=(\d*)-(\d*)", self.headers.get("Range", "").strip())
+        if rng and size and (rng.group(1) or rng.group(2)):  # los videos piden por pedazos
+            if rng.group(1):
+                start = int(rng.group(1))
+                end = min(int(rng.group(2)), size - 1) if rng.group(2) else size - 1
+            else:
+                start = max(0, size - int(rng.group(2)))
+            if start > end:
+                self.send_response(416)
+                self.send_header("Content-Range", f"bytes */{size}")
+                self.end_headers()
+                return
+            self.send_response(206)
+            self.send_header("Content-Range", f"bytes {start}-{end}/{size}")
+        else:
+            self.send_response(200)
         self.send_header("Content-Type", ctype)
-        self.send_header("Content-Length", str(len(data)))
+        self.send_header("Accept-Ranges", "bytes")
+        self.send_header("Content-Length", str(end - start + 1))
         self.end_headers()
-        self.wfile.write(data)
+        with contextlib.suppress(ConnectionError, OSError), target.open("rb") as fh:
+            fh.seek(start)
+            left = end - start + 1
+            while left > 0:
+                chunk = fh.read(min(256 * 1024, left))
+                if not chunk:
+                    break
+                self.wfile.write(chunk)
+                left -= len(chunk)
 
     def _send_sound(self, name: str) -> None:
         target = SOUNDS_DIR / Path(name).name
@@ -944,6 +1012,28 @@ class Handler(BaseHTTPRequestHandler):
                 self.send_json({"ok": True, "sound": import_sound(Path(chosen))})
             except (ValueError, OSError) as exc:
                 self.send_json({"ok": False, "error": str(exc)}, 400)
+        elif path == "/api/anim/pick":
+            chosen = pick_anim()
+            if not chosen:
+                self.send_json({"ok": True, "file": None})
+                return
+            try:
+                self.send_json({"ok": True, "file": import_anim(Path(chosen)), "animations": list_animations()})
+            except (ValueError, OSError) as exc:
+                self.send_json({"ok": False, "error": str(exc)}, 400)
+        elif path == "/api/special/play":
+            specials = CONFIG["anims"]["special"]
+            i = int(_num(data.get("i"), -1, -1, SPECIAL_MAX))
+            sp = specials[i] if 0 <= i < len(specials) else None
+            if not sp or not anim_path(sp["file"]):
+                self.send_json({"ok": False, "error": "No encontré esa animación."}, 404)
+                return
+            BUS.emit(new_event("special", file=sp["file"], video=sp["file"].lower().endswith(VIDEO_EXTS), size=sp["size"],
+                               volume=sp["volume"], seconds=sp["seconds"], label=sp["label"]))
+            self.send_json({"ok": True})
+        elif path == "/api/special/stop":
+            BUS.emit(new_event("special_stop"))
+            self.send_json({"ok": True})
         elif path == "/api/sounds/open":
             open_in_explorer(SOUNDS_DIR)
             self.send_json({"ok": True})

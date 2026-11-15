@@ -1,5 +1,17 @@
 """Traducciones de la ventana de EC-Tok (llave = texto en español)."""
 T = {
+'🌟 Animaciones especiales': ('🌟 Special animations', '🌟 Animações especiais'),
+'⏹ Quitar la animación especial': ('⏹ Remove the special animation', '⏹ Tirar a animação especial'),
+'➕ Agregar animación especial': ('➕ Add special animation', '➕ Adicionar animação especial'),
+'⏹ Quitar la que está saliendo': ('⏹ Remove the one playing', '⏹ Tirar a que está passando'),
+'Tus propias animaciones o videos (la intro de batalla estilo guerrero azteca o vikingo, tu logo, un meme…). No hacen nada solas: salen <b>encima de todo, con su sonido</b>, solo cuando tú le das clic en 🔴 En vivo. Así usas EC-Tok como tu gestor de animaciones y no tienes que andar prendiendo fuentes en LIVE Studio. Hasta 10. Acepta MP4, WebM, GIF, WebP y PNG.': ("Your own animations or videos (your battle intro as an Aztec or Viking warrior, your logo, a meme…). They don't do anything by themselves: they show up <b>on top of everything, with their sound</b>, only when you click them in 🔴 LIVE. This way EC-Tok is your animation manager and you don't have to toggle sources in LIVE Studio. Up to 10. Accepts MP4, WebM, GIF, WebP and PNG.", 'Suas próprias animações ou vídeos (a intro de batalha estilo guerreiro asteca ou viking, seu logo, um meme…). Não fazem nada sozinhas: aparecem <b>por cima de tudo, com o som</b>, só quando você clica em 🔴 Ao vivo. Assim o EC-Tok vira seu gerenciador de animações e você não precisa ficar ligando fontes no LIVE Studio. Até 10. Aceita MP4, WebM, GIF, WebP e PNG.'),
+'«Dura» en 0 = hasta que termine el video (las imágenes duran 8 s). Para que se oiga en LIVE Studio, deja prendido «Activar sonido» en la fuente de animaciones.': ('“Lasts” at 0 = until the video ends (images last 8 s). To hear it in LIVE Studio, keep “Enable sound” on in the animations source.', '«Dura» em 0 = até o vídeo terminar (imagens duram 8 s). Para ouvir no LIVE Studio, deixe «Ativar som» ligado na fonte de animações.'),
+'📂 Subir la mía…': ('📂 Upload mine…', '📂 Enviar a minha…'),
+'Todavía no tienes animaciones especiales.': ("You don't have special animations yet.", 'Você ainda não tem animações especiais.'),
+'Especial {0}': ('Special {0}', 'Especial {0}'),
+'(elige o sube la tuya)': ('(choose or upload yours)', '(escolha ou envie a sua)'),
+'Ese archivo no es una animación compatible (GIF, WebP, PNG, WebM, MP4).': ('That file is not a supported animation (GIF, WebP, PNG, WebM, MP4).', 'Esse arquivo não é uma animação compatível (GIF, WebP, PNG, WebM, MP4).'),
+'La animación pesa más de 300 MB; usa una más corta o más ligera.': ('The animation is over 300 MB; use a shorter or lighter one.', 'A animação tem mais de 300 MB; use uma mais curta ou mais leve.'),
 '❤️ Cada N likes de una persona': ('❤️ Every N likes from one viewer', '❤️ A cada N curtidas de uma pessoa'),
 '❤️ Cada N likes (de todo el live)': ('❤️ Every N likes (whole LIVE)', '❤️ A cada N curtidas (da live toda)'),
 'Texto del letrero. Comodines: {user} {gift} {count} {likes} {diamonds}': ('Sign text. Placeholders: {user} {gift} {count} {likes} {diamonds}', 'Texto da placa. Curingas: {user} {gift} {count} {likes} {diamonds}'),

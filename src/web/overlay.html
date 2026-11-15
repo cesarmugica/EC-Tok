@@ -82,6 +82,11 @@
   @keyframes whoPop { from { opacity: 0; transform: translateY(2vh) scale(.6); } to { opacity: 1; transform: none; } }
   @keyframes fadeout { to { opacity: 0; } }
   [hidden] { display: none !important; }
+  /* ---------- animaciones especiales (las del streamer) ---------- */
+  #special { position: fixed; inset: 0; z-index: 6; pointer-events: none; }
+  #special .sp { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); max-width: 100vw; max-height: 100vh;
+    object-fit: contain; animation: fade .35s ease both; }
+  #special .sp.out { animation: fadeout .45s ease both; }
   /* ---------- ya regresamos ---------- */
   #brb { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2vh;
     z-index: 4; animation: fade .6s ease both; }
@@ -116,6 +121,7 @@
 <body>
 <div id="alerts" class="top"></div>
 <div id="brb" hidden></div>
+<div id="special"></div>
 <div id="anim"></div>
 <div id="goal" hidden></div>
 <div id="top" hidden></div>
@@ -298,7 +304,31 @@
     box.hidden = false;
   }
 
+  // ---------- animaciones especiales: salen encima de todo, con su sonido, hasta que terminan ----------
+  let spTimer = null;
+  function stopSpecial() {
+    clearTimeout(spTimer);
+    for (const el of $('#special').children) { el.classList.add('out'); if (el.pause) setTimeout(() => el.pause(), 400); setTimeout(() => el.remove(), 450); }
+  }
+  function showSpecial(sp) {
+    stopSpecial();
+    const src = '/anim/' + encodeURIComponent(sp.file);
+    const el = document.createElement(sp.video ? 'video' : 'img');
+    el.className = 'sp'; el.src = src; el.style.height = sp.size + 'vh'; el.style.maxWidth = '100vw';
+    if (sp.video) {
+      el.playsInline = true; el.volume = Math.max(0, Math.min(1, sp.volume / 100)); el.muted = sp.volume === 0;
+      el.onended = () => { if (!sp.seconds) stopSpecial(); };
+      el.play().catch(() => { el.muted = true; el.play().catch(() => {}); });  // si no deja con sonido, al menos que se vea
+      if (sp.seconds) el.loop = true;
+    }
+    el.onerror = stopSpecial;
+    $('#special').appendChild(el);
+    if (sp.seconds || !sp.video) spTimer = setTimeout(stopSpecial, (sp.seconds || 8) * 1000);
+  }
+
   function onEvent(ev) {
+    if (ev.type === 'special') { if (which.includes('anim')) showSpecial(ev); return; }
+    if (ev.type === 'special_stop') { if (which.includes('anim')) stopSpecial(); return; }
     if (ev.type === 'anim') { if (which.includes('anim')) playAnim(ev); return; }
     if (ev.type === 'brb') { if (which.includes('anim')) showBrb(ev.brb); return; }
     if (ev.stats) stats = ev.stats;
