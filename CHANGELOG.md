@@ -1,5 +1,11 @@
 # Cambios de EC-Tok
 
+## 1.10.0 — 🎧 Banco de sonidos
+- **63 sonidos cortos de fábrica (máx. 5 s), libres de uso (CC0 / dominio público)**, en 🔊 Sonidos: festejo (aplausos, ovación, redoble y platillo, corneta, ¡ta-dá!, fanfarrias, fuegos artificiales…), voces en inglés («Congratulations!», «You win!», «Winner!», «Fight!»…), risas y chistosos, y efectos (subir de nivel, monedas, magia, campanitas…).
+- ▶ para escucharlos ahí mismo y ➕ para crear una regla con ese sonido. En cada regla el sonido se elige de una lista; con «📂 Mío…» usas uno de tu PC.
+- Vienen de los paquetes CC0 de Meta (Oculus Audio Pack), Kenney y OpenGameArt; los aplausos, la ovación, la corneta, el redoble, el ta-dá y el ding los hicimos nosotros.
+- Al actualizar, la ventana vieja ya se cierra (las vistas previas dejaban historial y Edge no la dejaba cerrarse). Si aun así no se puede, se recarga sola con la versión nueva y no se abre una segunda ventana.
+
 ## 1.9.0 — Agrega tus animaciones al banco
 - En 🗂 Banco de animaciones, el botón **«➕ Agregar animaciones»** deja elegir una o varias de tu PC (hasta 20 a la vez). Se convierten a un formato ligero, aparecen en el banco y se muestran en la 👁 vista previa. Luego las usas en las reglas, los botones rápidos, «Ya regresamos» o las especiales.
 - Las tuyas tienen un 🗑 para quitarlas del banco (las de EC-Tok no se pueden borrar).

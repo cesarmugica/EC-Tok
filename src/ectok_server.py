@@ -28,7 +28,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, unquote, urlsplit
 
-APP_VERSION = "1.9.0"
+APP_VERSION = "1.10.0"
 
 try:  # lo genera windows/build.ps1
     from ectok_build import BUILD_DATE  # type: ignore[import-not-found]
@@ -59,6 +59,7 @@ def ectok_home() -> Path:
 
 HOME = ectok_home()
 SOUNDS_DIR = HOME / "sounds"
+SOUND_BANK = WEB_ROOT / "sonidos"  # sonidos de fábrica (CC0), ver tools/make_sounds.py
 ANIM_USER = HOME / "animaciones"     # las tuyas (GIF, WebP, APNG o WebM con transparencia)
 ANIM_DEFAULT = WEB_ROOT / "anim"     # las que trae EC-Tok
 ANIM_EXTS = {".gif": "image/gif", ".webp": "image/webp", ".png": "image/png", ".apng": "image/apng", ".webm": "video/webm",
@@ -787,6 +788,12 @@ def import_anim(path: Path) -> str:
     return convert_anim(path, ANIM_USER, safe).name
 
 
+def sound_bank() -> list[dict]:
+    with contextlib.suppress(OSError, ValueError):
+        return json.loads((SOUND_BANK / "sonidos.json").read_text(encoding="utf-8"))
+    return []
+
+
 def import_sound(path: Path) -> dict:
     if path.suffix.lower() not in SOUND_EXTS:
         raise ValueError("Ese archivo no es un sonido compatible (mp3, wav, ogg, m4a…).")
@@ -948,7 +955,7 @@ class Handler(BaseHTTPRequestHandler):
         elif path == "/api/info":
             LAST_PING = time.time()
             self.send_json({"version": APP_VERSION, "build_date": BUILD_DATE, "config": CONFIG, "brb": BRB, "aliases": aliases_payload(),
-                            "animations": list_animations(),
+                            "animations": list_animations(), "sound_bank": sound_bank(),
                             "live": LIVE.public(CONFIG["top"]["count"]), "port": self.port,
                             "recent": list(LIVE.recent)[-60:]})
         elif path == "/api/overlay":
@@ -1027,6 +1034,8 @@ class Handler(BaseHTTPRequestHandler):
 
     def _send_sound(self, name: str) -> None:
         target = SOUNDS_DIR / Path(name).name
+        if not target.is_file():
+            target = SOUND_BANK / Path(name).name  # los de fábrica
         if not target.is_file() or target.suffix.lower() not in SOUND_EXTS:
             self.send_error(404)
             return
@@ -1183,6 +1192,7 @@ def main() -> int:
     parser.add_argument("--port", type=int, help=f"puerto (por defecto {DEFAULT_PORT})")
     parser.add_argument("--no-browser", action="store_true", help="no abrir la ventana")
     parser.add_argument("--stay", action="store_true", help="no cerrarse al cerrar la ventana")
+    parser.add_argument("--after-update", action="store_true", help=argparse.SUPPRESS)
     parser.add_argument("--version", action="version", version=f"EC-Tok {APP_VERSION} {BUILD_DATE}".strip())
     args = parser.parse_args()
 
@@ -1208,7 +1218,12 @@ def main() -> int:
                 "Si una tuya se llama igual que una de EC-Tok, se usa la tuya.\n", encoding="utf-8")
     if not args.stay:
         threading.Thread(target=_idle_watch, args=(server,), daemon=True).start()
-    if not args.no_browser:
+    if not args.no_browser and args.after_update:
+        # Tras actualizar: si la ventana vieja no se pudo cerrar, se recarga sola con esta versión;
+        # solo abrir una nueva si en unos segundos ninguna se reporta.
+        started = time.time()
+        threading.Timer(6, lambda: None if LAST_PING > started else open_app_window(url)).start()
+    elif not args.no_browser:
         threading.Timer(0.6, open_app_window, args=(url,)).start()
     if CONFIG.get("autoconnect") and CONFIG.get("username"):
         threading.Timer(1.5, lambda: LIVE.connect(CONFIG["username"], CONFIG.get("euler_key") or "")).start()

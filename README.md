@@ -45,3 +45,14 @@ EC-Tok no es de TikTok ni está afiliado con TikTok. Código abierto (la librer�
 ---
 
 💜 **EC-Tok es gratis y siempre lo será.** Sigue la cuenta [@imuxoficial](https://www.tiktok.com/@imuxoficial) en TikTok (Colab Claude AI).
+
+## Créditos de los sonidos de fábrica
+
+Los 63 sonidos del 🎧 Banco de sonidos son **CC0 / dominio público** (libres de uso, también comercial, sin atribución obligatoria). Igual damos crédito:
+
+- [Meta Open Sound — Oculus Audio Pack](https://github.com/facebookincubator/meta-open-sound) (CC0)
+- [Kenney](https://kenney.nl) — Voiceover Pack y Music Jingles (CC0)
+- [OpenGameArt](https://opengameart.org) — packs CC0 (fanfarrias 8-bit, fuegos artificiales, voces de pelea, monedas)
+- Aplausos, ovación, corneta, redoble, ¡ta-dá! y ding: sintetizados por EC-Tok (CC0)
+
+Se regeneran con `tools/make_sounds.py`.

@@ -70,7 +70,7 @@ Name: "{userdesktop}\EC-Tok"; Filename: "{app}\ectok.exe"; Tasks: desktopicon
 [Run]
 Filename: "{app}\ectok.exe"; Description: "{cm:RunApp}"; Flags: nowait postinstall skipifsilent
 ; Actualización desde la app (instalador en silencio): volver a abrir EC-Tok al terminar.
-Filename: "{app}\ectok.exe"; Flags: nowait; Check: WizardSilent
+Filename: "{app}\ectok.exe"; Parameters: "--after-update"; Flags: nowait; Check: WizardSilent
 
 [InstallDelete]
 ; Los accesos del menú Inicio cambian de nombre según el idioma

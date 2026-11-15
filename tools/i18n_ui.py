@@ -1,5 +1,15 @@
 """Traducciones de la ventana de EC-Tok (llave = texto en español)."""
 T = {
+'🎧 Banco de sonidos': ('🎧 Sound library', '🎧 Banco de sons'),
+'Sonidos cortos de fábrica, libres de uso (dominio público, CC0). ▶ para escucharlo aquí; ➕ para crear una regla con ese sonido. También los eliges en cada regla, en la lista «Sonido». Para usar los tuyos: «📂 Mío…» en la regla.': ('Short built-in sounds, free to use (public domain, CC0). ▶ to listen here; ➕ to create a rule with that sound. You can also pick them in each rule, in the “Sound” list. To use your own: “📂 Mine…” in the rule.', 'Sons curtos de fábrica, livres para usar (domínio público, CC0). ▶ para ouvir aqui; ➕ para criar uma regra com esse som. Você também os escolhe em cada regra, na lista «Som». Para usar os seus: «📂 Meu…» na regra.'),
+'🎉 Festejo': ('🎉 Celebration', '🎉 Comemoração'),
+'🗣 Voces (en inglés)': ('🗣 Voices (English)', '🗣 Vozes (em inglês)'),
+'😂 Risas y chistosos': ('😂 Laughs and funny', '😂 Risadas e engraçados'),
+'✨ Efectos': ('✨ Effects', '✨ Efeitos'),
+'📂 Mío…': ('📂 Mine…', '📂 Meu…'),
+'Elegir un sonido de tu PC': ('Choose a sound from your PC', 'Escolher um som do seu PC'),
+'Crear una regla con este sonido': ('Create a rule with this sound', 'Criar uma regra com este som'),
+'Listo: se agregó una regla con «{0}». Elige arriba cuándo suena.': ('Done: a rule with “{0}” was added. Choose above when it plays.', 'Pronto: uma regra com «{0}» foi adicionada. Escolha acima quando ela toca.'),
 '¿Quitar esta regla de sonido?\n\nSolo se quita la regla (cuándo suena). El archivo de sonido se queda en tu carpeta de sonidos y lo puedes volver a usar.': ('Remove this sound rule?\n\nOnly the rule (when it plays) is removed. The sound file stays in your sounds folder and you can use it again.', 'Tirar esta regra de som?\n\nSó a regra (quando toca) é removida. O arquivo de som fica na sua pasta de sons e você pode usá-lo de novo.'),
 '¿Quitar esta meta?\n\nSolo se quita la barra de la meta. Los likes, diamantes y demás números del live no cambian.': ("Remove this goal?\n\nOnly the goal bar is removed. Likes, diamonds and the other LIVE numbers don't change.", 'Tirar esta meta?\n\nSó a barra da meta é removida. Curtidas, diamantes e os outros números da live não mudam.'),
 '¿Quitar esta animación automática?\n\nSolo se quita la regla (cuándo sale). La animación sigue en el banco y la puedes volver a usar cuando quieras.': ('Remove this automatic animation?\n\nOnly the rule (when it plays) is removed. The animation stays in the library and you can use it again anytime.', 'Tirar esta animação automática?\n\nSó a regra (quando aparece) é removida. A animação continua no banco e você pode usá-la de novo quando quiser.'),
