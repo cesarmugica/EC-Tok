@@ -1,10 +1,15 @@
 # EC-Tok
 
-> 🇺🇸 **EC-Tok** — free alerts, gift sounds, chat reading (TTS), animations and goals for your **TikTok LIVE** on Windows (like TikFinity). The app is available in **English, Spanish and Brazilian Portuguese**. Download *EC-Tok-Setup* from *Releases*.
+> 🇺🇸 **EC-Tok** — free alerts, gift sounds, chat reading (TTS), animations and goals for your **TikTok LIVE** on Windows (like TikFinity). The app is available in **English, Spanish and Brazilian Portuguese**. **[⬇️ Download the latest version](https://github.com/cesarmugica/EC-Tok/releases/latest)**
 >
-> 🇧🇷 **EC-Tok** — alertas, sons por presente, leitura do chat (voz), animações e metas grátis para sua **live do TikTok** no Windows (como o TikFinity). O app está em **português do Brasil, inglês e espanhol**. Baixe o *EC-Tok-Setup* em *Releases*.
+> 🇧🇷 **EC-Tok** — alertas, sons por presente, leitura do chat (voz), animações e metas grátis para sua **live do TikTok** no Windows (como o TikFinity). O app está em **português do Brasil, inglês e espanhol**. **[⬇️ Baixe a versão mais recente](https://github.com/cesarmugica/EC-Tok/releases/latest)**
 
 Alertas, sonidos, lectura de chat y metas para tus **lives de TikTok** — gratis, para Windows. Al estilo de TikFinity.
+
+| | |
+|---|---|
+| ⬇️ **Descargar** | [Última versión](https://github.com/cesarmugica/EC-Tok/releases/latest) · [Historial de versiones](CHANGELOG.md) |
+| 💬 **Reportar** | [Reportar un problema](https://github.com/cesarmugica/EC-Tok/issues/new) |
 
 ## Qué hace
 
@@ -17,7 +22,7 @@ Alertas, sonidos, lectura de chat y metas para tus **lives de TikTok** — grati
 
 ## Cómo se usa
 
-1. Instala **EC-Tok-Setup** (pestaña *Releases*) y ábrelo.
+1. Descarga `EC-Tok-Setup-x.y.z.exe` de la [última versión](https://github.com/cesarmugica/EC-Tok/releases/latest) y ejecútalo (no pide permisos de administrador). Si SmartScreen avisa, elige *Más información → Ejecutar de todas formas*.
 2. En **🔴 En vivo** escribe tu @usuario y dale **Conectar** (si todavía no estás en vivo, EC-Tok espera y se conecta solo).
 3. Copia la dirección del overlay (alertas, metas o top) y agrégala como fuente web:
    - **TikTok LIVE Studio**: ➕ Agregar fuente → Enlace (Link).
