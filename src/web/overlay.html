@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EC-Tok overlay</title>
+<style>
+  :root { --c1: #FE2C55; --c2: #25F4EE; --fs: 34px; }
+  html, body { margin: 0; padding: 0; background: transparent; overflow: hidden; height: 100%;
+    font-family: "Segoe UI Variable Display", "Segoe UI", system-ui, sans-serif; color: #fff; }
+  .shadow { text-shadow: 0 2px 4px rgba(0,0,0,.85), 0 0 14px rgba(0,0,0,.55); }
+
+  /* ---------- alertas ---------- */
+  #alerts { position: fixed; left: 0; right: 0; display: flex; justify-content: center; pointer-events: none; padding: 24px; }
+  #alerts.top { top: 0; } #alerts.center { top: 50%; transform: translateY(-50%); } #alerts.bottom { bottom: 0; }
+  .alert { display: flex; align-items: center; gap: 18px; max-width: min(92vw, 900px); padding: 18px 26px 18px 18px;
+    border-radius: 26px; background: linear-gradient(135deg, rgba(20,20,28,.88), rgba(40,20,40,.88));
+    border: 3px solid var(--c1); box-shadow: 0 0 0 3px rgba(37,244,238,.35), 0 18px 40px rgba(0,0,0,.45); }
+  .alert .pic { width: calc(var(--fs) * 2.6); height: calc(var(--fs) * 2.6); flex: none; border-radius: 22px; display: grid;
+    place-items: center; font-size: calc(var(--fs) * 1.7); background: rgba(255,255,255,.08); overflow: hidden; }
+  .alert .pic img { width: 100%; height: 100%; object-fit: contain; }
+  .alert .txt { font-size: var(--fs); font-weight: 800; line-height: 1.15; }
+  .alert .txt .u { color: var(--c2); }
+  .alert .txt .g { color: var(--c1); }
+  .alert .sub { font-size: calc(var(--fs) * .55); font-weight: 600; opacity: .85; margin-top: 6px; }
+  .in-pop { animation: pop .55s cubic-bezier(.2,1.6,.4,1) both; }
+  .in-slide { animation: slide .5s cubic-bezier(.2,.9,.3,1.2) both; }
+  .in-bounce { animation: bounce .9s both; }
+  .in-fade { animation: fade .5s ease both; }
+  .out { animation: out .45s ease both; }
+  @keyframes pop { from { transform: scale(.2); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  @keyframes slide { from { transform: translateX(-120%); opacity: 0; } to { transform: none; opacity: 1; } }
+  @keyframes bounce { 0% { transform: translateY(-140%); opacity: 0; } 55% { transform: translateY(8%); opacity: 1; }
+    75% { transform: translateY(-4%); } 100% { transform: none; } }
+  @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes out { to { transform: scale(.9); opacity: 0; } }
+  .big .pic { animation: wiggle 1.2s ease-in-out infinite; }
+  @keyframes wiggle { 0%,100% { transform: rotate(0); } 25% { transform: rotate(-8deg) scale(1.06); } 75% { transform: rotate(8deg) scale(1.06); } }
+  .confetti { position: fixed; top: -20px; width: 12px; height: 18px; border-radius: 3px; pointer-events: none; animation: fall linear forwards; }
+  @keyframes fall { to { transform: translateY(110vh) rotate(720deg); } }
+
+  /* ---------- metas ---------- */
+  #goal { margin: 12px; display: flex; flex-direction: column; gap: 14px; }
+  .goal { padding: 12px 16px; border-radius: 18px; background: rgba(15,15,22,.72); border: 2px solid rgba(255,255,255,.12); }
+  .goal .head { display: flex; justify-content: space-between; gap: 10px; font-weight: 800; font-size: calc(var(--fs) * .62); }
+  .goal .bar { margin-top: 8px; height: calc(var(--fs) * .62); border-radius: 999px; background: rgba(255,255,255,.14); overflow: hidden; }
+  .goal .fill { height: 100%; width: 0; border-radius: 999px; background: linear-gradient(90deg, var(--c2), var(--c1)); transition: width .6s ease; }
+  .goal.done .fill { background: linear-gradient(90deg, #ffd600, #ff8a00); }
+  .goal.done .head span:last-child::after { content: "  🎉"; }
+
+  /* ---------- top donadores ---------- */
+  #top { margin: 12px; }
+  .topbox { padding: 12px 14px; border-radius: 18px; background: rgba(15,15,22,.72); border: 2px solid rgba(255,255,255,.12); }
+  .topbox h1 { margin: 0 0 8px; font-size: calc(var(--fs) * .66); color: var(--c2); }
+  .topbox ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+  .topbox li { display: grid; grid-template-columns: 1.6em calc(var(--fs) * 1.1) 1fr auto; gap: 10px; align-items: center;
+    font-size: calc(var(--fs) * .56); font-weight: 700; }
+  .topbox li .n { color: var(--c1); text-align: center; }
+  .topbox li img, .topbox li .av { width: calc(var(--fs) * 1.1); height: calc(var(--fs) * 1.1); border-radius: 50%; object-fit: cover;
+    background: rgba(255,255,255,.15); display: grid; place-items: center; font-size: .8em; }
+  .topbox li .nm { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .topbox .empty { opacity: .6; font-size: calc(var(--fs) * .5); }
+</style>
+</head>
+<body>
+<div id="alerts" class="top"></div>
+<div id="goal" hidden></div>
+<div id="top" hidden></div>
+<script>
+  const params = new URLSearchParams(location.search);
+  const which = (params.get('w') || 'alerts').split(',');
+  const $ = s => document.querySelector(s);
+  const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[c]));
+  let cfg = null, stats = null, likeMark = 0;
+  const EMOJI = {gift: '🎁', follow: '💖', share: '📣', like: '❤️'};
+
+  function applyStyle() {
+    const s = cfg.style, r = document.documentElement.style;
+    r.setProperty('--c1', s.color); r.setProperty('--c2', s.accent); r.setProperty('--fs', (+params.get('size') || s.font_size) + 'px');
+    $('#alerts').className = s.position;
+  }
+  function fill(tpl, ev) {
+    const g = ev.gift || {};
+    const vals = {user: `<span class="u">${esc(ev.user ? ev.user.name : '')}</span>`, gift: `<span class="g">${esc(g.name || '')}</span>`,
+      count: esc(g.count || ''), diamonds: esc(g.total || ''), likes: esc((ev.likes_total || 0).toLocaleString('es-MX'))};
+    return esc(tpl).replace(/\{(user|gift|count|diamonds|likes)\}/g, (_, k) => vals[k]);
+  }
+
+  // ---------- alertas (una a la vez) ----------
+  const queue = [];
+  let showing = false;
+  function wantAlert(ev) {
+    const a = cfg.alerts;
+    if (ev.type === 'gift') return a.gift.on && ev.gift.total >= a.gift.min_diamonds ? a.gift : null;
+    if (ev.type === 'follow') return a.follow.on ? a.follow : null;
+    if (ev.type === 'share') return a.share.on ? a.share : null;
+    return null;
+  }
+  function likeMilestone(total) {
+    const a = cfg.alerts.like; if (!a.on || !a.every) return;
+    const mark = Math.floor(total / a.every) * a.every;
+    if (mark > likeMark && mark > 0) { queue.push({ev: {type: 'like', likes_total: mark}, conf: a}); likeMark = mark; next(); }
+  }
+  function next() {
+    if (showing || !queue.length) return;
+    showing = true;
+    const {ev, conf} = queue.shift(), box = document.createElement('div');
+    const big = ev.type === 'gift' && ev.gift.total >= 100;
+    const img = ev.type === 'gift' && ev.gift.image ? `<img src="${esc(ev.gift.image)}" alt="">` : ev.user && ev.user.avatar && ev.type !== 'gift' ? `<img src="${esc(ev.user.avatar)}" alt="">` : EMOJI[ev.type];
+    const sub = ev.type === 'gift' ? `💎 ${ev.gift.total.toLocaleString('es-MX')}` : '';
+    box.className = `alert in-${cfg.style.animation}${big ? ' big' : ''}`;
+    box.innerHTML = `<div class="pic">${img}</div><div><div class="txt shadow">${fill(conf.text, ev)}</div>${sub ? `<div class="sub shadow">${sub}</div>` : ''}</div>`;
+    $('#alerts').replaceChildren(box);
+    if (big) confetti(ev.gift.total >= 1000 ? 120 : 50);
+    setTimeout(() => { box.className = 'alert out'; setTimeout(() => { box.remove(); showing = false; next(); }, 450); }, conf.seconds * 1000);
+  }
+  function confetti(n) {
+    const colors = [cfg.style.color, cfg.style.accent, '#ffd600', '#ffffff', '#8b5cf6'];
+    for (let i = 0; i < n; i++) {
+      const c = document.createElement('div'); c.className = 'confetti';
+      c.style.left = Math.random() * 100 + 'vw'; c.style.background = colors[i % colors.length];
+      c.style.animationDuration = 2.2 + Math.random() * 2.5 + 's'; c.style.animationDelay = Math.random() * .8 + 's';
+      document.body.appendChild(c); setTimeout(() => c.remove(), 6000);
+    }
+  }
+
+  // ---------- metas ----------
+  const VALUE = {likes: s => s.likes, diamonds: s => s.diamonds, follows: s => s.follows, shares: s => s.shares, gifts: s => s.gifts};
+  const UNIT = {likes: '❤️', diamonds: '💎', follows: '💖', shares: '📣', gifts: '🎁'};
+  function drawGoals() {
+    if (!which.includes('goal') || !stats) return;
+    const only = params.get('goal');
+    const goals = cfg.goals.filter(g => g.on && (!only || g.id === only));
+    $('#goal').innerHTML = goals.map(g => {
+      const v = VALUE[g.kind](stats), pct = Math.min(100, v / g.target * 100);
+      return `<div class="goal ${v >= g.target ? 'done' : ''}"><div class="head shadow"><span>${esc(g.title)}</span><span>${UNIT[g.kind]} ${v.toLocaleString('es-MX')} / ${g.target.toLocaleString('es-MX')}</span></div><div class="bar"><div class="fill" style="width:${pct}%"></div></div></div>`;
+    }).join('');
+  }
+
+  // ---------- top donadores ----------
+  function drawTop() {
+    if (!which.includes('top') || !stats) return;
+    const list = stats.top.slice(0, cfg.top.count);
+    $('#top').innerHTML = `<div class="topbox"><h1 class="shadow">🏆 ${esc(cfg.top.title)}</h1>${list.length ? `<ol>${list.map((d, i) =>
+      `<li class="shadow"><span class="n">${['🥇', '🥈', '🥉'][i] || i + 1}</span>${d.avatar ? `<img src="${esc(d.avatar)}" alt="">` : '<span class="av">👤</span>'}<span class="nm">${esc(d.name)}</span><span>💎 ${d.diamonds.toLocaleString('es-MX')}</span></li>`).join('')}</ol>` : '<div class="empty shadow">Todavía nadie… ¡manda el primer regalo!</div>'}</div>`;
+  }
+
+  function onEvent(ev) {
+    if (ev.stats) stats = ev.stats;
+    if (ev.type === 'config') { cfg = ev.overlay; stats = ev.overlay.stats; applyStyle(); }
+    if (ev.type === 'stats_reset') { load(); return; }
+    if (which.includes('alerts')) {
+      const conf = wantAlert(ev); if (conf) { queue.push({ev, conf}); next(); }
+      if (ev.type === 'like' && stats) likeMilestone(stats.likes);
+    }
+    drawGoals(); drawTop();
+  }
+
+  async function load() {
+    const data = await (await fetch('/api/overlay')).json();
+    cfg = data; stats = data.stats; likeMark = Math.floor(stats.likes / (cfg.alerts.like.every || 1)) * (cfg.alerts.like.every || 1);
+    applyStyle();
+    $('#goal').hidden = !which.includes('goal'); $('#top').hidden = !which.includes('top'); $('#alerts').hidden = !which.includes('alerts');
+    drawGoals(); drawTop();
+  }
+  load().then(() => {
+    const es = new EventSource('/api/stream?who=overlay');
+    es.onmessage = m => { try { onEvent(JSON.parse(m.data)); } catch (_) {} };
+    es.onopen = () => load().catch(() => {});
+  }).catch(() => setTimeout(() => location.reload(), 3000));
+</script>
+</body>
+</html>

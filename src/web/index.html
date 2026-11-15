@@ -1,0 +1,574 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>EC-Tok</title>
+  <link rel="icon" href="/img/ectok.png">
+  <style>
+    :root {
+      color-scheme: dark;
+      font-family: "Segoe UI", Inter, ui-sans-serif, system-ui, sans-serif;
+      --bg: #101114; --surface: #191b20; --surface-2: #23262d; --surface-3: #2e323a;
+      --border: #2c3038; --muted: #9aa1ab; --text: #f3f4f6;
+      --accent: #fe2c55; --accent-strong: #ff4d70; --cyan: #25f4ee; --ok: #6fcf97; --warn: #f2c94c; --danger: #ff7a70;
+    }
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+    html, body { margin: 0; background: var(--bg); color: var(--text); }
+    button, select, textarea, input { font: inherit; }
+    button { border: 0; border-radius: 10px; padding: 9px 14px; background: var(--accent); color: #fff; font-weight: 600; cursor: pointer; }
+    button:hover:not(:disabled) { background: var(--accent-strong); }
+    button:disabled { opacity: .5; cursor: default; }
+    button.secondary { background: var(--surface-2); color: var(--text); }
+    button.secondary:hover:not(:disabled) { background: var(--surface-3); }
+    button.link { background: none; padding: 0; color: var(--muted); font-weight: 500; text-decoration: underline; }
+    button.small { padding: 6px 10px; font-size: .85rem; }
+    input[type=text], input[type=number], input[type=password], select, textarea {
+      border: 1px solid var(--border); border-radius: 10px; background: var(--bg); color: var(--text); padding: 8px 10px; }
+    input[type=number] { width: 96px; }
+    input[type=range] { accent-color: var(--accent); }
+    input[type=checkbox] { width: 17px; height: 17px; accent-color: var(--accent); }
+    header { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 12px clamp(16px, 3vw, 30px);
+      border-bottom: 1px solid var(--border); background: var(--surface); }
+    .brand { display: flex; align-items: center; gap: 12px; }
+    .brand img { width: 40px; height: 40px; border-radius: 12px; }
+    .brand h1 { margin: 0; font-size: 1.25rem; }
+    .brand small { color: var(--muted); font-size: .78rem; }
+    .status { display: flex; align-items: center; gap: 10px; font-weight: 600; }
+    .dot { width: 12px; height: 12px; border-radius: 50%; background: var(--surface-3); }
+    .dot.live { background: #ff2d55; box-shadow: 0 0 0 4px rgba(255,45,85,.25); animation: pulse 1.4s infinite; }
+    .dot.connecting, .dot.waiting { background: var(--warn); }
+    .dot.error { background: var(--danger); }
+    @keyframes pulse { 50% { box-shadow: 0 0 0 9px rgba(255,45,85,0); } }
+    nav.tabs { display: flex; gap: 4px; padding: 0 clamp(16px, 3vw, 30px); border-bottom: 1px solid var(--border); background: var(--surface); overflow-x: auto; }
+    nav.tabs button { background: none; color: var(--muted); border-radius: 0; padding: 12px 14px; border-bottom: 3px solid transparent; white-space: nowrap; }
+    nav.tabs button.on { color: var(--text); border-bottom-color: var(--accent); }
+    nav.tabs button:hover { background: none; color: var(--text); }
+    main { max-width: 1100px; margin: 0 auto; padding: 18px clamp(16px, 3vw, 30px) 40px; display: grid; gap: 16px; }
+    .panel { border: 1px solid var(--border); border-radius: 16px; background: var(--surface); padding: 16px 18px; }
+    .panel h2 { margin: 0 0 4px; font-size: 1.05rem; }
+    .help { color: var(--muted); font-size: .86rem; margin: 4px 0 0; line-height: 1.45; }
+    .row { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; margin-top: 12px; }
+    .grow { flex: 1 1 auto; }
+    .field { display: inline-flex; align-items: center; gap: 8px; color: var(--muted); font-size: .9rem; }
+    .check { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; }
+    .grid2 { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 16px; }
+    @media (max-width: 900px) { .grid2 { grid-template-columns: 1fr; } }
+    .msg { min-height: 1.2em; color: var(--warn); font-size: .9rem; margin: 8px 0 0; } .msg.ok { color: var(--ok); }
+
+    .stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-top: 12px; }
+    .stat { background: var(--bg); border: 1px solid var(--border); border-radius: 12px; padding: 10px 12px; }
+    .stat b { display: block; font-size: 1.35rem; font-variant-numeric: tabular-nums; }
+    .stat span { color: var(--muted); font-size: .8rem; }
+    .feed { list-style: none; margin: 10px 0 0; padding: 0; max-height: 430px; overflow: auto; border: 1px solid var(--border); border-radius: 12px; background: var(--bg); }
+    .feed li { display: grid; grid-template-columns: 26px minmax(0, 1fr) auto; gap: 8px; align-items: start; padding: 7px 10px; border-bottom: 1px solid var(--border); font-size: .9rem; }
+    .feed li:last-child { border-bottom: 0; }
+    .feed .t { color: var(--muted); font-size: .75rem; font-variant-numeric: tabular-nums; }
+    .feed .u { color: var(--cyan); font-weight: 600; }
+    .feed .g { color: var(--accent); font-weight: 700; }
+    .feed li.test { opacity: .7; }
+    .feed .empty { display: block; color: var(--muted); padding: 14px; }
+    .top { list-style: none; margin: 8px 0 0; padding: 0; display: grid; gap: 6px; }
+    .top li { display: grid; grid-template-columns: 28px 28px 1fr auto; gap: 8px; align-items: center; }
+    .top img, .top .av { width: 28px; height: 28px; border-radius: 50%; object-fit: cover; background: var(--surface-2); display: grid; place-items: center; font-size: .8rem; }
+
+    .url { display: flex; gap: 8px; align-items: center; margin-top: 8px; }
+    .url code { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 8px 10px; font-size: .86rem; }
+    .url b { width: 120px; flex: none; font-size: .9rem; }
+
+    table.rules { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    table.rules td, table.rules th { padding: 7px 6px; border-bottom: 1px solid var(--border); text-align: left; font-size: .9rem; vertical-align: middle; }
+    table.rules th { color: var(--muted); font-weight: 600; font-size: .8rem; }
+    table.rules input[type=text] { width: 100%; min-width: 120px; }
+    table.rules .snd { max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--cyan); }
+    .alertcard { display: grid; grid-template-columns: 150px minmax(0, 1fr) auto auto; gap: 10px; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--border); }
+    .alertcard:last-child { border-bottom: 0; }
+    .alertcard input[type=text] { width: 100%; }
+    .preview { position: relative; height: 230px; margin-top: 10px; border-radius: 12px; overflow: hidden; border: 1px solid var(--border);
+      background: repeating-conic-gradient(#20232a 0% 25%, #191b20 0% 50%) 50% / 24px 24px; }
+    .preview iframe { width: 100%; height: 100%; border: 0; color-scheme: normal; background: transparent; }
+    .update { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between; padding: 10px 14px; border-radius: 12px; background: color-mix(in srgb, var(--accent) 14%, var(--surface)); border: 1px solid var(--accent); }
+    footer { color: var(--muted); font-size: .76rem; text-align: center; padding-bottom: 20px; }
+  </style>
+</head>
+<body>
+<header>
+  <div class="brand"><img src="/img/ectok.png" alt=""><div><h1>EC-Tok</h1><small id="version">—</small></div></div>
+  <div class="status"><span class="dot" id="dot"></span><span id="statusText">Sin conectar</span></div>
+</header>
+<nav class="tabs">
+  <button type="button" data-tab="live" class="on">🔴 En vivo</button>
+  <button type="button" data-tab="alerts">🔔 Alertas</button>
+  <button type="button" data-tab="sounds">🔊 Sonidos</button>
+  <button type="button" data-tab="tts">🗣 Voz (leer chat)</button>
+  <button type="button" data-tab="goals">🎯 Metas y top</button>
+  <button type="button" data-tab="settings">⚙ Ajustes</button>
+</nav>
+<main>
+  <div class="update" id="updateBar" hidden><span id="updateText"></span><button type="button" id="updateBtn">Actualizar</button></div>
+
+  <!-- ===================== EN VIVO ===================== -->
+  <section data-page="live">
+    <div class="panel">
+      <h2>Conectar a tu live</h2>
+      <p class="help">Escribe tu <b>@usuario</b> de TikTok y conéctate cuando estés en vivo (o antes: EC-Tok espera y se conecta solo cuando empiezas). No necesita tu contraseña.</p>
+      <div class="row">
+        <label class="field">@ <input type="text" id="username" placeholder="tu_usuario" style="width:220px" autocomplete="off"></label>
+        <button type="button" id="connectBtn">▶ Conectar</button>
+        <button type="button" class="secondary" id="disconnectBtn" hidden>⏹ Desconectar</button>
+        <label class="check"><input type="checkbox" id="autoconnect"> Conectar solo al abrir EC-Tok</label>
+      </div>
+      <p class="msg" id="liveMsg"></p>
+    </div>
+    <div class="grid2" style="margin-top:16px">
+      <div class="panel">
+        <h2>Lo que va pasando</h2>
+        <ul class="feed" id="feed"><li><span class="empty">Aquí vas a ver regalos, follows, likes y comentarios.</span></li></ul>
+        <div class="row">
+          <span class="field">Probar sin estar en vivo:</span>
+          <button type="button" class="secondary small" data-test="gift">🎁 Regalo</button>
+          <button type="button" class="secondary small" data-test="gift" data-gift="Lion">🦁 Regalo grande</button>
+          <button type="button" class="secondary small" data-test="follow">💖 Follow</button>
+          <button type="button" class="secondary small" data-test="share">📣 Compartir</button>
+          <button type="button" class="secondary small" data-test="like">❤️ Likes</button>
+          <button type="button" class="secondary small" data-test="comment">💬 Comentario</button>
+        </div>
+      </div>
+      <div class="panel">
+        <h2>Este live</h2>
+        <div class="stats">
+          <div class="stat"><b id="sLikes">0</b><span>❤️ likes</span></div>
+          <div class="stat"><b id="sDiamonds">0</b><span>💎 diamantes</span></div>
+          <div class="stat"><b id="sGifts">0</b><span>🎁 regalos</span></div>
+          <div class="stat"><b id="sFollows">0</b><span>💖 follows</span></div>
+          <div class="stat"><b id="sShares">0</b><span>📣 compartidos</span></div>
+          <div class="stat"><b id="sComments">0</b><span>💬 comentarios</span></div>
+        </div>
+        <h2 style="margin-top:16px">🏆 Top donadores</h2>
+        <ol class="top" id="topList"></ol>
+        <div class="row"><button type="button" class="secondary small" id="resetStats">↺ Empezar la cuenta de cero</button>
+          <button type="button" class="secondary small" id="ttsSkip">⏭ Callar la voz</button></div>
+      </div>
+    </div>
+    <div class="panel" style="margin-top:16px">
+      <h2>📺 Poner las alertas en tu live</h2>
+      <p class="help">Copia una dirección y agrégala como fuente web: en <b>TikTok LIVE Studio</b> «➕ Agregar fuente → Enlace (Link)», en <b>OBS</b> «Fuente → Navegador». EC-Tok tiene que estar abierto mientras transmites. Los sonidos y la voz suenan en tu PC (asegúrate de que LIVE Studio u OBS capture el audio del escritorio).</p>
+      <div id="urls"></div>
+    </div>
+  </section>
+
+  <!-- ===================== ALERTAS ===================== -->
+  <section data-page="alerts" hidden>
+    <div class="panel">
+      <h2>Alertas en pantalla</h2>
+      <p class="help">Qué aparece en el overlay de alertas. En el texto puedes usar <code>{user}</code>, <code>{gift}</code>, <code>{count}</code>, <code>{diamonds}</code> y <code>{likes}</code>.</p>
+      <div id="alertRows"></div>
+    </div>
+    <div class="panel">
+      <h2>Cómo se ven</h2>
+      <div class="row">
+        <label class="field">Color <input type="color" id="stColor"></label>
+        <label class="field">Acento <input type="color" id="stAccent"></label>
+        <label class="field">Tamaño <input type="range" id="stSize" min="18" max="70"></label>
+        <label class="field">Animación <select id="stAnim"><option value="pop">Aparecer (pop)</option><option value="slide">Deslizar</option><option value="bounce">Rebotar</option><option value="fade">Desvanecer</option></select></label>
+        <label class="field">Posición <select id="stPos"><option value="top">Arriba</option><option value="center">En medio</option><option value="bottom">Abajo</option></select></label>
+      </div>
+      <div class="row"><span class="field">Probar:</span>
+        <button type="button" class="secondary small" data-test="gift">🎁 Regalo</button>
+        <button type="button" class="secondary small" data-test="gift" data-gift="Universe">🌌 Regalo enorme</button>
+        <button type="button" class="secondary small" data-test="follow">💖 Follow</button>
+        <button type="button" class="secondary small" data-test="share">📣 Compartir</button></div>
+      <div class="preview"><iframe id="previewAlerts" title="Vista previa"></iframe></div>
+    </div>
+  </section>
+
+  <!-- ===================== SONIDOS ===================== -->
+  <section data-page="sounds" hidden>
+    <div class="panel">
+      <h2>Sonidos por regalo</h2>
+      <p class="help">Cada regla dice qué sonido toca y cuándo. Si un regalo cumple varias, suena la más específica: el regalo exacto, luego «regalo de N 💎 o más» (la más alta que cumpla) y al final «cualquier regalo».</p>
+      <table class="rules">
+        <thead><tr><th></th><th>Cuándo</th><th>Detalle</th><th>Sonido</th><th>Volumen</th><th></th></tr></thead>
+        <tbody id="soundRows"></tbody>
+      </table>
+      <div class="row">
+        <button type="button" id="addSound">➕ Agregar sonido</button>
+        <label class="check"><input type="checkbox" id="soundOverlap"> Dejar que se encimen (si no, suenan en fila)</label>
+        <span class="grow"></span>
+        <button type="button" class="secondary small" id="openSounds">📂 Carpeta de sonidos</button>
+      </div>
+      <p class="msg" id="soundMsg"></p>
+      <datalist id="giftNames"></datalist>
+    </div>
+  </section>
+
+  <!-- ===================== VOZ ===================== -->
+  <section data-page="tts" hidden>
+    <div class="panel">
+      <h2>Leer el chat en voz alta</h2>
+      <p class="help">Usa las voces de Windows (las «Natural» de Microsoft suenan muy bien). En los textos puedes usar <code>{user}</code>, <code>{text}</code>, <code>{gift}</code> y <code>{count}</code>.</p>
+      <div class="row"><label class="check"><input type="checkbox" id="ttsOn"> <b>Encender la voz</b></label></div>
+      <div class="row">
+        <label class="check"><input type="checkbox" id="ttsComments"> Comentarios</label>
+        <label class="check"><input type="checkbox" id="ttsGifts"> Regalos</label>
+        <label class="check"><input type="checkbox" id="ttsFollows"> Follows</label>
+        <label class="check"><input type="checkbox" id="ttsShares"> Compartidos</label>
+      </div>
+      <div class="row">
+        <label class="field">Voz <select id="ttsVoice" style="max-width:360px"></select></label>
+        <label class="field">Velocidad <input type="range" id="ttsRate" min="0.5" max="2" step="0.05"></label>
+        <label class="field">Tono <input type="range" id="ttsPitch" min="0.5" max="2" step="0.05"></label>
+        <label class="field">Volumen <input type="range" id="ttsVolume" min="0" max="1" step="0.05"></label>
+      </div>
+      <div class="row">
+        <label class="field">Solo comentarios que empiecen con <input type="text" id="ttsPrefix" style="width:70px" placeholder="(todos)"></label>
+        <label class="field">Máximo de letras <input type="number" id="ttsMax" min="20" max="300"></label>
+        <label class="check"><input type="checkbox" id="ttsLinks"> No leer enlaces</label>
+      </div>
+      <div class="row"><label class="field grow">Comentario <input type="text" id="ttsTplComment" class="grow" style="flex:1"></label></div>
+      <div class="row"><label class="field grow">Regalo <input type="text" id="ttsTplGift" style="flex:1"></label></div>
+      <div class="row"><label class="field grow">Follow <input type="text" id="ttsTplFollow" style="flex:1"></label></div>
+      <div class="row"><label class="field grow">Compartir <input type="text" id="ttsTplShare" style="flex:1"></label></div>
+      <div class="row"><button type="button" class="secondary" id="ttsTest">🔈 Probar la voz</button><button type="button" class="secondary" id="ttsStop">⏭ Callar</button></div>
+    </div>
+  </section>
+
+  <!-- ===================== METAS ===================== -->
+  <section data-page="goals" hidden>
+    <div class="panel">
+      <h2>🎯 Metas</h2>
+      <p class="help">Barras de progreso para el overlay de metas. Cuentan desde que te conectas (o desde «Empezar la cuenta de cero»).</p>
+      <div id="goalRows"></div>
+      <div class="row"><button type="button" id="addGoal">➕ Agregar meta</button></div>
+    </div>
+    <div class="panel">
+      <h2>🏆 Top donadores</h2>
+      <div class="row">
+        <label class="field">Título <input type="text" id="topTitle" style="width:240px"></label>
+        <label class="field">Cuántos mostrar <input type="number" id="topCount" min="1" max="10"></label>
+      </div>
+      <div class="row" style="align-items:stretch">
+        <div class="preview grow" style="height:220px"><iframe id="previewGoal" title="Metas"></iframe></div>
+        <div class="preview grow" style="height:220px"><iframe id="previewTop" title="Top"></iframe></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== AJUSTES ===================== -->
+  <section data-page="settings" hidden>
+    <div class="panel">
+      <h2>Conexión con TikTok</h2>
+      <p class="help">TikTok no tiene una conexión oficial para esto: EC-Tok (como TikFinity) usa la librería libre <b>TikTokLive</b> y el servicio de «firma» <b>Euler Stream</b>. El uso gratis permite unas cuantas conexiones por hora (de sobra para un live). Si te sale que se alcanzó el límite, crea una cuenta gratis en eulerstream.com y pega aquí tu clave.</p>
+      <div class="row"><label class="field">Clave de Euler Stream (opcional) <input type="password" id="eulerKey" style="width:320px" autocomplete="off"></label></div>
+    </div>
+    <div class="panel">
+      <h2>Acerca de</h2>
+      <p class="help" id="about"></p>
+      <div class="row"><button type="button" class="secondary" id="checkUpdate">Buscar actualización</button><span class="msg" id="updateMsg"></span></div>
+    </div>
+  </section>
+</main>
+<footer>EC-Tok es gratis y de código abierto. No es de TikTok ni está afiliado con TikTok.</footer>
+
+<script>
+  const $ = s => document.querySelector(s);
+  const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[c]));
+  const fmt = n => (+n || 0).toLocaleString('es-MX');
+  async function api(path, body) {
+    const res = await fetch(path, body === undefined ? {} : {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(body)});
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || data.ok === false) throw new Error(data.error || 'Algo salió mal.');
+    return data;
+  }
+  let cfg = null, live = null, port = 8795;
+  const COMMON_GIFTS = ['Rose', 'TikTok', 'GG', 'Ice Cream Cone', 'Heart Me', 'Finger Heart', 'Doughnut', 'Perfume', 'Hand Hearts',
+    'Hat and Mustache', 'Corgi', 'Money Gun', 'Galaxy', 'Interstellar', 'Lion', 'Universe', 'TikTok Universe'];
+
+  // ---------- pestañas ----------
+  document.querySelectorAll('nav.tabs button').forEach(b => b.addEventListener('click', () => {
+    document.querySelectorAll('nav.tabs button').forEach(x => x.classList.toggle('on', x === b));
+    document.querySelectorAll('section[data-page]').forEach(p => p.hidden = p.dataset.page !== b.dataset.tab);
+    try { localStorage.setItem('ectok-tab', b.dataset.tab); } catch (_) {}
+  }));
+
+  // ---------- guardar ----------
+  let saveTimer = null;
+  function save() { clearTimeout(saveTimer); saveTimer = setTimeout(async () => { try { const d = await api('/api/settings', cfg); cfg = d.config; } catch (e) { $('#liveMsg').textContent = e.message; } }, 400); }
+
+  // ---------- estado del live ----------
+  const STATE = {idle: 'Sin conectar', connecting: 'Conectando…', waiting: 'Esperando el live…', live: 'EN VIVO', error: 'Error'};
+  function showLive() {
+    $('#dot').className = 'dot ' + live.state;
+    $('#statusText').textContent = live.state === 'live' ? `EN VIVO · @${live.username}` : STATE[live.state] || live.state;
+    $('#liveMsg').textContent = live.message || '';
+    $('#liveMsg').className = 'msg' + (live.state === 'live' ? ' ok' : '');
+    const on = live.state !== 'idle' && live.state !== 'error';
+    $('#connectBtn').hidden = on; $('#disconnectBtn').hidden = !on;
+  }
+  function showStats(s) {
+    if (!s) return;
+    $('#sLikes').textContent = fmt(s.likes); $('#sDiamonds').textContent = fmt(s.diamonds); $('#sGifts').textContent = fmt(s.gifts);
+    $('#sFollows').textContent = fmt(s.follows); $('#sShares').textContent = fmt(s.shares); $('#sComments').textContent = fmt(s.comments);
+    $('#topList').innerHTML = s.top.length ? s.top.slice(0, 10).map((d, i) => `<li><span>${['🥇', '🥈', '🥉'][i] || i + 1}</span>${d.avatar ? `<img src="${esc(d.avatar)}" alt="">` : '<span class="av">👤</span>'}<span>${esc(d.name)}</span><b>💎 ${fmt(d.diamonds)}</b></li>`).join('') : '<li style="color:var(--muted)">Todavía nadie ha enviado regalos.</li>';
+    const names = new Set([...COMMON_GIFTS, ...(s.gift_names || [])]);
+    $('#giftNames').innerHTML = [...names].map(n => `<option value="${esc(n)}">`).join('');
+  }
+
+  // ---------- lista de eventos ----------
+  const ICON = {gift: '🎁', follow: '💖', share: '📣', like: '❤️', comment: '💬', system: 'ℹ️'};
+  let feedCount = 0;
+  function addFeed(ev) {
+    if (!ICON[ev.type]) return;
+    const u = ev.user ? `<span class="u">${esc(ev.user.name)}</span>` : '';
+    const text = ev.type === 'gift' ? `${u} envió <span class="g">${ev.gift.count}× ${esc(ev.gift.name)}</span> (💎 ${fmt(ev.gift.total)})`
+      : ev.type === 'follow' ? `${u} te sigue` : ev.type === 'share' ? `${u} compartió el live`
+      : ev.type === 'like' ? `${u} dio ${fmt(ev.count)} likes` : ev.type === 'comment' ? `${u}: ${esc(ev.text)}` : esc(ev.text);
+    const li = document.createElement('li');
+    if (ev.test) li.className = 'test';
+    li.innerHTML = `<span>${ICON[ev.type]}</span><span>${text}${ev.test ? ' <small style="color:var(--muted)">(prueba)</small>' : ''}</span><span class="t">${new Date(ev.ts * 1000).toLocaleTimeString('es-MX', {hour: '2-digit', minute: '2-digit', second: '2-digit'})}</span>`;
+    const feed = $('#feed');
+    if (!feedCount) feed.innerHTML = '';
+    feed.prepend(li); feedCount++;
+    while (feed.children.length > 150) feed.lastChild.remove();
+  }
+
+  // ---------- sonidos ----------
+  const soundQueue = [];
+  let soundPlaying = false;
+  function pickRule(ev) {
+    const rules = (cfg.sounds || []).filter(r => r.on && r.file);
+    if (ev.type === 'gift') {
+      const exact = rules.find(r => r.trigger === 'gift' && r.gift && r.gift.toLowerCase() === ev.gift.name.toLowerCase());
+      if (exact) return exact;
+      const byMin = rules.filter(r => r.trigger === 'min_diamonds' && ev.gift.total >= r.min_diamonds).sort((a, b) => b.min_diamonds - a.min_diamonds)[0];
+      return byMin || rules.find(r => r.trigger === 'any_gift');
+    }
+    if (ev.type === 'follow' || ev.type === 'share') return rules.find(r => r.trigger === ev.type);
+    return null;
+  }
+  function playSound(rule) {
+    if (!rule) return;
+    if (cfg.sound_overlap) { const a = new Audio('/sound/' + encodeURIComponent(rule.file)); a.volume = rule.volume / 100; a.play().catch(() => {}); return; }
+    if (soundQueue.length < 25) soundQueue.push(rule);
+    nextSound();
+  }
+  function nextSound() {
+    if (soundPlaying || !soundQueue.length) return;
+    const rule = soundQueue.shift(); soundPlaying = true;
+    const a = new Audio('/sound/' + encodeURIComponent(rule.file)); a.volume = rule.volume / 100;
+    const done = () => { soundPlaying = false; nextSound(); };
+    a.onended = done; a.onerror = done; a.play().catch(done);
+  }
+  function soundsFor(ev) {
+    playSound(pickRule(ev));
+    if (ev.type === 'like' && ev.stats) {
+      for (const r of (cfg.sounds || []).filter(r => r.on && r.file && r.trigger === 'likes')) {
+        const mark = Math.floor(ev.stats.likes / r.every) * r.every;
+        if (r._mark === undefined) { r._mark = mark; continue; }  // al conectar a un live que ya lleva likes: empezar a contar desde ahí
+        if (mark > r._mark) { r._mark = mark; playSound(r); }
+      }
+    }
+  }
+
+  // ---------- voz ----------
+  let voices = [], sayBacklog = 0;
+  function loadVoices() {
+    voices = speechSynthesis.getVoices().slice().sort((a, b) => (b.lang.startsWith('es') - a.lang.startsWith('es')) || a.name.localeCompare(b.name));
+    const sel = $('#ttsVoice');
+    sel.innerHTML = '<option value="">(la de Windows por defecto)</option>' + voices.map(v => `<option value="${esc(v.name)}">${esc(v.name)} — ${esc(v.lang)}</option>`).join('');
+    if (cfg) sel.value = cfg.tts.voice || '';
+  }
+  speechSynthesis.onvoiceschanged = loadVoices;
+  function say(text) {
+    const t = cfg.tts;
+    if (!text) return;
+    if (sayBacklog > 6) return;  // si la gente escribe más rápido de lo que se lee, no acumular
+    const u = new SpeechSynthesisUtterance(text.slice(0, t.max_chars));
+    const v = voices.find(v => v.name === t.voice); if (v) { u.voice = v; u.lang = v.lang; } else u.lang = 'es-MX';
+    u.rate = t.rate; u.pitch = t.pitch; u.volume = t.volume;
+    sayBacklog++; u.onend = u.onerror = () => { sayBacklog = Math.max(0, sayBacklog - 1); };
+    speechSynthesis.speak(u);
+  }
+  function tpl(s, ev) {
+    const g = ev.gift || {};
+    return String(s).replace(/\{user\}/g, ev.user ? ev.user.name : '').replace(/\{text\}/g, ev.text || '').replace(/\{gift\}/g, g.name || '').replace(/\{count\}/g, g.count || '');
+  }
+  function speakFor(ev) {
+    const t = cfg.tts; if (!t.on) return;
+    if (ev.type === 'comment' && t.comments) {
+      let text = ev.text || '';
+      if (t.prefix) { if (!text.startsWith(t.prefix)) return; text = text.slice(t.prefix.length).trim(); }
+      if (t.skip_links) text = text.replace(/https?:\/\/\S+|www\.\S+/gi, '').trim();
+      if (!text) return;
+      say(tpl(t.comment_text, {...ev, text}));
+    } else if (ev.type === 'gift' && t.gifts) say(tpl(t.gift_text, ev));
+    else if (ev.type === 'follow' && t.follows) say(tpl(t.follow_text, ev));
+    else if (ev.type === 'share' && t.shares) say(tpl(t.share_text, ev));
+  }
+
+  // ---------- eventos en vivo ----------
+  function onEvent(ev) {
+    if (ev.type === 'status') { live.state = ev.state; live.message = ev.message; live.username = ev.username; showLive(); return; }
+    if (ev.type === 'config') return;
+    if (ev.type === 'stats_reset') { refresh(); return; }
+    if (ev.stats) showStats(ev.stats);
+    addFeed(ev); soundsFor(ev); speakFor(ev);
+  }
+
+  // ---------- llenar las pestañas ----------
+  const ALERT_NAMES = {gift: '🎁 Regalos', follow: '💖 Follows', share: '📣 Compartir', like: '❤️ Cada N likes'};
+  function fillAlerts() {
+    $('#alertRows').innerHTML = Object.entries(cfg.alerts).map(([k, a]) => `<div class="alertcard" data-k="${k}">
+      <label class="check"><input type="checkbox" data-f="on" ${a.on ? 'checked' : ''}> ${ALERT_NAMES[k]}</label>
+      <input type="text" data-f="text" value="${esc(a.text)}">
+      ${k === 'gift' ? `<label class="field">desde 💎 <input type="number" data-f="min_diamonds" min="0" value="${a.min_diamonds}"></label>` : k === 'like' ? `<label class="field">cada <input type="number" data-f="every" min="10" value="${a.every}"></label>` : '<span></span>'}
+      <label class="field">dura <input type="number" data-f="seconds" min="1" max="30" value="${a.seconds}" style="width:64px"> s</label></div>`).join('');
+    const s = cfg.style;
+    $('#stColor').value = s.color; $('#stAccent').value = s.accent; $('#stSize').value = s.font_size; $('#stAnim').value = s.animation; $('#stPos').value = s.position;
+  }
+  $('#alertRows').addEventListener('input', e => {
+    const row = e.target.closest('[data-k]'), f = e.target.dataset.f; if (!row || !f) return;
+    const a = cfg.alerts[row.dataset.k];
+    a[f] = e.target.type === 'checkbox' ? e.target.checked : e.target.type === 'number' ? +e.target.value : e.target.value;
+    save();
+  });
+  [['#stColor', 'color'], ['#stAccent', 'accent'], ['#stSize', 'font_size'], ['#stAnim', 'animation'], ['#stPos', 'position']].forEach(([sel, key]) =>
+    $(sel).addEventListener('input', () => { cfg.style[key] = key === 'font_size' ? +$(sel).value : $(sel).value; save(); }));
+
+  const TRIGGERS = {any_gift: 'Cualquier regalo', gift: 'Un regalo en especial', min_diamonds: 'Regalo de N 💎 o más', follow: 'Follow', share: 'Compartir', likes: 'Cada N likes'};
+  function fillSounds() {
+    $('#soundRows').innerHTML = cfg.sounds.length ? cfg.sounds.map((r, i) => `<tr data-i="${i}">
+      <td><input type="checkbox" data-f="on" ${r.on ? 'checked' : ''} title="Encendido"></td>
+      <td><select data-f="trigger">${Object.entries(TRIGGERS).map(([k, v]) => `<option value="${k}" ${k === r.trigger ? 'selected' : ''}>${v}</option>`).join('')}</select></td>
+      <td>${r.trigger === 'gift' ? `<input type="text" data-f="gift" list="giftNames" value="${esc(r.gift)}" placeholder="Rose, Lion…">`
+        : r.trigger === 'min_diamonds' ? `<input type="number" data-f="min_diamonds" min="0" value="${r.min_diamonds}"> 💎`
+        : r.trigger === 'likes' ? `<input type="number" data-f="every" min="10" value="${r.every}"> likes` : ''}</td>
+      <td><span class="snd" title="${esc(r.name)}">${r.file ? '🎵 ' + esc(r.name) : '—'}</span> <button type="button" class="secondary small" data-act="pick">Elegir…</button></td>
+      <td><input type="range" data-f="volume" min="0" max="100" value="${r.volume}" style="width:90px"></td>
+      <td style="white-space:nowrap"><button type="button" class="secondary small" data-act="play" title="Escuchar">▶</button> <button type="button" class="secondary small" data-act="del" title="Quitar">🗑</button></td></tr>`).join('')
+      : '<tr><td colspan="6" style="color:var(--muted)">Todavía no hay sonidos. Agrega uno con «➕ Agregar sonido».</td></tr>';
+    $('#soundOverlap').checked = !!cfg.sound_overlap;
+  }
+  $('#soundRows').addEventListener('input', e => {
+    const tr = e.target.closest('tr[data-i]'), f = e.target.dataset.f; if (!tr || !f) return;
+    const r = cfg.sounds[+tr.dataset.i];
+    r[f] = e.target.type === 'checkbox' ? e.target.checked : (e.target.type === 'number' || e.target.type === 'range') ? +e.target.value : e.target.value;
+    if (f === 'trigger') fillSounds();
+    save();
+  });
+  $('#soundRows').addEventListener('click', async e => {
+    const b = e.target.closest('button[data-act]'), tr = e.target.closest('tr[data-i]'); if (!b || !tr) return;
+    const i = +tr.dataset.i, r = cfg.sounds[i];
+    if (b.dataset.act === 'del') { cfg.sounds.splice(i, 1); fillSounds(); save(); }
+    else if (b.dataset.act === 'play') { if (r.file) { const a = new Audio('/sound/' + encodeURIComponent(r.file)); a.volume = r.volume / 100; a.play().catch(() => {}); } }
+    else if (b.dataset.act === 'pick') {
+      try { const d = await api('/api/sound/pick', {}); if (d.sound) { r.file = d.sound.file; r.name = d.sound.name; fillSounds(); save(); } }
+      catch (err) { $('#soundMsg').textContent = err.message; }
+    }
+  });
+  $('#addSound').addEventListener('click', async () => {
+    const rule = {id: Math.random().toString(36).slice(2, 10), on: true, trigger: cfg.sounds.some(r => r.trigger === 'any_gift') ? 'gift' : 'any_gift', gift: '', min_diamonds: 100, every: 1000, file: '', name: '', volume: 80};
+    try { const d = await api('/api/sound/pick', {}); if (!d.sound) return; rule.file = d.sound.file; rule.name = d.sound.name; }
+    catch (err) { $('#soundMsg').textContent = err.message; return; }
+    cfg.sounds.push(rule); fillSounds(); save();
+  });
+  $('#soundOverlap').addEventListener('change', () => { cfg.sound_overlap = $('#soundOverlap').checked; save(); });
+  $('#openSounds').addEventListener('click', () => api('/api/sounds/open', {}).catch(() => {}));
+
+  const TTS_FIELDS = [['#ttsOn', 'on'], ['#ttsComments', 'comments'], ['#ttsGifts', 'gifts'], ['#ttsFollows', 'follows'], ['#ttsShares', 'shares'], ['#ttsLinks', 'skip_links'],
+    ['#ttsVoice', 'voice'], ['#ttsRate', 'rate'], ['#ttsPitch', 'pitch'], ['#ttsVolume', 'volume'], ['#ttsPrefix', 'prefix'], ['#ttsMax', 'max_chars'],
+    ['#ttsTplComment', 'comment_text'], ['#ttsTplGift', 'gift_text'], ['#ttsTplFollow', 'follow_text'], ['#ttsTplShare', 'share_text']];
+  function fillTts() {
+    for (const [sel, key] of TTS_FIELDS) { const el = $(sel); if (el.type === 'checkbox') el.checked = !!cfg.tts[key]; else el.value = cfg.tts[key]; }
+  }
+  for (const [sel, key] of TTS_FIELDS) $(sel).addEventListener('input', () => {
+    const el = $(sel); cfg.tts[key] = el.type === 'checkbox' ? el.checked : (el.type === 'range' || el.type === 'number') ? +el.value : el.value; save();
+  });
+  $('#ttsTest').addEventListener('click', () => { say(tpl(cfg.tts.comment_text, {user: {name: 'Ana'}, text: 'hola, esta es la voz de EC-Tok'})); });
+  $('#ttsStop').addEventListener('click', () => { speechSynthesis.cancel(); sayBacklog = 0; });
+  $('#ttsSkip').addEventListener('click', () => { speechSynthesis.cancel(); sayBacklog = 0; });
+
+  const GOAL_KINDS = {likes: '❤️ Likes', diamonds: '💎 Diamantes', gifts: '🎁 Regalos', follows: '💖 Follows', shares: '📣 Compartidos'};
+  function fillGoals() {
+    $('#goalRows').innerHTML = cfg.goals.length ? cfg.goals.map((g, i) => `<div class="row" data-i="${i}">
+      <label class="check"><input type="checkbox" data-f="on" ${g.on ? 'checked' : ''}></label>
+      <input type="text" data-f="title" value="${esc(g.title)}" style="width:220px">
+      <select data-f="kind">${Object.entries(GOAL_KINDS).map(([k, v]) => `<option value="${k}" ${k === g.kind ? 'selected' : ''}>${v}</option>`).join('')}</select>
+      <label class="field">meta <input type="number" data-f="target" min="1" value="${g.target}" style="width:120px"></label>
+      <button type="button" class="secondary small" data-act="del">🗑</button></div>`).join('') : '<p class="help">Sin metas.</p>';
+    $('#topTitle').value = cfg.top.title; $('#topCount').value = cfg.top.count;
+  }
+  $('#goalRows').addEventListener('input', e => {
+    const row = e.target.closest('[data-i]'), f = e.target.dataset.f; if (!row || !f) return;
+    const g = cfg.goals[+row.dataset.i];
+    g[f] = e.target.type === 'checkbox' ? e.target.checked : e.target.type === 'number' ? +e.target.value : e.target.value; save();
+  });
+  $('#goalRows').addEventListener('click', e => {
+    const b = e.target.closest('button[data-act=del]'), row = e.target.closest('[data-i]'); if (!b || !row) return;
+    cfg.goals.splice(+row.dataset.i, 1); fillGoals(); save();
+  });
+  $('#addGoal').addEventListener('click', () => { if (cfg.goals.length >= 6) return; cfg.goals.push({id: Math.random().toString(36).slice(2, 10), on: true, kind: 'diamonds', target: 1000, title: 'Meta de diamantes'}); fillGoals(); save(); });
+  $('#topTitle').addEventListener('input', () => { cfg.top.title = $('#topTitle').value; save(); });
+  $('#topCount').addEventListener('input', () => { cfg.top.count = +$('#topCount').value || 5; save(); });
+
+  function fillUrls() {
+    const base = `http://127.0.0.1:${port}/overlay?w=`;
+    const list = [['🔔 Alertas', base + 'alerts'], ['🎯 Metas', base + 'goal'], ['🏆 Top donadores', base + 'top']];
+    $('#urls').innerHTML = list.map(([n, u]) => `<div class="url"><b>${n}</b><code>${esc(u)}</code><button type="button" class="secondary small" data-copy="${esc(u)}">📋 Copiar</button></div>`).join('');
+    $('#previewAlerts').src = '/overlay?w=alerts&size=22'; $('#previewGoal').src = '/overlay?w=goal&size=26'; $('#previewTop').src = '/overlay?w=top&size=26';
+  }
+  $('#urls').addEventListener('click', async e => {
+    const b = e.target.closest('[data-copy]'); if (!b) return;
+    try { await navigator.clipboard.writeText(b.dataset.copy); b.textContent = '✅ Copiado'; setTimeout(() => b.textContent = '📋 Copiar', 1500); } catch (_) {}
+  });
+
+  // ---------- conectar ----------
+  $('#connectBtn').addEventListener('click', async () => {
+    try { const d = await api('/api/connect', {username: $('#username').value}); live = d.live; showLive(); }
+    catch (e) { $('#liveMsg').textContent = e.message; }
+  });
+  $('#username').addEventListener('keydown', e => { if (e.key === 'Enter') $('#connectBtn').click(); });
+  $('#disconnectBtn').addEventListener('click', () => api('/api/disconnect', {}).catch(() => {}));
+  $('#autoconnect').addEventListener('change', () => { cfg.autoconnect = $('#autoconnect').checked; save(); });
+  $('#eulerKey').addEventListener('input', () => { cfg.euler_key = $('#eulerKey').value; save(); });
+  document.addEventListener('click', e => {
+    const b = e.target.closest('[data-test]'); if (!b) return;
+    api('/api/test', {type: b.dataset.test, gift: b.dataset.gift || ''}).catch(() => {});
+  });
+  $('#resetStats').addEventListener('click', async () => { const d = await api('/api/reset-stats', {}); showStats(d.live.stats); });
+
+  // ---------- actualizaciones ----------
+  async function checkUpdate() {
+    try {
+      const u = await api('/api/update');
+      $('#updateBar').hidden = u.state !== 'available' && u.state !== 'downloading' && u.state !== 'installing';
+      $('#updateText').textContent = u.state === 'downloading' ? `Bajando EC-Tok ${u.latest}… ${u.percent ?? ''}%` : u.state === 'installing' ? 'Instalando… EC-Tok se va a cerrar y abrir solo.' : `Hay una versión nueva: EC-Tok ${u.latest}`;
+      $('#updateBtn').hidden = u.state !== 'available';
+      $('#updateMsg').textContent = u.error || (u.state === 'uptodate' ? '✓ Estás al día.' : '');
+      if (u.state === 'downloading' || u.state === 'installing' || u.state === 'checking') setTimeout(checkUpdate, 1000);
+    } catch (_) {}
+  }
+  $('#updateBtn').addEventListener('click', async () => { try { await api('/api/update/install', {}); checkUpdate(); } catch (e) { $('#updateText').textContent = e.message; } });
+  $('#checkUpdate').addEventListener('click', async () => { await api('/api/update/check', {}).catch(() => {}); setTimeout(checkUpdate, 1500); });
+
+  // ---------- arrancar ----------
+  async function refresh() {
+    const info = await api('/api/info');
+    cfg = info.config; live = info.live; port = info.port;
+    $('#version').textContent = `Versión ${info.version}${info.build_date ? ' · ' + info.build_date : ''}`;
+    $('#about').textContent = `EC-Tok ${info.version}. Alertas, sonidos, voz y metas para TikTok LIVE. Gratis y de código abierto.`;
+    $('#username').value = cfg.username || ''; $('#autoconnect').checked = !!cfg.autoconnect; $('#eulerKey').value = cfg.euler_key || '';
+    showLive(); showStats(live.stats); fillAlerts(); fillSounds(); fillTts(); fillGoals(); fillUrls(); loadVoices();
+    if (!feedCount) for (const ev of info.recent || []) addFeed(ev);
+  }
+  refresh().then(() => {
+    const es = new EventSource('/api/stream?who=panel');
+    es.onmessage = m => { try { onEvent(JSON.parse(m.data)); } catch (_) {} };
+    setInterval(() => fetch('/api/ping').catch(() => {}), 20000);
+    checkUpdate(); setInterval(checkUpdate, 10 * 60 * 1000);
+    try { const tab = localStorage.getItem('ectok-tab'); if (tab) document.querySelector(`nav.tabs button[data-tab="${tab}"]`)?.click(); } catch (_) {}
+  }).catch(() => { $('#liveMsg').textContent = 'No se pudo conectar con EC-Tok. Ciérralo y vuelve a abrirlo.'; });
+</script>
+</body>
+</html>
