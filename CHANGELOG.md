@@ -1,7 +1,10 @@
 # Cambios de EC-Tok
 
+## 1.3.1
+- En el modo prueba, el Heart Me llega de uno en uno (TikTok solo deja mandar uno al día por persona), sin «×10».
+
 ## 1.3.0 — El nombre de quien lo mandó
-- Las animaciones automáticas ahora pueden mostrar **la foto y el nombre de quien mandó el regalo** (o quien te siguió, abrió el cofre o se suscribió), en una tarjeta que aparece con un rebote debajo de la animación. En regalos también dice cuál y cuántos («Heart Me ×5»).
+- Las animaciones automáticas ahora pueden mostrar **la foto y el nombre de quien mandó el regalo** (o quien te siguió, abrió el cofre o se suscribió), en una tarjeta que aparece con un rebote debajo de la animación. En regalos también dice cuál y cuántos («Rosa ×5»).
 - Se prende o apaga por animación con la nueva columna **Nombre** (🎬 Animaciones). Viene prendida en Heart Me, follow, regalos grandes, cofre y suscripción.
 - El botón ▶ de cada regla muestra cómo se ve, con tu @usuario de ejemplo.
 

@@ -379,7 +379,8 @@ def test_event(kind: str, gift: str = "") -> dict:
     if kind == "gift":
         options = [g for g in TEST_GIFTS if g[0].lower() == gift.lower()] or [random.choice(TEST_GIFTS[:8])]
         gname, each = options[0]
-        count = random.choice([1, 1, 3, 5, 10]) if each < 100 else 1
+        # Heart Me: TikTok solo deja mandar uno al día por persona.
+        count = 1 if each >= 100 or gname.lower() == "heart me" else random.choice([1, 1, 3, 5, 10])
         return new_event("gift", user=user, test=True,
                          gift={"name": gname, "count": count, "diamonds": each, "total": each * count, "image": ""})
     if kind == "like":
