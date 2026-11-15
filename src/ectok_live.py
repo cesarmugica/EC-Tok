@@ -50,6 +50,33 @@ def _user(u) -> dict:
     return {"id": uid, "name": name, "avatar": str(avatar or "")}
 
 
+# Mensajes del estado de la conexión, en el idioma de la app.
+MESSAGES = {
+    "connecting": {"es": "Conectando con @{u}…", "en": "Connecting to @{u}…", "pt": "Conectando com @{u}…"},
+    "live": {"es": "Conectado al live de @{u}.", "en": "Connected to @{u}'s LIVE.", "pt": "Conectado à live de @{u}."},
+    "offline": {"es": "@{u} no está en vivo. Vuelvo a intentar cada {s} s…", "en": "@{u} is not live. Trying again every {s} s…",
+                "pt": "@{u} não está ao vivo. Tento de novo a cada {s} s…"},
+    "notfound": {"es": "No existe la cuenta @{u}. Revisa el usuario.", "en": "The account @{u} does not exist. Check the username.",
+                 "pt": "A conta @{u} não existe. Confira o usuário."},
+    "ratelimit": {"es": "Se alcanzó el límite gratis de conexiones de Euler Stream. Espera un rato o pon tu clave de Euler en Ajustes.",
+                  "en": "The free Euler Stream connection limit was reached. Wait a while or add your Euler key in Settings.",
+                  "pt": "O limite grátis de conexões do Euler Stream foi atingido. Espere um pouco ou coloque sua chave do Euler em Ajustes."},
+    "failed": {"es": "No se pudo conectar ({e}). Vuelvo a intentar en {s} s…", "en": "Could not connect ({e}). Trying again in {s} s…",
+               "pt": "Não foi possível conectar ({e}). Tento de novo em {s} s…"},
+    "ended": {"es": "El live terminó o se cortó. Vuelvo a intentar en {s} s…", "en": "The LIVE ended or dropped. Trying again in {s} s…",
+              "pt": "A live terminou ou caiu. Tento de novo em {s} s…"},
+    "disconnected": {"es": "Desconectado.", "en": "Disconnected.", "pt": "Desconectado."},
+    "live_end": {"es": "El live terminó.", "en": "The LIVE ended.", "pt": "A live terminou."},
+    "need_user": {"es": "Escribe tu @usuario de TikTok.", "en": "Type your TikTok @username.", "pt": "Escreva seu @usuário do TikTok."},
+}
+LANG = {"value": "es"}
+
+
+def msg(key: str, **kw) -> str:
+    table = MESSAGES[key]
+    return table.get(LANG["value"], table["es"]).format(**kw)
+
+
 def new_event(kind: str, **data) -> dict:
     return {"id": next(_ids), "type": kind, "ts": time.time(), **data}
 
@@ -135,7 +162,7 @@ class Live:
     def connect(self, username: str, api_key: str = "") -> None:
         username = username.strip().lstrip("@").strip()
         if not username:
-            raise ValueError("Escribe tu @usuario de TikTok.")
+            raise ValueError(msg("need_user"))
         self.disconnect()
         with self.lock:
             self.username, self.want = username, True
@@ -154,7 +181,7 @@ class Live:
             thread.join(timeout=6)
         self.thread = None
         if self.state != "idle":
-            self._set("idle", "Desconectado.")
+            self._set("idle", msg("disconnected"))
 
     def _thread(self, username: str, api_key: str) -> None:
         loop = asyncio.new_event_loop()
@@ -170,19 +197,18 @@ class Live:
                     if not self.want:
                         break
                     if "offline" in text.lower() or "not live" in text.lower() or exc.__class__.__name__ in ("UserOfflineError",):
-                        self._set("waiting", f"@{username} no está en vivo. Vuelvo a intentar cada {self.RETRY_SECONDS} s…")
+                        self._set("waiting", msg("offline", u=username, s=self.RETRY_SECONDS))
                     elif "UserNotFound" in exc.__class__.__name__:
-                        self._set("error", f"No existe la cuenta @{username}. Revisa el usuario.")
+                        self._set("error", msg("notfound", u=username))
                         self.want = False
                         break
                     elif "rate" in text.lower() or "limit" in text.lower() or "429" in text:
-                        self._set("waiting", "Se alcanzó el límite gratis de conexiones de Euler Stream. Espera un rato "
-                                             "o pon tu clave de Euler en Ajustes.")
+                        self._set("waiting", msg("ratelimit"))
                     else:
-                        self._set("waiting", f"No se pudo conectar ({text[:120]}). Vuelvo a intentar en {self.RETRY_SECONDS} s…")
+                        self._set("waiting", msg("failed", e=text[:120], s=self.RETRY_SECONDS))
                 else:
                     if self.want:
-                        self._set("waiting", f"El live terminó o se cortó. Vuelvo a intentar en {self.RETRY_SECONDS} s…")
+                        self._set("waiting", msg("ended", s=self.RETRY_SECONDS))
                 for _ in range(self.RETRY_SECONDS * 2):
                     if not self.want:
                         break
@@ -204,13 +230,13 @@ class Live:
                 from TikTokLive.client.web.web_settings import WebDefaults  # type: ignore[import-not-found]
 
                 WebDefaults.tiktok_sign_api_key = api_key
-        self._set("connecting", f"Conectando con @{username}…")
+        self._set("connecting", msg("connecting", u=username))
         client = TikTokLiveClient(unique_id=username)
         self.client = client
 
         @client.on(ConnectEvent)
         async def _connected(_event) -> None:
-            self._set("live", f"Conectado al live de @{username}.")
+            self._set("live", msg("live", u=username))
             self.log(f"[live] conectado a @{username}")
 
         @client.on(DisconnectEvent)
@@ -219,7 +245,7 @@ class Live:
 
         @client.on(LiveEndEvent)
         async def _ended(_event) -> None:
-            self.emit(new_event("system", text="El live terminó."))
+            self.emit(new_event("system", text=msg("live_end")))
 
         @client.on(GiftEvent)
         async def _gift(event) -> None:
@@ -365,7 +391,9 @@ def test_event(kind: str, gift: str = "") -> dict:
     if kind == "booster":
         return new_event("booster", multiplier=int(gift or 3), user=user, test=True)
     if kind == "comment":
-        text = random.choice(["¡Hola a todos!", "Saludos desde Monterrey 🔥", "Esa canción está buenísima",
-                              "¿Cantas la de Marlboro Rojo?", "Qué bonito live"])
+        samples = {"es": ["¡Hola a todos!", "Saludos desde Monterrey 🔥", "Esa canción está buenísima", "¿Cantas otra?", "Qué bonito live"],
+                   "en": ["Hi everyone!", "Greetings from Texas 🔥", "That song is great", "Can you sing another one?", "Lovely LIVE"],
+                   "pt": ["Oi, gente!", "Saudações de São Paulo 🔥", "Essa música é demais", "Canta outra?", "Que live linda"]}
+        text = random.choice(samples.get(LANG["value"], samples["es"]))
         return new_event("comment", user=user, text=text, test=True)
     return new_event(kind if kind in ("follow", "share") else "follow", user=user, test=True)

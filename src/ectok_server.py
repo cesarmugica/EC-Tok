@@ -28,7 +28,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, unquote, urlsplit
 
-APP_VERSION = "1.1.3"
+APP_VERSION = "1.2.0"
 
 try:  # lo genera windows/build.ps1
     from ectok_build import BUILD_DATE  # type: ignore[import-not-found]
@@ -171,7 +171,66 @@ def save_config(config: dict) -> None:
         tmp.replace(CONFIG_PATH)
 
 
+# Textos que trae EC-Tok de fábrica, en cada idioma. Al cambiar de idioma se cambian solo los que
+# no habías editado (si el texto sigue igual al de fábrica del idioma anterior).
+DEFAULT_TEXTS: dict[tuple, dict[str, str]] = {
+    ("alerts", "gift", "text"): {"es": "{user} envió {count}× {gift}", "en": "{user} sent {count}× {gift}", "pt": "{user} enviou {count}× {gift}"},
+    ("alerts", "follow", "text"): {"es": "{user} te empezó a seguir", "en": "{user} followed you", "pt": "{user} começou a te seguir"},
+    ("alerts", "share", "text"): {"es": "{user} compartió el live", "en": "{user} shared the LIVE", "pt": "{user} compartilhou a live"},
+    ("alerts", "like", "text"): {"es": "¡Ya llevamos {likes} likes!", "en": "We reached {likes} likes!", "pt": "Já temos {likes} curtidas!"},
+    ("tts", "comment_text"): {"es": "{user} dice: {text}", "en": "{user} says: {text}", "pt": "{user} diz: {text}"},
+    ("tts", "gift_text"): {"es": "{user} envió {count} {gift}. ¡Gracias!", "en": "{user} sent {count} {gift}. Thank you!", "pt": "{user} enviou {count} {gift}. Obrigado!"},
+    ("tts", "follow_text"): {"es": "Gracias por seguirme, {user}", "en": "Thanks for following, {user}", "pt": "Obrigado por me seguir, {user}"},
+    ("tts", "share_text"): {"es": "Gracias por compartir, {user}", "en": "Thanks for sharing, {user}", "pt": "Obrigado por compartilhar, {user}"},
+    ("top", "title"): {"es": "Top donadores", "en": "Top gifters", "pt": "Top doadores"},
+    ("anims", "brb", "text"): {"es": "Ya regresamos", "en": "Be right back", "pt": "Já voltamos"},
+    ("anims", "brb", "sub"): {"es": "No te vayas 💖", "en": "Don't go anywhere 💖", "pt": "Não vá embora 💖"},
+}
+DEFAULT_LIST_TEXTS = {  # (lista, id, campo)
+    ("goals", "likes", "title"): {"es": "Meta de likes", "en": "Likes goal", "pt": "Meta de curtidas"},
+    ("quick", "q1", "label"): {"es": "Corazones", "en": "Hearts", "pt": "Corações"},
+    ("quick", "q2", "label"): {"es": "Confeti", "en": "Confetti", "pt": "Confete"},
+    ("quick", "q3", "label"): {"es": "¡Gracias!", "en": "Thank you!", "pt": "Obrigado!"},
+    ("quick", "q6", "label"): {"es": "Fuegos", "en": "Fireworks", "pt": "Fogos"},
+}
+
+
+def _list_for(cfg: dict, name: str) -> list:
+    return cfg["goals"] if name == "goals" else cfg["anims"]["quick"]
+
+
+def set_language(cfg: dict, old: str, new: str) -> None:
+    """Cambiar los textos de fábrica al nuevo idioma (los que editaste se quedan)."""
+    for path, texts in DEFAULT_TEXTS.items():
+        node = cfg
+        for key in path[:-1]:
+            node = node[key]
+        if node.get(path[-1]) == texts.get(old):
+            node[path[-1]] = texts[new]
+    thanks = {"es": "gracias.webp", "en": "thank-you.webp", "pt": "obrigado.webp"}  # la animación con texto
+    for item in [*cfg["anims"]["rules"], *cfg["anims"]["quick"]]:
+        if item.get("file") == thanks.get(old):
+            item["file"] = thanks[new]
+    for (name, item_id, field), texts in DEFAULT_LIST_TEXTS.items():
+        for item in _list_for(cfg, name):
+            if item.get("id") == item_id and item.get(field) == texts.get(old):
+                item[field] = texts[new]
+    cfg["language"] = new
+
+
+def _first_language() -> None:
+    """La primera vez: el idioma que elegiste en el instalador."""
+    if CONFIG_PATH.exists():
+        return
+    with contextlib.suppress(OSError):
+        lang = (HOME / "language.txt").read_text(encoding="utf-8").strip().lower()[:2]
+        if lang in ("en", "pt"):
+            set_language(CONFIG, "es", lang)
+            save_config(CONFIG)
+
+
 CONFIG = load_config()
+_first_language()
 HEX = re.compile(r"#[0-9a-fA-F]{6}")
 
 
@@ -192,8 +251,10 @@ def clean_config(data: dict) -> dict:
         cfg["euler_key"] = _text(data["euler_key"], "", 200).strip()
     if isinstance(data.get("autoconnect"), bool):
         cfg["autoconnect"] = data["autoconnect"]
-    if data.get("language") in ("es", "en"):
-        cfg["language"] = data["language"]
+    if data.get("language") in ("es", "en", "pt") and data["language"] != cfg["language"]:
+        new_lang = data["language"]
+        data = {k: v for k, v in data.items() if k not in ("alerts", "tts", "top", "anims", "goals")}  # se cambian abajo
+        set_language(cfg, cfg["language"], new_lang)
     alerts = data.get("alerts")
     if isinstance(alerts, dict):
         for kind, current in cfg["alerts"].items():
@@ -424,12 +485,16 @@ def live_emit(event: dict) -> None:
 
 
 LIVE = Live(emit=live_emit, log=log)
+import ectok_live  # noqa: E402
+
+ectok_live.LANG["value"] = CONFIG["language"]
 
 
 def overlay_payload() -> dict:
     """Lo que necesitan los overlays: estilos, alertas, metas y el estado del live."""
     return {"style": CONFIG["style"], "alerts": CONFIG["alerts"], "goals": CONFIG["goals"], "top": CONFIG["top"],
-            "stats": LIVE.stats.public(CONFIG["top"]["count"]), "brb": {**CONFIG["anims"]["brb"], **BRB}}
+            "stats": LIVE.stats.public(CONFIG["top"]["count"]), "brb": {**CONFIG["anims"]["brb"], **BRB},
+            "lang": CONFIG["language"]}
 
 
 def aliases_payload() -> list[list[str]]:
@@ -451,8 +516,8 @@ def pick_sound() -> str | None:
         "Add-Type -AssemblyName System.Windows.Forms;"
         "$owner = New-Object System.Windows.Forms.Form -Property @{TopMost=$true; ShowInTaskbar=$false; Opacity=0; StartPosition='CenterScreen'}; $owner.Show(); $owner.Activate();"
         "$d = New-Object System.Windows.Forms.OpenFileDialog;"
-        "$d.Title = 'Elige el sonido';"
-        f"$d.Filter = 'Sonidos|{patterns}|Todos los archivos|*.*';"
+        f"$d.Title = '{ {'en': 'Choose the sound', 'pt': 'Escolha o som'}.get(CONFIG['language'], 'Elige el sonido') }';"
+        f"$d.Filter = '{ {'en': 'Sounds', 'pt': 'Sons'}.get(CONFIG['language'], 'Sonidos') }|{patterns}|*.*|*.*';"
         f"$d.InitialDirectory = '{str(Path.home() / 'Music').replace(chr(39), chr(39) * 2)}';"
         "if ($d.ShowDialog($owner) -eq 'OK') { [Console]::OutputEncoding = [Text.Encoding]::UTF8; $d.FileName }"
     )
@@ -597,7 +662,8 @@ class Handler(BaseHTTPRequestHandler):
         parts = urlsplit(self.path)
         path, query = parts.path, parse_qs(parts.query)
         if path in ("/", "/index.html"):
-            self.send_file(WEB_ROOT / "index.html")
+            html = (WEB_ROOT / "index.html").read_text(encoding="utf-8").replace('<html lang="es">', f'<html lang="{CONFIG["language"]}">', 1)
+            self.send_file(WEB_ROOT / "index.html", html.encode("utf-8"))
         elif path in ("/overlay", "/overlay.html"):
             self.send_file(WEB_ROOT / "overlay.html")
         elif path.startswith("/img/") and re.fullmatch(r"/img/[\w.-]+", path):
@@ -698,6 +764,7 @@ class Handler(BaseHTTPRequestHandler):
         if path == "/api/settings":
             CONFIG = clean_config(data)
             save_config(CONFIG)
+            ectok_live.LANG["value"] = CONFIG["language"]
             BUS.emit(new_event("config", overlay=overlay_payload()))
             self.send_json({"ok": True, "config": CONFIG})
         elif path == "/api/connect":
@@ -764,7 +831,8 @@ class Handler(BaseHTTPRequestHandler):
 from ectok_update import Updater  # noqa: E402
 
 UPDATER = Updater(app="EC-Tok", repo="EC-Tok", tag_prefix="v", current=APP_VERSION, folder=HOME / "updates", log=log,
-                  busy=lambda: "Estás conectado a un live: desconéctate primero." if LIVE.state == "live" else "")
+                  busy=lambda: "Estás conectado a un live: desconéctate primero." if LIVE.state == "live" else "",
+                  extra_args=lambda: [f"/LANG={CONFIG['language']}"])
 
 
 def _idle_watch(server: ThreadingHTTPServer) -> None:

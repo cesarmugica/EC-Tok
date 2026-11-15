@@ -35,6 +35,7 @@
     .brand img { width: 40px; height: 40px; border-radius: 12px; }
     .brand h1 { margin: 0; font-size: 1.25rem; }
     .brand small { color: var(--muted); font-size: .78rem; }
+    .headright { display: flex; align-items: center; gap: 16px; }
     .status { display: flex; align-items: center; gap: 10px; font-weight: 600; }
     .dot { width: 12px; height: 12px; border-radius: 50%; background: var(--surface-3); }
     .dot.live { background: #ff2d55; box-shadow: 0 0 0 4px rgba(255,45,85,.25); animation: pulse 1.4s infinite; }
@@ -111,7 +112,10 @@
 <body>
 <header>
   <div class="brand"><img src="/img/ectok.png" alt=""><div><h1>EC-Tok</h1><small id="version">—</small></div></div>
-  <div class="status"><span class="dot" id="dot"></span><span id="statusText">Sin conectar</span></div>
+  <div class="headright">
+    <select id="langSelect" aria-label="Idioma" title="🌐 Idioma"><option value="es">🌐 Español</option><option value="en">🌐 English</option><option value="pt">🌐 Português (Brasil)</option></select>
+    <div class="status"><span class="dot" id="dot"></span><span id="statusText">Sin conectar</span></div>
+  </div>
 </header>
 <nav class="tabs">
   <button type="button" data-tab="live" class="on">🔴 En vivo</button>
@@ -341,13 +345,29 @@
 <footer>EC-Tok es gratis y de código abierto. No es de TikTok ni está afiliado con TikTok.</footer>
 
 <script>
+  const LANG = ['en', 'pt'].includes(document.documentElement.lang) ? document.documentElement.lang : 'es';
+  const LOCALE = {es: 'es-MX', en: 'en-US', pt: 'pt-BR'}[LANG];
+  /* I18N-START */ const I18N = {"en":{"Abajo":"Below","Acento":"Accent","Acerca de":"About","Actualizar":"Update","Alertas en pantalla":"On-screen alerts","Animación":"Animation","Aparecer (pop)":"Pop in","Aquí vas a ver regalos, follows, likes y comentarios.":"Gifts, follows, likes and comments will show up here.","Arriba":"Top","Buscar actualización":"Check for updates","Clave de Euler Stream (opcional)":"Euler Stream key (optional)","Color":"Color","Comentario":"Comment","Comentarios":"Comments","Compartidos":"Shares","Compartir":"Share","Conectar a tu live":"Connect to your LIVE","Conectar solo al abrir EC-Tok":"Connect automatically when EC-Tok opens","Conexión con TikTok":"TikTok connection","Cuándo":"When","Cuántos mostrar":"How many to show","Cómo se ven":"How they look","Dejar que se encimen (si no, suenan en fila)":"Let them overlap (otherwise they play one after another)","Deslizar":"Slide","Desvanecer":"Fade","Detalle":"Detail","Dura":"Lasts","Duran":"Last","EC-Tok es gratis y de código abierto. No es de TikTok ni está afiliado con TikTok.":"EC-Tok is free and open source. It is not made by or affiliated with TikTok.","En medio":"Middle","Encender la voz":"Turn on the voice","Este live":"This LIVE","Follow":"Follow","Follows":"Follows","Leer el chat en voz alta":"Read the chat out loud","Lo que va pasando":"What's happening","Máximo de letras":"Max characters","No leer enlaces":"Don't read links","Oscurecer el fondo":"Darken the background","Posición":"Position","Probar sin estar en vivo:":"Try it without being live:","Probar:":"Try:","Rebotar":"Bounce","Regalo":"Gift","Regalos":"Gifts","Sin conectar":"Not connected","Solo comentarios que empiecen con":"Only comments starting with","Sonido":"Sound","Sonidos por regalo":"Sounds per gift","Tamaño":"Size","Texto":"Text","Tono":"Pitch","Título":"Title","Velocidad":"Speed","Volumen":"Volume","Voz":"Voice","↺ Empezar la cuenta de cero":"↺ Reset the counts","⏭ Callar":"⏭ Stop talking","⏭ Callar la voz":"⏭ Stop the voice","⏹ Desconectar":"⏹ Disconnect","▶ Conectar":"▶ Connect","☕ Poner «Ya regresamos»":"☕ Show “Be right back”","☕ «Ya regresamos»":"☕ “Be right back”","⚔ Batalla":"⚔ Battle","⚙ Ajustes":"⚙ Settings","⚡ Acceso rápido":"⚡ Quick access","⚡ Botones de acceso rápido":"⚡ Quick access buttons","❤️ Likes":"❤️ Likes","❤️ likes":"❤️ likes","➕ Agregar animación automática":"➕ Add automatic animation","➕ Agregar botón":"➕ Add button","➕ Agregar meta":"➕ Add goal","➕ Agregar sonido":"➕ Add sound","⭐ Suscripción":"⭐ Subscription","🌌 Regalo enorme":"🌌 Huge gift","🎁 Regalo":"🎁 Gift","🎁 regalos":"🎁 gifts","🎉 Cofre":"🎉 Treasure chest","🎬 Animaciones":"🎬 Animations","🎬 Animaciones automáticas":"🎬 Automatic animations","🎯 Metas":"🎯 Goals","🎯 Metas y top":"🎯 Goals & top","🏆 Top donadores":"🏆 Top gifters","💎 diamantes":"💎 diamonds","💖 Follow":"💖 Follow","💖 follows":"💖 follows","💗 Heart Me":"💗 Heart Me","💬 Comentario":"💬 Comment","💬 comentarios":"💬 comments","📂 Abrir carpeta de animaciones":"📂 Open animations folder","📂 Carpeta de sonidos":"📂 Sounds folder","📣 Compartir":"📣 Share","📣 compartidos":"📣 shares","📺 Poner las alertas en tu live":"📺 Add the alerts to your LIVE","🔄 Actualizar lista":"🔄 Refresh list","🔈 Probar la voz":"🔈 Test the voice","🔊 Sonidos":"🔊 Sounds","🔔 Alertas":"🔔 Alerts","🔴 En vivo":"🔴 LIVE","🗂 Banco de animaciones":"🗂 Animation library","🗣 Voz (leer chat)":"🗣 Voice (read chat)","🦁 Regalo grande":"🦁 Big gift","(todos)":"(all)","Metas":"Goals","Top":"Top","Vista previa":"Preview","tu_usuario":"your_username","Escribe tu <b>@usuario</b> de TikTok y conéctate cuando estés en vivo (o antes: EC-Tok espera y se conecta solo cuando empiezas). No necesita tu contraseña.":"Type your TikTok <b>@username</b> and connect when you are live (or before: EC-Tok waits and connects by itself when you start). It does not need your password.","Clic (o las teclas 1 a 9 cuando no estás escribiendo) y la animación sale en tu live. Se editan en 🎬 Animaciones.":"Click (or keys 1 to 9 when you are not typing) and the animation appears in your LIVE. Edit them in 🎬 Animations.","Copia una dirección y agrégala como fuente web: en <b>TikTok LIVE Studio</b> «➕ Agregar fuente → Enlace (Link)», en <b>OBS</b> «Fuente → Navegador». EC-Tok tiene que estar abierto mientras transmites. Los sonidos y la voz suenan en tu PC (asegúrate de que LIVE Studio u OBS capture el audio del escritorio).":"Copy an address and add it as a web source: in <b>TikTok LIVE Studio</b> “➕ Add source → Link”, in <b>OBS</b> “Source → Browser”. EC-Tok must stay open while you stream. Sounds and voice play on your PC (make sure LIVE Studio or OBS captures desktop audio).","Qué aparece en el overlay de alertas. En el texto puedes usar <code>{user}</code>, <code>{gift}</code>, <code>{count}</code>, <code>{diamonds}</code> y <code>{likes}</code>.":"What shows in the alerts overlay. In the text you can use <code>{user}</code>, <code>{gift}</code>, <code>{count}</code>, <code>{diamonds}</code> and <code>{likes}</code>.","Salen solas en el overlay <b>🎬 Animaciones</b> cuando pasa algo en tu live. Si un regalo cumple varias reglas, gana la más específica (el regalo exacto, luego «N 💎 o más», luego «cualquier regalo»). Si llegan varias juntas, salen en fila.":"They play by themselves in the <b>🎬 Animations</b> overlay when something happens in your LIVE. If a gift matches several rules, the most specific wins (the exact gift, then “N 💎 or more”, then “any gift”). If several arrive together, they play in line.","Las batallas y los potenciadores x2/x3 casi no están documentados por TikTok: EC-Tok intenta reconocerlos solo. Si en tu live no salen, usa los botones de acceso rápido (y mándame tu registro para afinarlos).":"Battles and x2/x3 boosters are barely documented by TikTok: EC-Tok tries to recognize them by itself. If they don't show in your LIVE, use the quick access buttons (and send your log so they can be tuned).","Para lanzar una animación cuando tú quieras (también con las teclas 1 a 9 en la pestaña 🔴 En vivo).":"To launch an animation whenever you want (also with keys 1 to 9 in the 🔴 LIVE tab).","Para cuando te paras un momento: se queda en pantalla (con la animación que elijas) hasta que lo quitas.":"For when you step away for a moment: it stays on screen (with the animation you choose) until you remove it.","Las de EC-Tok y las tuyas. Para agregar las tuyas, cópialas a la carpeta de animaciones y dale «Actualizar lista». Mejor <b>WebM con transparencia</b> o <b>WebP animado</b> (orillas lisas); también <b>APNG</b> y <b>GIF</b> (el GIF solo tiene transparencia de «todo o nada»).":"EC-Tok's and yours. To add yours, copy them to the animations folder and click “Refresh list”. Best: <b>WebM with transparency</b> or <b>animated WebP</b> (smooth edges); <b>APNG</b> and <b>GIF</b> also work (GIF only has all-or-nothing transparency).","Cada regla dice qué sonido toca y cuándo. Si un regalo cumple varias, suena la más específica: el regalo exacto, luego «regalo de N 💎 o más» (la más alta que cumpla) y al final «cualquier regalo».":"Each rule says which sound plays and when. If a gift matches several, the most specific plays: the exact gift, then “gift of N 💎 or more” (the highest one it meets) and finally “any gift”.","Usa las voces de Windows (las «Natural» de Microsoft suenan muy bien). En los textos puedes usar <code>{user}</code>, <code>{text}</code>, <code>{gift}</code> y <code>{count}</code>.":"Uses Windows voices (Microsoft's “Natural” ones sound great). In the texts you can use <code>{user}</code>, <code>{text}</code>, <code>{gift}</code> and <code>{count}</code>.","Barras de progreso para el overlay de metas. Cuentan desde que te conectas (o desde «Empezar la cuenta de cero»).":"Progress bars for the goals overlay. They count from when you connect (or from “Reset the counts”).","TikTok no tiene una conexión oficial para esto: EC-Tok (como TikFinity) usa la librería libre <b>TikTokLive</b> y el servicio de «firma» <b>Euler Stream</b>. El uso gratis permite unas cuantas conexiones por hora (de sobra para un live). Si te sale que se alcanzó el límite, crea una cuenta gratis en eulerstream.com y pega aquí tu clave.":"TikTok has no official connection for this: EC-Tok (like TikFinity) uses the free <b>TikTokLive</b> library and the <b>Euler Stream</b> “signing” service. Free use allows a few connections per hour (plenty for a LIVE). If you see that the limit was reached, create a free account at eulerstream.com and paste your key here.","Algo salió mal.":"Something went wrong.","Conectando…":"Connecting…","Esperando el live…":"Waiting for the LIVE…","EN VIVO":"LIVE","Error":"Error","Todavía nadie ha enviado regalos.":"Nobody has sent gifts yet.","{0} envió {1} (💎 {2})":"{0} sent {1} (💎 {2})","{0} te sigue":"{0} followed you","{0} compartió el live":"{0} shared the LIVE","{0} dio {1} likes":"{0} sent {1} likes","{0} se suscribió":"{0} subscribed","{0} es Super Fan":"{0} is a Super Fan","{0} soltó un cofre (regalo de la comunidad)":"{0} dropped a treasure chest (community gift)","Terminó la batalla":"The battle ended","¡Empezó una batalla!":"A battle started!","Potenciador {0} en la batalla":"{0} booster in the battle","El live terminó.":"The LIVE ended.","(prueba)":"(test)","(la de Windows por defecto)":"(Windows default)","🎁 Regalos":"🎁 Gifts","💖 Follows":"💖 Follows","❤️ Cada N likes":"❤️ Every N likes","desde":"from","cada":"every","dura":"lasts","Cualquier regalo":"Any gift","Un regalo en especial":"A specific gift","Regalo de N 💎 o más":"Gift of N 💎 or more","Cada N likes":"Every N likes","Elegir…":"Choose…","Escuchar":"Listen","Quitar":"Remove","Todavía no hay sonidos. Agrega uno con «➕ Agregar sonido».":"No sounds yet. Add one with “➕ Add sound”.","hola, esta es la voz de EC-Tok":"hi, this is the EC-Tok voice","💎 Diamantes":"💎 Diamonds","📣 Compartidos":"📣 Shares","meta":"goal","Sin metas.":"No goals.","Meta de diamantes":"Diamonds goal","📋 Copiar":"📋 Copy","✅ Copiado":"✅ Copied","tuya":"yours","🎁 Cualquier regalo":"🎁 Any gift","🎁 Un regalo en especial":"🎁 A specific gift","💎 Regalo de N 💎 o más":"💎 Gift of N 💎 or more","🌟 Super Fan":"🌟 Super Fan","🎉 Regalo de la comunidad (cofre)":"🎉 Community gift (treasure chest)","⚔ Empieza una batalla":"⚔ A battle starts","🏁 Termina la batalla":"🏁 The battle ends","✖ Potenciador en batalla (x2/x3)":"✖ Battle booster (x2/x3)","cualquiera":"any","Ver en el overlay":"Show in the overlay","Sin animaciones automáticas.":"No automatic animations.","tecla":"key","Sin botones todavía.":"No buttons yet.","▶ Probar":"▶ Try","✅ Ya volví (quitar «Ya regresamos»)":"✅ I'm back (remove “Be right back”)","Bajando EC-Tok {0}… {1}%":"Downloading EC-Tok {0}… {1}%","Instalando… EC-Tok se va a cerrar y abrir solo.":"Installing… EC-Tok will close and reopen by itself.","Hay una versión nueva: EC-Tok {0}":"A new version is available: EC-Tok {0}","✓ Estás al día.":"✓ You're up to date.","Versión":"Version","EC-Tok {0}. Alertas, sonidos, voz y metas para TikTok LIVE. Gratis y de código abierto.":"EC-Tok {0}. Alerts, sounds, voice and goals for TikTok LIVE. Free and open source.","No se pudo conectar con EC-Tok. Ciérralo y vuelve a abrirlo.":"Could not reach EC-Tok. Close it and open it again.","Desconectado.":"Disconnected.","🌐 Idioma":"🌐 Language","No se pudo buscar actualización (¿sin internet?).":"Could not check for updates (no internet?).","No hay una versión nueva para instalar.":"There is no new version to install.","Estás conectado a un live: desconéctate primero.":"You are connected to a LIVE: disconnect first.","El instalador se bajó dañado (no coincide su huella). Vuelve a intentar.":"The installer downloaded damaged (checksum mismatch). Try again.","Escribe tu @usuario de TikTok.":"Type your TikTok @username.","Solicitud inválida.":"Invalid request.","No encontré esa animación.":"I couldn't find that animation.","Ese archivo no es un sonido compatible (mp3, wav, ogg, m4a…).":"That file is not a supported sound (mp3, wav, ogg, m4a…).","El sonido pesa más de 30 MB; usa uno más corto.":"The sound is over 30 MB; use a shorter one."},"pt":{"Abajo":"Abaixo","Acento":"Destaque","Acerca de":"Sobre","Actualizar":"Atualizar","Alertas en pantalla":"Alertas na tela","Animación":"Animação","Aparecer (pop)":"Aparecer (pop)","Aquí vas a ver regalos, follows, likes y comentarios.":"Aqui você vai ver presentes, follows, curtidas e comentários.","Arriba":"Em cima","Buscar actualización":"Procurar atualização","Clave de Euler Stream (opcional)":"Chave do Euler Stream (opcional)","Color":"Cor","Comentario":"Comentário","Comentarios":"Comentários","Compartidos":"Compartilhamentos","Compartir":"Compartilhar","Conectar a tu live":"Conectar à sua live","Conectar solo al abrir EC-Tok":"Conectar sozinho ao abrir o EC-Tok","Conexión con TikTok":"Conexão com o TikTok","Cuándo":"Quando","Cuántos mostrar":"Quantos mostrar","Cómo se ven":"Como ficam","Dejar que se encimen (si no, suenan en fila)":"Deixar sobrepor (senão tocam em fila)","Deslizar":"Deslizar","Desvanecer":"Esmaecer","Detalle":"Detalhe","Dura":"Dura","Duran":"Duram","EC-Tok es gratis y de código abierto. No es de TikTok ni está afiliado con TikTok.":"O EC-Tok é grátis e de código aberto. Não é do TikTok nem afiliado ao TikTok.","En medio":"No meio","Encender la voz":"Ligar a voz","Este live":"Esta live","Follow":"Follow","Follows":"Follows","Leer el chat en voz alta":"Ler o chat em voz alta","Lo que va pasando":"O que está acontecendo","Máximo de letras":"Máximo de letras","No leer enlaces":"Não ler links","Oscurecer el fondo":"Escurecer o fundo","Posición":"Posição","Probar sin estar en vivo:":"Testar sem estar ao vivo:","Probar:":"Testar:","Rebotar":"Quicar","Regalo":"Presente","Regalos":"Presentes","Sin conectar":"Desconectado","Solo comentarios que empiecen con":"Só comentários que começam com","Sonido":"Som","Sonidos por regalo":"Sons por presente","Tamaño":"Tamanho","Texto":"Texto","Tono":"Tom","Título":"Título","Velocidad":"Velocidade","Volumen":"Volume","Voz":"Voz","↺ Empezar la cuenta de cero":"↺ Zerar a contagem","⏭ Callar":"⏭ Calar","⏭ Callar la voz":"⏭ Calar a voz","⏹ Desconectar":"⏹ Desconectar","▶ Conectar":"▶ Conectar","☕ Poner «Ya regresamos»":"☕ Mostrar «Já voltamos»","☕ «Ya regresamos»":"☕ «Já voltamos»","⚔ Batalla":"⚔ Batalha","⚙ Ajustes":"⚙ Ajustes","⚡ Acceso rápido":"⚡ Acesso rápido","⚡ Botones de acceso rápido":"⚡ Botões de acesso rápido","❤️ Likes":"❤️ Curtidas","❤️ likes":"❤️ curtidas","➕ Agregar animación automática":"➕ Adicionar animação automática","➕ Agregar botón":"➕ Adicionar botão","➕ Agregar meta":"➕ Adicionar meta","➕ Agregar sonido":"➕ Adicionar som","⭐ Suscripción":"⭐ Assinatura","🌌 Regalo enorme":"🌌 Presente enorme","🎁 Regalo":"🎁 Presente","🎁 regalos":"🎁 presentes","🎉 Cofre":"🎉 Baú","🎬 Animaciones":"🎬 Animações","🎬 Animaciones automáticas":"🎬 Animações automáticas","🎯 Metas":"🎯 Metas","🎯 Metas y top":"🎯 Metas e top","🏆 Top donadores":"🏆 Top doadores","💎 diamantes":"💎 diamantes","💖 Follow":"💖 Follow","💖 follows":"💖 follows","💗 Heart Me":"💗 Heart Me","💬 Comentario":"💬 Comentário","💬 comentarios":"💬 comentários","📂 Abrir carpeta de animaciones":"📂 Abrir pasta de animações","📂 Carpeta de sonidos":"📂 Pasta de sons","📣 Compartir":"📣 Compartilhar","📣 compartidos":"📣 compartilhamentos","📺 Poner las alertas en tu live":"📺 Colocar os alertas na sua live","🔄 Actualizar lista":"🔄 Atualizar lista","🔈 Probar la voz":"🔈 Testar a voz","🔊 Sonidos":"🔊 Sons","🔔 Alertas":"🔔 Alertas","🔴 En vivo":"🔴 Ao vivo","🗂 Banco de animaciones":"🗂 Banco de animações","🗣 Voz (leer chat)":"🗣 Voz (ler chat)","🦁 Regalo grande":"🦁 Presente grande","(todos)":"(todos)","Metas":"Metas","Top":"Top","Vista previa":"Prévia","tu_usuario":"seu_usuario","Escribe tu <b>@usuario</b> de TikTok y conéctate cuando estés en vivo (o antes: EC-Tok espera y se conecta solo cuando empiezas). No necesita tu contraseña.":"Escreva seu <b>@usuário</b> do TikTok e conecte quando estiver ao vivo (ou antes: o EC-Tok espera e conecta sozinho quando você começar). Não precisa da sua senha.","Clic (o las teclas 1 a 9 cuando no estás escribiendo) y la animación sale en tu live. Se editan en 🎬 Animaciones.":"Clique (ou as teclas 1 a 9 quando não estiver digitando) e a animação aparece na sua live. Edite em 🎬 Animações.","Copia una dirección y agrégala como fuente web: en <b>TikTok LIVE Studio</b> «➕ Agregar fuente → Enlace (Link)», en <b>OBS</b> «Fuente → Navegador». EC-Tok tiene que estar abierto mientras transmites. Los sonidos y la voz suenan en tu PC (asegúrate de que LIVE Studio u OBS capture el audio del escritorio).":"Copie um endereço e adicione como fonte web: no <b>TikTok LIVE Studio</b> «➕ Adicionar fonte → Link», no <b>OBS</b> «Fonte → Navegador». O EC-Tok precisa ficar aberto enquanto você transmite. Os sons e a voz tocam no seu PC (verifique se o LIVE Studio ou o OBS captura o áudio da área de trabalho).","Qué aparece en el overlay de alertas. En el texto puedes usar <code>{user}</code>, <code>{gift}</code>, <code>{count}</code>, <code>{diamonds}</code> y <code>{likes}</code>.":"O que aparece no overlay de alertas. No texto você pode usar <code>{user}</code>, <code>{gift}</code>, <code>{count}</code>, <code>{diamonds}</code> e <code>{likes}</code>.","Salen solas en el overlay <b>🎬 Animaciones</b> cuando pasa algo en tu live. Si un regalo cumple varias reglas, gana la más específica (el regalo exacto, luego «N 💎 o más», luego «cualquier regalo»). Si llegan varias juntas, salen en fila.":"Aparecem sozinhas no overlay <b>🎬 Animações</b> quando algo acontece na sua live. Se um presente cumpre várias regras, ganha a mais específica (o presente exato, depois «N 💎 ou mais», depois «qualquer presente»). Se chegarem várias juntas, saem em fila.","Las batallas y los potenciadores x2/x3 casi no están documentados por TikTok: EC-Tok intenta reconocerlos solo. Si en tu live no salen, usa los botones de acceso rápido (y mándame tu registro para afinarlos).":"Batalhas e multiplicadores x2/x3 quase não são documentados pelo TikTok: o EC-Tok tenta reconhecê-los sozinho. Se não aparecerem na sua live, use os botões de acesso rápido (e envie seu registro para ajustá-los).","Para lanzar una animación cuando tú quieras (también con las teclas 1 a 9 en la pestaña 🔴 En vivo).":"Para lançar uma animação quando você quiser (também com as teclas 1 a 9 na aba 🔴 Ao vivo).","Para cuando te paras un momento: se queda en pantalla (con la animación que elijas) hasta que lo quitas.":"Para quando você sai um pouco: fica na tela (com a animação que você escolher) até você tirar.","Las de EC-Tok y las tuyas. Para agregar las tuyas, cópialas a la carpeta de animaciones y dale «Actualizar lista». Mejor <b>WebM con transparencia</b> o <b>WebP animado</b> (orillas lisas); también <b>APNG</b> y <b>GIF</b> (el GIF solo tiene transparencia de «todo o nada»).":"As do EC-Tok e as suas. Para adicionar as suas, copie para a pasta de animações e clique em «Atualizar lista». Melhor <b>WebM com transparência</b> ou <b>WebP animado</b> (bordas lisas); também <b>APNG</b> e <b>GIF</b> (o GIF só tem transparência de «tudo ou nada»).","Cada regla dice qué sonido toca y cuándo. Si un regalo cumple varias, suena la más específica: el regalo exacto, luego «regalo de N 💎 o más» (la más alta que cumpla) y al final «cualquier regalo».":"Cada regra diz qual som toca e quando. Se um presente cumpre várias, toca a mais específica: o presente exato, depois «presente de N 💎 ou mais» (a mais alta que cumprir) e por último «qualquer presente».","Usa las voces de Windows (las «Natural» de Microsoft suenan muy bien). En los textos puedes usar <code>{user}</code>, <code>{text}</code>, <code>{gift}</code> y <code>{count}</code>.":"Usa as vozes do Windows (as «Natural» da Microsoft soam muito bem). Nos textos você pode usar <code>{user}</code>, <code>{text}</code>, <code>{gift}</code> e <code>{count}</code>.","Barras de progreso para el overlay de metas. Cuentan desde que te conectas (o desde «Empezar la cuenta de cero»).":"Barras de progresso para o overlay de metas. Contam desde que você conecta (ou desde «Zerar a contagem»).","TikTok no tiene una conexión oficial para esto: EC-Tok (como TikFinity) usa la librería libre <b>TikTokLive</b> y el servicio de «firma» <b>Euler Stream</b>. El uso gratis permite unas cuantas conexiones por hora (de sobra para un live). Si te sale que se alcanzó el límite, crea una cuenta gratis en eulerstream.com y pega aquí tu clave.":"O TikTok não tem uma conexão oficial para isso: o EC-Tok (como o TikFinity) usa a biblioteca livre <b>TikTokLive</b> e o serviço de «assinatura» <b>Euler Stream</b>. O uso grátis permite algumas conexões por hora (de sobra para uma live). Se aparecer que o limite foi atingido, crie uma conta grátis em eulerstream.com e cole sua chave aqui.","Algo salió mal.":"Algo deu errado.","Conectando…":"Conectando…","Esperando el live…":"Esperando a live…","EN VIVO":"AO VIVO","Error":"Erro","Todavía nadie ha enviado regalos.":"Ninguém mandou presentes ainda.","{0} envió {1} (💎 {2})":"{0} enviou {1} (💎 {2})","{0} te sigue":"{0} te seguiu","{0} compartió el live":"{0} compartilhou a live","{0} dio {1} likes":"{0} deu {1} curtidas","{0} se suscribió":"{0} assinou","{0} es Super Fan":"{0} é Super Fã","{0} soltó un cofre (regalo de la comunidad)":"{0} soltou um baú (presente da comunidade)","Terminó la batalla":"A batalha terminou","¡Empezó una batalla!":"Começou uma batalha!","Potenciador {0} en la batalla":"Multiplicador {0} na batalha","El live terminó.":"A live terminou.","(prueba)":"(teste)","(la de Windows por defecto)":"(a padrão do Windows)","🎁 Regalos":"🎁 Presentes","💖 Follows":"💖 Follows","❤️ Cada N likes":"❤️ A cada N curtidas","desde":"a partir de","cada":"a cada","dura":"dura","Cualquier regalo":"Qualquer presente","Un regalo en especial":"Um presente específico","Regalo de N 💎 o más":"Presente de N 💎 ou mais","Cada N likes":"A cada N curtidas","Elegir…":"Escolher…","Escuchar":"Ouvir","Quitar":"Remover","Todavía no hay sonidos. Agrega uno con «➕ Agregar sonido».":"Ainda não há sons. Adicione um com «➕ Adicionar som».","hola, esta es la voz de EC-Tok":"oi, esta é a voz do EC-Tok","💎 Diamantes":"💎 Diamantes","📣 Compartidos":"📣 Compartilhamentos","meta":"meta","Sin metas.":"Sem metas.","Meta de diamantes":"Meta de diamantes","📋 Copiar":"📋 Copiar","✅ Copiado":"✅ Copiado","tuya":"sua","🎁 Cualquier regalo":"🎁 Qualquer presente","🎁 Un regalo en especial":"🎁 Um presente específico","💎 Regalo de N 💎 o más":"💎 Presente de N 💎 ou mais","🌟 Super Fan":"🌟 Super Fã","🎉 Regalo de la comunidad (cofre)":"🎉 Presente da comunidade (baú)","⚔ Empieza una batalla":"⚔ Começa uma batalha","🏁 Termina la batalla":"🏁 Termina a batalha","✖ Potenciador en batalla (x2/x3)":"✖ Multiplicador na batalha (x2/x3)","cualquiera":"qualquer","Ver en el overlay":"Ver no overlay","Sin animaciones automáticas.":"Sem animações automáticas.","tecla":"tecla","Sin botones todavía.":"Sem botões ainda.","▶ Probar":"▶ Testar","✅ Ya volví (quitar «Ya regresamos»)":"✅ Voltei (tirar «Já voltamos»)","Bajando EC-Tok {0}… {1}%":"Baixando o EC-Tok {0}… {1}%","Instalando… EC-Tok se va a cerrar y abrir solo.":"Instalando… o EC-Tok vai fechar e abrir sozinho.","Hay una versión nueva: EC-Tok {0}":"Há uma versão nova: EC-Tok {0}","✓ Estás al día.":"✓ Você está atualizado.","Versión":"Versão","EC-Tok {0}. Alertas, sonidos, voz y metas para TikTok LIVE. Gratis y de código abierto.":"EC-Tok {0}. Alertas, sons, voz e metas para TikTok LIVE. Grátis e de código aberto.","No se pudo conectar con EC-Tok. Ciérralo y vuelve a abrirlo.":"Não foi possível conectar ao EC-Tok. Feche e abra de novo.","Desconectado.":"Desconectado.","🌐 Idioma":"🌐 Idioma","No se pudo buscar actualización (¿sin internet?).":"Não foi possível procurar atualização (sem internet?).","No hay una versión nueva para instalar.":"Não há versão nova para instalar.","Estás conectado a un live: desconéctate primero.":"Você está conectado a uma live: desconecte primeiro.","El instalador se bajó dañado (no coincide su huella). Vuelve a intentar.":"O instalador baixou corrompido (impressão não confere). Tente de novo.","Escribe tu @usuario de TikTok.":"Escreva seu @usuário do TikTok.","Solicitud inválida.":"Solicitação inválida.","No encontré esa animación.":"Não encontrei essa animação.","Ese archivo no es un sonido compatible (mp3, wav, ogg, m4a…).":"Esse arquivo não é um som compatível (mp3, wav, ogg, m4a…).","El sonido pesa más de 30 MB; usa uno más corto.":"O som tem mais de 30 MB; use um mais curto."}}; /* I18N-END */
+  const t = s => (s && I18N[LANG] && I18N[LANG][s]) || s || '';
+  const tf = (s, ...v) => t(s).replace(/\{(\d)\}/g, (_, i) => v[+i]);
+  function i18n() {
+    if (LANG === 'es') return;
+    const D = I18N[LANG];
+    document.querySelectorAll('p.help').forEach(el => { const k = el.innerHTML.trim().replace(/\s+/g, ' '); if (D[k]) el.innerHTML = D[k]; });
+    const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+    for (let n; (n = walker.nextNode());) { const k = n.nodeValue.trim(); if (k && D[k]) n.nodeValue = n.nodeValue.replace(k, D[k]); }
+    document.querySelectorAll('[title],[placeholder],[aria-label]').forEach(el => {
+      for (const a of ['title', 'placeholder', 'aria-label']) { const v = el.getAttribute(a); if (v && D[v]) el.setAttribute(a, D[v]); }
+    });
+  }
+  i18n();
   const $ = s => document.querySelector(s);
   const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[c]));
-  const fmt = n => (+n || 0).toLocaleString('es-MX');
+  const fmt = n => (+n || 0).toLocaleString(LOCALE);
   async function api(path, body) {
     const res = await fetch(path, body === undefined ? {} : {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(body)});
     const data = await res.json().catch(() => ({}));
-    if (!res.ok || data.ok === false) throw new Error(data.error || 'Algo salió mal.');
+    if (!res.ok || data.ok === false) throw new Error(t(data.error || 'Algo salió mal.'));
     return data;
   }
   let cfg = null, live = null, port = 8795;
@@ -366,10 +386,10 @@
   function save() { clearTimeout(saveTimer); saveTimer = setTimeout(async () => { try { const d = await api('/api/settings', cfg); cfg = d.config; } catch (e) { $('#liveMsg').textContent = e.message; } }, 400); }
 
   // ---------- estado del live ----------
-  const STATE = {idle: 'Sin conectar', connecting: 'Conectando…', waiting: 'Esperando el live…', live: 'EN VIVO', error: 'Error'};
+  const STATE = {idle: 'Sin conectar', connecting: 'Conectando…', waiting: 'Esperando el live…', live: 'EN VIVO', error: 'Error'};  // se traducen al mostrar
   function showLive() {
     $('#dot').className = 'dot ' + live.state;
-    $('#statusText').textContent = live.state === 'live' ? `EN VIVO · @${live.username}` : STATE[live.state] || live.state;
+    $('#statusText').textContent = live.state === 'live' ? `${t('EN VIVO')} · @${live.username}` : t(STATE[live.state] || live.state);
     $('#liveMsg').textContent = live.message || '';
     $('#liveMsg').className = 'msg' + (live.state === 'live' ? ' ok' : '');
     const on = live.state !== 'idle' && live.state !== 'error';
@@ -379,7 +399,7 @@
     if (!s) return;
     $('#sLikes').textContent = fmt(s.likes); $('#sDiamonds').textContent = fmt(s.diamonds); $('#sGifts').textContent = fmt(s.gifts);
     $('#sFollows').textContent = fmt(s.follows); $('#sShares').textContent = fmt(s.shares); $('#sComments').textContent = fmt(s.comments);
-    $('#topList').innerHTML = s.top.length ? s.top.slice(0, 10).map((d, i) => `<li><span>${['🥇', '🥈', '🥉'][i] || i + 1}</span>${d.avatar ? `<img src="${esc(d.avatar)}" alt="">` : '<span class="av">👤</span>'}<span>${esc(d.name)}</span><b>💎 ${fmt(d.diamonds)}</b></li>`).join('') : '<li style="color:var(--muted)">Todavía nadie ha enviado regalos.</li>';
+    $('#topList').innerHTML = s.top.length ? s.top.slice(0, 10).map((d, i) => `<li><span>${['🥇', '🥈', '🥉'][i] || i + 1}</span>${d.avatar ? `<img src="${esc(d.avatar)}" alt="">` : '<span class="av">👤</span>'}<span>${esc(d.name)}</span><b>💎 ${fmt(d.diamonds)}</b></li>`).join('') : `<li style="color:var(--muted)">${t('Todavía nadie ha enviado regalos.')}</li>`;
     const names = new Set([...COMMON_GIFTS, ...(s.gift_names || [])]);
     $('#giftNames').innerHTML = [...names].map(n => `<option value="${esc(n)}">`).join('');
   }
@@ -390,14 +410,14 @@
   function addFeed(ev) {
     if (!ICON[ev.type]) return;
     const u = ev.user ? `<span class="u">${esc(ev.user.name)}</span>` : '';
-    const text = ev.type === 'gift' ? `${u} envió <span class="g">${ev.gift.count}× ${esc(ev.gift.name)}</span> (💎 ${fmt(ev.gift.total)})`
-      : ev.type === 'follow' ? `${u} te sigue` : ev.type === 'share' ? `${u} compartió el live`
-      : ev.type === 'like' ? `${u} dio ${fmt(ev.count)} likes` : ev.type === 'comment' ? `${u}: ${esc(ev.text)}`
-      : ev.type === 'subscribe' ? `${u} se suscribió` : ev.type === 'superfan' ? `${u} es Super Fan` : ev.type === 'envelope' ? `${u} soltó un cofre (regalo de la comunidad)`
-      : ev.type === 'battle' ? (ev.phase === 'end' ? 'Terminó la batalla' : '¡Empezó una batalla!') : ev.type === 'booster' ? `Potenciador ${ev.multiplier ? 'x' + ev.multiplier : ''} en la batalla` : esc(ev.text);
+    const text = ev.type === 'gift' ? tf('{0} envió {1} (💎 {2})', u, `<span class="g">${ev.gift.count}× ${esc(ev.gift.name)}</span>`, fmt(ev.gift.total))
+      : ev.type === 'follow' ? tf('{0} te sigue', u) : ev.type === 'share' ? tf('{0} compartió el live', u)
+      : ev.type === 'like' ? tf('{0} dio {1} likes', u, fmt(ev.count)) : ev.type === 'comment' ? `${u}: ${esc(ev.text)}`
+      : ev.type === 'subscribe' ? tf('{0} se suscribió', u) : ev.type === 'superfan' ? tf('{0} es Super Fan', u) : ev.type === 'envelope' ? tf('{0} soltó un cofre (regalo de la comunidad)', u)
+      : ev.type === 'battle' ? (ev.phase === 'end' ? t('Terminó la batalla') : t('¡Empezó una batalla!')) : ev.type === 'booster' ? tf('Potenciador {0} en la batalla', ev.multiplier ? 'x' + ev.multiplier : '') : esc(t(ev.text));
     const li = document.createElement('li');
     if (ev.test) li.className = 'test';
-    li.innerHTML = `<span>${ICON[ev.type]}</span><span>${text}${ev.test ? ' <small style="color:var(--muted)">(prueba)</small>' : ''}</span><span class="t">${new Date(ev.ts * 1000).toLocaleTimeString('es-MX', {hour: '2-digit', minute: '2-digit', second: '2-digit'})}</span>`;
+    li.innerHTML = `<span>${ICON[ev.type]}</span><span>${text}${ev.test ? ` <small style="color:var(--muted)">${t('(prueba)')}</small>` : ''}</span><span class="t">${new Date(ev.ts * 1000).toLocaleTimeString(LOCALE, {hour: '2-digit', minute: '2-digit', second: '2-digit'})}</span>`;
     const feed = $('#feed');
     if (!feedCount) feed.innerHTML = '';
     feed.prepend(li); feedCount++;
@@ -449,9 +469,9 @@
   // ---------- voz ----------
   let voices = [], sayBacklog = 0;
   function loadVoices() {
-    voices = speechSynthesis.getVoices().slice().sort((a, b) => (b.lang.startsWith('es') - a.lang.startsWith('es')) || a.name.localeCompare(b.name));
+    voices = speechSynthesis.getVoices().slice().sort((a, b) => (b.lang.startsWith(LANG) - a.lang.startsWith(LANG)) || a.name.localeCompare(b.name));
     const sel = $('#ttsVoice');
-    sel.innerHTML = '<option value="">(la de Windows por defecto)</option>' + voices.map(v => `<option value="${esc(v.name)}">${esc(v.name)} — ${esc(v.lang)}</option>`).join('');
+    sel.innerHTML = `<option value="">${t('(la de Windows por defecto)')}</option>` + voices.map(v => `<option value="${esc(v.name)}">${esc(v.name)} — ${esc(v.lang)}</option>`).join('');
     if (cfg) sel.value = cfg.tts.voice || '';
   }
   speechSynthesis.onvoiceschanged = loadVoices;
@@ -460,7 +480,7 @@
     if (!text) return;
     if (sayBacklog > 6) return;  // si la gente escribe más rápido de lo que se lee, no acumular
     const u = new SpeechSynthesisUtterance(text.slice(0, t.max_chars));
-    const v = voices.find(v => v.name === t.voice); if (v) { u.voice = v; u.lang = v.lang; } else u.lang = 'es-MX';
+    const v = voices.find(v => v.name === t.voice); if (v) { u.voice = v; u.lang = v.lang; } else u.lang = LOCALE;
     u.rate = t.rate; u.pitch = t.pitch; u.volume = t.volume;
     sayBacklog++; u.onend = u.onerror = () => { sayBacklog = Math.max(0, sayBacklog - 1); };
     speechSynthesis.speak(u);
@@ -493,13 +513,13 @@
   }
 
   // ---------- llenar las pestañas ----------
-  const ALERT_NAMES = {gift: '🎁 Regalos', follow: '💖 Follows', share: '📣 Compartir', like: '❤️ Cada N likes'};
+  const ALERT_NAMES = {gift: '🎁 Regalos', follow: '💖 Follows', share: '📣 Compartir', like: '❤️ Cada N likes'};  // t() al pintar
   function fillAlerts() {
     $('#alertRows').innerHTML = Object.entries(cfg.alerts).map(([k, a]) => `<div class="alertcard" data-k="${k}">
-      <label class="check"><input type="checkbox" data-f="on" ${a.on ? 'checked' : ''}> ${ALERT_NAMES[k]}</label>
+      <label class="check"><input type="checkbox" data-f="on" ${a.on ? 'checked' : ''}> ${t(ALERT_NAMES[k])}</label>
       <input type="text" data-f="text" value="${esc(a.text)}">
-      ${k === 'gift' ? `<label class="field">desde 💎 <input type="number" data-f="min_diamonds" min="0" value="${a.min_diamonds}"></label>` : k === 'like' ? `<label class="field">cada <input type="number" data-f="every" min="10" value="${a.every}"></label>` : '<span></span>'}
-      <label class="field">dura <input type="number" data-f="seconds" min="1" max="30" value="${a.seconds}" style="width:64px"> s</label></div>`).join('');
+      ${k === 'gift' ? `<label class="field">${t('desde')} 💎 <input type="number" data-f="min_diamonds" min="0" value="${a.min_diamonds}"></label>` : k === 'like' ? `<label class="field">${t('cada')} <input type="number" data-f="every" min="10" value="${a.every}"></label>` : '<span></span>'}
+      <label class="field">${t('dura')} <input type="number" data-f="seconds" min="1" max="30" value="${a.seconds}" style="width:64px"> s</label></div>`).join('');
     const s = cfg.style;
     $('#stColor').value = s.color; $('#stAccent').value = s.accent; $('#stSize').value = s.font_size; $('#stAnim').value = s.animation; $('#stPos').value = s.position;
   }
@@ -516,14 +536,14 @@
   function fillSounds() {
     $('#soundRows').innerHTML = cfg.sounds.length ? cfg.sounds.map((r, i) => `<tr data-i="${i}">
       <td><input type="checkbox" data-f="on" ${r.on ? 'checked' : ''} title="Encendido"></td>
-      <td><select data-f="trigger">${Object.entries(TRIGGERS).map(([k, v]) => `<option value="${k}" ${k === r.trigger ? 'selected' : ''}>${v}</option>`).join('')}</select></td>
+      <td><select data-f="trigger">${Object.entries(TRIGGERS).map(([k, v]) => `<option value="${k}" ${k === r.trigger ? 'selected' : ''}>${t(v)}</option>`).join('')}</select></td>
       <td>${r.trigger === 'gift' ? `<input type="text" data-f="gift" list="giftNames" value="${esc(r.gift)}" placeholder="Rose, Lion…">`
         : r.trigger === 'min_diamonds' ? `<input type="number" data-f="min_diamonds" min="0" value="${r.min_diamonds}"> 💎`
         : r.trigger === 'likes' ? `<input type="number" data-f="every" min="10" value="${r.every}"> likes` : ''}</td>
-      <td><span class="snd" title="${esc(r.name)}">${r.file ? '🎵 ' + esc(r.name) : '—'}</span> <button type="button" class="secondary small" data-act="pick">Elegir…</button></td>
+      <td><span class="snd" title="${esc(r.name)}">${r.file ? '🎵 ' + esc(r.name) : '—'}</span> <button type="button" class="secondary small" data-act="pick">${t('Elegir…')}</button></td>
       <td><input type="range" data-f="volume" min="0" max="100" value="${r.volume}" style="width:90px"></td>
-      <td style="white-space:nowrap"><button type="button" class="secondary small" data-act="play" title="Escuchar">▶</button> <button type="button" class="secondary small" data-act="del" title="Quitar">🗑</button></td></tr>`).join('')
-      : '<tr><td colspan="6" style="color:var(--muted)">Todavía no hay sonidos. Agrega uno con «➕ Agregar sonido».</td></tr>';
+      <td style="white-space:nowrap"><button type="button" class="secondary small" data-act="play" title="${t('Escuchar')}">▶</button> <button type="button" class="secondary small" data-act="del" title="${t('Quitar')}">🗑</button></td></tr>`).join('')
+      : `<tr><td colspan="6" style="color:var(--muted)">${t('Todavía no hay sonidos. Agrega uno con «➕ Agregar sonido».')}</td></tr>`;
     $('#soundOverlap').checked = !!cfg.sound_overlap;
   }
   $('#soundRows').addEventListener('input', e => {
@@ -561,7 +581,7 @@
   for (const [sel, key] of TTS_FIELDS) $(sel).addEventListener('input', () => {
     const el = $(sel); cfg.tts[key] = el.type === 'checkbox' ? el.checked : (el.type === 'range' || el.type === 'number') ? +el.value : el.value; save();
   });
-  $('#ttsTest').addEventListener('click', () => { say(tpl(cfg.tts.comment_text, {user: {name: 'Ana'}, text: 'hola, esta es la voz de EC-Tok'})); });
+  $('#ttsTest').addEventListener('click', () => { say(tpl(cfg.tts.comment_text, {user: {name: 'Ana'}, text: t('hola, esta es la voz de EC-Tok')})); });
   $('#ttsStop').addEventListener('click', () => { speechSynthesis.cancel(); sayBacklog = 0; });
   $('#ttsSkip').addEventListener('click', () => { speechSynthesis.cancel(); sayBacklog = 0; });
 
@@ -570,9 +590,9 @@
     $('#goalRows').innerHTML = cfg.goals.length ? cfg.goals.map((g, i) => `<div class="row" data-i="${i}">
       <label class="check"><input type="checkbox" data-f="on" ${g.on ? 'checked' : ''}></label>
       <input type="text" data-f="title" value="${esc(g.title)}" style="width:220px">
-      <select data-f="kind">${Object.entries(GOAL_KINDS).map(([k, v]) => `<option value="${k}" ${k === g.kind ? 'selected' : ''}>${v}</option>`).join('')}</select>
-      <label class="field">meta <input type="number" data-f="target" min="1" value="${g.target}" style="width:120px"></label>
-      <button type="button" class="secondary small" data-act="del">🗑</button></div>`).join('') : '<p class="help">Sin metas.</p>';
+      <select data-f="kind">${Object.entries(GOAL_KINDS).map(([k, v]) => `<option value="${k}" ${k === g.kind ? 'selected' : ''}>${t(v)}</option>`).join('')}</select>
+      <label class="field">${t('meta')} <input type="number" data-f="target" min="1" value="${g.target}" style="width:120px"></label>
+      <button type="button" class="secondary small" data-act="del">🗑</button></div>`).join('') : `<p class="help">${t('Sin metas.')}</p>`;
     $('#topTitle').value = cfg.top.title; $('#topCount').value = cfg.top.count;
   }
   $('#goalRows').addEventListener('input', e => {
@@ -584,19 +604,19 @@
     const b = e.target.closest('button[data-act=del]'), row = e.target.closest('[data-i]'); if (!b || !row) return;
     cfg.goals.splice(+row.dataset.i, 1); fillGoals(); save();
   });
-  $('#addGoal').addEventListener('click', () => { if (cfg.goals.length >= 6) return; cfg.goals.push({id: Math.random().toString(36).slice(2, 10), on: true, kind: 'diamonds', target: 1000, title: 'Meta de diamantes'}); fillGoals(); save(); });
+  $('#addGoal').addEventListener('click', () => { if (cfg.goals.length >= 6) return; cfg.goals.push({id: Math.random().toString(36).slice(2, 10), on: true, kind: 'diamonds', target: 1000, title: t('Meta de diamantes')}); fillGoals(); save(); });
   $('#topTitle').addEventListener('input', () => { cfg.top.title = $('#topTitle').value; save(); });
   $('#topCount').addEventListener('input', () => { cfg.top.count = +$('#topCount').value || 5; save(); });
 
   function fillUrls() {
     const base = `http://127.0.0.1:${port}/overlay?w=`;
-    const list = [['🔔 Alertas', base + 'alerts'], ['🎬 Animaciones', base + 'anim'], ['🎯 Metas', base + 'goal'], ['🏆 Top donadores', base + 'top']];
-    $('#urls').innerHTML = list.map(([n, u]) => `<div class="url"><b>${n}</b><code>${esc(u)}</code><button type="button" class="secondary small" data-copy="${esc(u)}">📋 Copiar</button></div>`).join('');
+    const list = [[t('🔔 Alertas'), base + 'alerts'], [t('🎬 Animaciones'), base + 'anim'], [t('🎯 Metas'), base + 'goal'], [t('🏆 Top donadores'), base + 'top']];
+    $('#urls').innerHTML = list.map(([n, u]) => `<div class="url"><b>${n}</b><code>${esc(u)}</code><button type="button" class="secondary small" data-copy="${esc(u)}">${t('📋 Copiar')}</button></div>`).join('');
     $('#previewAlerts').src = '/overlay?w=alerts&size=22'; $('#previewGoal').src = '/overlay?w=goal&size=26'; $('#previewTop').src = '/overlay?w=top&size=26';
   }
   $('#urls').addEventListener('click', async e => {
     const b = e.target.closest('[data-copy]'); if (!b) return;
-    try { await navigator.clipboard.writeText(b.dataset.copy); b.textContent = '✅ Copiado'; setTimeout(() => b.textContent = '📋 Copiar', 1500); } catch (_) {}
+    try { await navigator.clipboard.writeText(b.dataset.copy); b.textContent = t('✅ Copiado'); setTimeout(() => b.textContent = t('📋 Copiar'), 1500); } catch (_) {}
   });
 
   // ---------- animaciones ----------
@@ -604,7 +624,7 @@
   const animSrc = f => '/anim/' + encodeURIComponent(f);
   const thumb = (f, cls = '') => !f ? '<span class="thumb"></span>' : f.toLowerCase().endsWith('.webm')
     ? `<video class="${cls}" src="${animSrc(f)}" autoplay muted loop playsinline></video>` : `<img class="${cls}" src="${animSrc(f)}" alt="" loading="lazy">`;
-  const animOptions = sel => animations.map(a => `<option value="${esc(a.file)}" ${a.file === sel ? 'selected' : ''}>${esc(a.name)}${a.source === 'tuya' ? ' (tuya)' : ''}</option>`).join('');
+  const animOptions = sel => animations.map(a => `<option value="${esc(a.file)}" ${a.file === sel ? 'selected' : ''}>${esc(a.name)}${a.source === 'tuya' ? ' (' + t('tuya') + ')' : ''}</option>`).join('');
   const ANIM_TRIGGERS = {any_gift: '🎁 Cualquier regalo', gift: '🎁 Un regalo en especial', min_diamonds: '💎 Regalo de N 💎 o más', follow: '💖 Follow',
     share: '📣 Compartir', likes: '❤️ Cada N likes', subscribe: '⭐ Suscripción', superfan: '🌟 Super Fan', envelope: '🎉 Regalo de la comunidad (cofre)',
     battle_start: '⚔ Empieza una batalla', battle_end: '🏁 Termina la batalla', booster: '✖ Potenciador en batalla (x2/x3)'};
@@ -612,29 +632,29 @@
     const a = cfg.anims;
     $('#animRows').innerHTML = a.rules.length ? a.rules.map((r, i) => `<tr data-i="${i}">
       <td><input type="checkbox" data-f="on" ${r.on ? 'checked' : ''}></td>
-      <td><select data-f="trigger">${Object.entries(ANIM_TRIGGERS).map(([k, v]) => `<option value="${k}" ${k === r.trigger ? 'selected' : ''}>${v}</option>`).join('')}</select></td>
+      <td><select data-f="trigger">${Object.entries(ANIM_TRIGGERS).map(([k, v]) => `<option value="${k}" ${k === r.trigger ? 'selected' : ''}>${t(v)}</option>`).join('')}</select></td>
       <td>${r.trigger === 'gift' ? `<input type="text" data-f="gift" list="giftNames" value="${esc(r.gift)}" placeholder="Heart Me, Rose…">`
         : r.trigger === 'min_diamonds' ? `<input type="number" data-f="min_diamonds" min="0" value="${r.min_diamonds}"> 💎`
         : r.trigger === 'likes' ? `<input type="number" data-f="every" min="10" value="${r.every}"> likes`
-        : r.trigger === 'booster' ? `<select data-f="multiplier"><option value="0" ${!r.multiplier ? 'selected' : ''}>cualquiera</option><option value="2" ${r.multiplier === 2 ? 'selected' : ''}>x2</option><option value="3" ${r.multiplier === 3 ? 'selected' : ''}>x3</option></select>` : ''}</td>
+        : r.trigger === 'booster' ? `<select data-f="multiplier"><option value="0" ${!r.multiplier ? 'selected' : ''}>${t('cualquiera')}</option><option value="2" ${r.multiplier === 2 ? 'selected' : ''}>x2</option><option value="3" ${r.multiplier === 3 ? 'selected' : ''}>x3</option></select>` : ''}</td>
       <td style="white-space:nowrap">${thumb(r.file, 'thumb')} <select data-f="file">${animOptions(r.file)}</select></td>
       <td><input type="number" data-f="seconds" min="1" max="30" value="${r.seconds}" style="width:60px"> s</td>
       <td><input type="range" data-f="size" min="10" max="100" value="${r.size}" style="width:80px"></td>
-      <td style="white-space:nowrap"><button type="button" class="secondary small" data-act="play" title="Ver en el overlay">▶</button> <button type="button" class="secondary small" data-act="del">🗑</button></td></tr>`).join('')
-      : '<tr><td colspan="7" style="color:var(--muted)">Sin animaciones automáticas.</td></tr>';
+      <td style="white-space:nowrap"><button type="button" class="secondary small" data-act="play" title="${t('Ver en el overlay')}">▶</button> <button type="button" class="secondary small" data-act="del">🗑</button></td></tr>`).join('')
+      : `<tr><td colspan="7" style="color:var(--muted)">${t('Sin animaciones automáticas.')}</td></tr>`;
     $('#quickRows').innerHTML = a.quick.map((q, i) => `<div class="row" data-i="${i}" style="margin-top:8px">${thumb(q.file, 'thumb')}
       <input type="text" data-f="label" value="${esc(q.label)}" style="width:180px"> <select data-f="file">${animOptions(q.file)}</select>
-      <span class="field">tecla ${i < 9 ? i + 1 : '—'}</span><button type="button" class="secondary small" data-act="play">▶</button><button type="button" class="secondary small" data-act="del">🗑</button></div>`).join('');
+      <span class="field">${t('tecla')} ${i < 9 ? i + 1 : '—'}</span><button type="button" class="secondary small" data-act="play">▶</button><button type="button" class="secondary small" data-act="del">🗑</button></div>`).join('');
     $('#quickSeconds').value = a.quick_seconds; $('#quickSize').value = a.quick_size;
     $('#brbFile').innerHTML = animOptions(a.brb.file); $('#brbText').value = a.brb.text; $('#brbSub').value = a.brb.sub; $('#brbDim').checked = !!a.brb.dim;
     $('#quickLive').innerHTML = a.quick.length ? a.quick.map((q, i) => `<button type="button" data-quick="${i}">${thumb(q.file)}<span>${esc(q.label)}</span><kbd>${i < 9 ? i + 1 : ''}</kbd></button>`).join('')
-      : '<p class="help">Sin botones todavía.</p>';
-    $('#bank').innerHTML = animations.map(x => `<div class="it">${thumb(x.file)}<span>${esc(x.name)}</span><small>${x.source === 'tuya' ? 'tuya' : 'EC-Tok'}</small>
-      <button type="button" class="secondary small" data-play="${esc(x.file)}">▶ Probar</button></div>`).join('');
+      : `<p class="help">${t('Sin botones todavía.')}</p>`;
+    $('#bank').innerHTML = animations.map(x => `<div class="it">${thumb(x.file)}<span>${esc(x.name)}</span><small>${x.source === 'tuya' ? t('tuya') : 'EC-Tok'}</small>
+      <button type="button" class="secondary small" data-play="${esc(x.file)}">${t('▶ Probar')}</button></div>`).join('');
     showBrb();
   }
   function showBrb() {
-    for (const b of [$('#brbLive'), $('#brbAnims')]) { b.classList.toggle('on', brbOn); b.textContent = brbOn ? '✅ Ya volví (quitar «Ya regresamos»)' : '☕ Poner «Ya regresamos»'; }
+    for (const b of [$('#brbLive'), $('#brbAnims')]) { b.classList.toggle('on', brbOn); b.textContent = brbOn ? t('✅ Ya volví (quitar «Ya regresamos»)') : t('☕ Poner «Ya regresamos»'); }
   }
   const playAnim = (file, label = '') => api('/api/anim/play', {file, label}).catch(e => { $('#liveMsg').textContent = e.message; });
   $('#animRows').addEventListener('input', e => {
@@ -665,7 +685,7 @@
     const q = cfg.anims.quick[+row.dataset.i];
     if (b.dataset.act === 'del') { cfg.anims.quick.splice(+row.dataset.i, 1); fillAnims(); save(); } else playAnim(q.file, q.label);
   });
-  $('#addQuick').addEventListener('click', () => { if (cfg.anims.quick.length >= 12) return; cfg.anims.quick.push({id: Math.random().toString(36).slice(2, 10), label: 'Animación', file: (animations[0] || {}).file || ''}); fillAnims(); save(); });
+  $('#addQuick').addEventListener('click', () => { if (cfg.anims.quick.length >= 12) return; cfg.anims.quick.push({id: Math.random().toString(36).slice(2, 10), label: t('Animación'), file: (animations[0] || {}).file || ''}); fillAnims(); save(); });
   $('#quickSeconds').addEventListener('input', () => { cfg.anims.quick_seconds = +$('#quickSeconds').value || 4; save(); });
   $('#quickSize').addEventListener('input', () => { cfg.anims.quick_size = +$('#quickSize').value; save(); });
   $('#quickLive').addEventListener('click', e => { const b = e.target.closest('[data-quick]'); if (b) { const q = cfg.anims.quick[+b.dataset.quick]; playAnim(q.file, q.label); } });
@@ -682,6 +702,14 @@
     if (e.ctrlKey || e.metaKey || e.altKey || /^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement && document.activeElement.tagName)) return;
     if ($('section[data-page="live"]').hidden) return;
     const n = +e.key; if (n >= 1 && n <= 9 && cfg.anims.quick[n - 1]) { e.preventDefault(); const q = cfg.anims.quick[n - 1]; playAnim(q.file, q.label); }
+  });
+
+  // ---------- idioma ----------
+  $('#langSelect').value = LANG;
+  $('#langSelect').addEventListener('change', async () => {
+    clearTimeout(saveTimer);
+    try { await api('/api/settings', {...cfg, language: $('#langSelect').value}); } catch (_) {}
+    location.reload();
   });
 
   // ---------- conectar ----------
@@ -704,21 +732,21 @@
     try {
       const u = await api('/api/update');
       $('#updateBar').hidden = u.state !== 'available' && u.state !== 'downloading' && u.state !== 'installing';
-      $('#updateText').textContent = u.state === 'downloading' ? `Bajando EC-Tok ${u.latest}… ${u.percent ?? ''}%` : u.state === 'installing' ? 'Instalando… EC-Tok se va a cerrar y abrir solo.' : `Hay una versión nueva: EC-Tok ${u.latest}`;
+      $('#updateText').textContent = u.state === 'downloading' ? tf('Bajando EC-Tok {0}… {1}%', u.latest, u.percent ?? '') : u.state === 'installing' ? t('Instalando… EC-Tok se va a cerrar y abrir solo.') : tf('Hay una versión nueva: EC-Tok {0}', u.latest);
       $('#updateBtn').hidden = u.state !== 'available';
-      $('#updateMsg').textContent = u.error || (u.state === 'uptodate' ? '✓ Estás al día.' : '');
+      $('#updateMsg').textContent = t(u.error) || (u.state === 'uptodate' ? t('✓ Estás al día.') : '');
       if (u.state === 'downloading' || u.state === 'installing' || u.state === 'checking') setTimeout(checkUpdate, 1000);
     } catch (_) {}
   }
-  $('#updateBtn').addEventListener('click', async () => { try { await api('/api/update/install', {}); checkUpdate(); } catch (e) { $('#updateText').textContent = e.message; } });
+  $('#updateBtn').addEventListener('click', async () => { try { await api('/api/update/install', {}); checkUpdate(); } catch (e) { $('#updateText').textContent = t(e.message); } });
   $('#checkUpdate').addEventListener('click', async () => { await api('/api/update/check', {}).catch(() => {}); setTimeout(checkUpdate, 1500); });
 
   // ---------- arrancar ----------
   async function refresh() {
     const info = await api('/api/info');
     cfg = info.config; live = info.live; port = info.port; animations = info.animations || []; aliases = info.aliases || []; brbOn = !!(info.brb && info.brb.on);
-    $('#version').textContent = `Versión ${info.version}${info.build_date ? ' · ' + info.build_date : ''}`;
-    $('#about').textContent = `EC-Tok ${info.version}. Alertas, sonidos, voz y metas para TikTok LIVE. Gratis y de código abierto.`;
+    $('#version').textContent = `${t('Versión')} ${info.version}${info.build_date ? ' · ' + info.build_date : ''}`;
+    $('#about').textContent = tf('EC-Tok {0}. Alertas, sonidos, voz y metas para TikTok LIVE. Gratis y de código abierto.', info.version);
     $('#username').value = cfg.username || ''; $('#autoconnect').checked = !!cfg.autoconnect; $('#eulerKey').value = cfg.euler_key || '';
     showLive(); showStats(live.stats); fillAlerts(); fillAnims(); fillSounds(); fillTts(); fillGoals(); fillUrls(); loadVoices();
     if (!feedCount) for (const ev of info.recent || []) addFeed(ev);
@@ -729,7 +757,7 @@
     setInterval(() => fetch('/api/ping').catch(() => {}), 20000);
     checkUpdate(); setInterval(checkUpdate, 10 * 60 * 1000);
     try { const tab = localStorage.getItem('ectok-tab'); if (tab) document.querySelector(`nav.tabs button[data-tab="${tab}"]`)?.click(); } catch (_) {}
-  }).catch(() => { $('#liveMsg').textContent = 'No se pudo conectar con EC-Tok. Ciérralo y vuelve a abrirlo.'; });
+  }).catch(() => { $('#liveMsg').textContent = t('No se pudo conectar con EC-Tok. Ciérralo y vuelve a abrirlo.'); });
 </script>
 </body>
 </html>

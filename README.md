@@ -1,5 +1,9 @@
 # EC-Tok
 
+> 🇺🇸 **EC-Tok** — free alerts, gift sounds, chat reading (TTS), animations and goals for your **TikTok LIVE** on Windows (like TikFinity). The app is available in **English, Spanish and Brazilian Portuguese**. Download *EC-Tok-Setup* from *Releases*.
+>
+> 🇧🇷 **EC-Tok** — alertas, sons por presente, leitura do chat (voz), animações e metas grátis para sua **live do TikTok** no Windows (como o TikFinity). O app está em **português do Brasil, inglês e espanhol**. Baixe o *EC-Tok-Setup* em *Releases*.
+
 Alertas, sonidos, lectura de chat y metas para tus **lives de TikTok** — gratis, para Windows. Al estilo de TikFinity.
 
 ## Qué hace

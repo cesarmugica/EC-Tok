@@ -140,11 +140,21 @@ def estrellas(t: float) -> Image.Image:
     return img
 
 
-def gracias(t: float) -> Image.Image:
+def thanks(word: str):
+    def frame(t: float) -> Image.Image:
+        return gracias(t, word)
+    return frame
+
+
+def gracias(t: float, word: str = "¡GRACIAS!") -> Image.Image:
     img = blank()
-    if not hasattr(gracias, "layer"):
-        gracias.layer = text_layer("¡GRACIAS!", 170, WHITE, PINK, 12, shadow=CYAN)
-    paste_center(img, gracias.layer, S / 2, S / 2, scale=.88 + .07 * math.sin(t * 2 * math.pi))
+    key = "layer_" + word
+    if not hasattr(gracias, key):
+        layer = text_layer(word, 170, WHITE, PINK, 12, shadow=CYAN)
+        if layer.width > S * .82:  # que quepa
+            layer = layer.resize((int(S * .82), int(layer.height * S * .82 / layer.width)), Image.LANCZOS)
+        setattr(gracias, key, layer)
+    paste_center(img, getattr(gracias, key), S / 2, S / 2, scale=.88 + .07 * math.sin(t * 2 * math.pi))
     d = ImageDraw.Draw(img)
     for i in range(8):
         a = t * 2 * math.pi + i / 8 * 2 * math.pi
@@ -300,14 +310,19 @@ def platica(t: float) -> Image.Image:
 
 BANK = {
     "corazones": corazones, "confeti": confeti, "fuegos-artificiales": fuegos, "estrellas": estrellas,
-    "gracias": gracias, "x2": multiplicador("x2"), "x3": multiplicador("x3"), "microfono-cantando": microfono,
+    "gracias": gracias, "thank-you": thanks("THANK YOU!"), "obrigado": thanks("OBRIGADO!"), "x2": multiplicador("x2"), "x3": multiplicador("x3"), "microfono-cantando": microfono,
     "osito-bailando": osito, "cafe-ya-regreso": cafe, "ecualizador": ecualizador, "platicando": platica,
 }
 
 
 if __name__ == "__main__":
+    import sys
+
     OUT.mkdir(parents=True, exist_ok=True)
+    only = set(sys.argv[1:])
     for name, fn in BANK.items():
+        if only and name not in only:
+            continue
         frames = [fn(i / FRAMES).resize((FINAL, FINAL), Image.LANCZOS) for i in range(FRAMES)]
         path = OUT / f"{name}.webp"
         frames[0].save(path, save_all=True, append_images=frames[1:], duration=MS, loop=0, quality=82, method=4,

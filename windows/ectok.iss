@@ -33,20 +33,27 @@ RestartApplications=no
 [Languages]
 Name: "es"; MessagesFile: "compiler:Languages\Spanish.isl"
 Name: "en"; MessagesFile: "compiler:Default.isl"
+Name: "pt"; MessagesFile: "compiler:Languages\BrazilianPortuguese.isl"
 
 [CustomMessages]
 es.TaskDesktop=Crear acceso directo «EC-Tok» en el escritorio
 en.TaskDesktop=Create an "EC-Tok" desktop shortcut
+pt.TaskDesktop=Criar atalho «EC-Tok» na área de trabalho
 es.GroupShortcuts=Accesos directos:
 en.GroupShortcuts=Shortcuts:
+pt.GroupShortcuts=Atalhos:
 es.IconComment=Alertas, sonidos y voz para tus lives de TikTok
 en.IconComment=Alerts, sounds and TTS for your TikTok lives
+pt.IconComment=Alertas, sons e voz para suas lives do TikTok
 es.IconData=Carpeta de datos de EC-Tok
 en.IconData=EC-Tok data folder
+pt.IconData=Pasta de dados do EC-Tok
 es.IconUninstall=Desinstalar EC-Tok
 en.IconUninstall=Uninstall EC-Tok
+pt.IconUninstall=Desinstalar o EC-Tok
 es.RunApp=Abrir EC-Tok
 en.RunApp=Open EC-Tok
+pt.RunApp=Abrir o EC-Tok
 
 [Tasks]
 Name: "desktopicon"; Description: "{cm:TaskDesktop}"; GroupDescription: "{cm:GroupShortcuts}"

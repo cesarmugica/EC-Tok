@@ -87,7 +87,8 @@
   const which = (params.get('w') || 'alerts').split(',');
   const $ = s => document.querySelector(s);
   const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[c]));
-  let cfg = null, stats = null, likeMark = 0;
+  let cfg = null, stats = null, likeMark = 0, LOC = 'es-MX';
+  const EMPTY_TOP = {es: 'Todavía nadie… ¡manda el primer regalo!', en: 'Nobody yet… send the first gift!', pt: 'Ninguém ainda… mande o primeiro presente!'};
   const EMOJI = {gift: '🎁', follow: '💖', share: '📣', like: '❤️'};
 
   function applyStyle() {
@@ -98,7 +99,7 @@
   function fill(tpl, ev) {
     const g = ev.gift || {};
     const vals = {user: `<span class="u">${esc(ev.user ? ev.user.name : '')}</span>`, gift: `<span class="g">${esc(g.name || '')}</span>`,
-      count: esc(g.count || ''), diamonds: esc(g.total || ''), likes: esc((ev.likes_total || 0).toLocaleString('es-MX'))};
+      count: esc(g.count || ''), diamonds: esc(g.total || ''), likes: esc((ev.likes_total || 0).toLocaleString(LOC))};
     return esc(tpl).replace(/\{(user|gift|count|diamonds|likes)\}/g, (_, k) => vals[k]);
   }
 
@@ -123,7 +124,7 @@
     const {ev, conf} = queue.shift(), box = document.createElement('div');
     const big = ev.type === 'gift' && ev.gift.total >= 100;
     const img = ev.type === 'gift' && ev.gift.image ? `<img src="${esc(ev.gift.image)}" alt="">` : ev.user && ev.user.avatar && ev.type !== 'gift' ? `<img src="${esc(ev.user.avatar)}" alt="">` : EMOJI[ev.type];
-    const sub = ev.type === 'gift' ? `💎 ${ev.gift.total.toLocaleString('es-MX')}` : '';
+    const sub = ev.type === 'gift' ? `💎 ${ev.gift.total.toLocaleString(LOC)}` : '';
     box.className = `alert in-${cfg.style.animation}${big ? ' big' : ''}`;
     box.innerHTML = `<div class="pic">${img}</div><div><div class="txt shadow">${fill(conf.text, ev)}</div>${sub ? `<div class="sub shadow">${sub}</div>` : ''}</div>`;
     $('#alerts').replaceChildren(box);
@@ -149,7 +150,7 @@
     const goals = cfg.goals.filter(g => g.on && (!only || g.id === only));
     $('#goal').innerHTML = goals.map(g => {
       const v = VALUE[g.kind](stats), pct = Math.min(100, v / g.target * 100);
-      return `<div class="goal ${v >= g.target ? 'done' : ''}"><div class="head shadow"><span>${esc(g.title)}</span><span>${UNIT[g.kind]} ${v.toLocaleString('es-MX')} / ${g.target.toLocaleString('es-MX')}</span></div><div class="bar"><div class="fill" style="width:${pct}%"></div></div></div>`;
+      return `<div class="goal ${v >= g.target ? 'done' : ''}"><div class="head shadow"><span>${esc(g.title)}</span><span>${UNIT[g.kind]} ${v.toLocaleString(LOC)} / ${g.target.toLocaleString(LOC)}</span></div><div class="bar"><div class="fill" style="width:${pct}%"></div></div></div>`;
     }).join('');
   }
 
@@ -158,7 +159,7 @@
     if (!which.includes('top') || !stats) return;
     const list = stats.top.slice(0, cfg.top.count);
     $('#top').innerHTML = `<div class="topbox"><h1 class="shadow">🏆 ${esc(cfg.top.title)}</h1>${list.length ? `<ol>${list.map((d, i) =>
-      `<li class="shadow"><span class="n">${['🥇', '🥈', '🥉'][i] || i + 1}</span>${d.avatar ? `<img src="${esc(d.avatar)}" alt="">` : '<span class="av">👤</span>'}<span class="nm">${esc(d.name)}</span><span>💎 ${d.diamonds.toLocaleString('es-MX')}</span></li>`).join('')}</ol>` : '<div class="empty shadow">Todavía nadie… ¡manda el primer regalo!</div>'}</div>`;
+      `<li class="shadow"><span class="n">${['🥇', '🥈', '🥉'][i] || i + 1}</span>${d.avatar ? `<img src="${esc(d.avatar)}" alt="">` : '<span class="av">👤</span>'}<span class="nm">${esc(d.name)}</span><span>💎 ${d.diamonds.toLocaleString(LOC)}</span></li>`).join('')}</ol>` : '<div class="empty shadow">${EMPTY_TOP[cfg.lang] || EMPTY_TOP.es}</div>'}</div>`;
   }
 
   // ---------- animaciones (una a la vez, en fila) ----------
@@ -203,7 +204,7 @@
 
   async function load() {
     const data = await (await fetch('/api/overlay')).json();
-    cfg = data; stats = data.stats; likeMark = Math.floor(stats.likes / (cfg.alerts.like.every || 1)) * (cfg.alerts.like.every || 1);
+    cfg = data; stats = data.stats; LOC = {en: 'en-US', pt: 'pt-BR'}[data.lang] || 'es-MX'; likeMark = Math.floor(stats.likes / (cfg.alerts.like.every || 1)) * (cfg.alerts.like.every || 1);
     applyStyle();
     if (which.includes('anim')) showBrb(data.brb);
     $('#goal').hidden = !which.includes('goal'); $('#top').hidden = !which.includes('top'); $('#alerts').hidden = !which.includes('alerts');

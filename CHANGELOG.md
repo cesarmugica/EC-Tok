@@ -1,5 +1,11 @@
 # Cambios de EC-Tok
 
+## 1.2.0 — Español, English, Português (Brasil)
+- La ventana de EC-Tok ahora está en **español, inglés y portugués de Brasil** (🌐 arriba a la derecha). Arranca en el idioma que elijas al instalar; el instalador también viene en los tres.
+- Los textos de fábrica (alertas, lectura de chat, metas, «Ya regresamos», botones rápidos) se cambian al nuevo idioma; los que ya editaste se respetan.
+- Nuevas animaciones **THANK YOU!** y **OBRIGADO!** (la de «¡GRACIAS!» cambia sola según el idioma).
+- Los mensajes de conexión y los comentarios de prueba también salen en el idioma elegido.
+
 ## 1.1.3 — Regalos en inglés o español
 - Las reglas de animaciones y sonidos reconocen los regalos comunes con su nombre en inglés o en español: «Heart Me» = «Quiéreme», «Rose» = «Rosa», «Lion» = «León», «Universe» = «Universo», etc. (y sin importar acentos o mayúsculas).
 
