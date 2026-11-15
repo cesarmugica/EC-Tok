@@ -1,5 +1,9 @@
 """Traducciones de la ventana de EC-Tok (llave = texto en español)."""
 T = {
+"De código abierto. No es de TikTok ni está afiliado con TikTok.": ("Open source. Not made by or affiliated with TikTok.", "Código aberto. Não é do TikTok nem afiliado ao TikTok."),
+"💜 EC-Tok es gratis y siempre lo será.": ("💜 EC-Tok is free and always will be.", "💜 O EC-Tok é grátis e sempre será."),
+"Sigue la cuenta": ("Follow", "Siga a conta"),
+"en TikTok": ("on TikTok", "no TikTok"),
 "Instalando la versión nueva… se abrirá una ventana nueva. Esta se cierra sola.": ("Installing the new version… a new window will open. This one closes by itself.", "Instalando a nova versão… uma janela nova vai abrir. Esta fecha sozinha."),
 '<code>localtest.me</code> apunta a tu propia PC (TikTok LIVE Studio pide una dirección con .com, .me…). Si tu programa no la carga, cambia <code>localtest.me</code> por <code>127.0.0.1</code>.': ("<code>localtest.me</code> points to your own PC (TikTok LIVE Studio requires an address with .com, .me…). If your app doesn't load it, change <code>localtest.me</code> to <code>127.0.0.1</code>.", "<code>localtest.me</code> aponta para o seu próprio PC (o TikTok LIVE Studio pede um endereço com .com, .me…). Se o seu programa não carregar, troque <code>localtest.me</code> por <code>127.0.0.1</code>."),
 # ---- textos fijos ----

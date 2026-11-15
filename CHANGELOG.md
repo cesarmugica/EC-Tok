@@ -1,5 +1,8 @@
 # Cambios de EC-Tok
 
+## 1.2.5 — Créditos
+- Abajo de la ventana: «💜 EC-Tok es gratis y siempre lo será. Sigue la cuenta @imuxoficial en TikTok (Colab Claude AI)», en los tres idiomas.
+
 ## 1.2.4 — Direcciones listas para LIVE Studio
 - Las direcciones de los overlays (pestaña 🔴 En vivo → 📋 Copiar) ahora son `http://localtest.me:8795/overlay?w=…`, que TikTok LIVE Studio acepta tal cual.
 

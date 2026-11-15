@@ -41,3 +41,7 @@ El programa es un servidor local (solo en tu PC, puerto `8795`; los overlays en 
 Los datos se guardan en `%LOCALAPPDATA%\EC-Tok` (ajustes y sonidos).
 
 EC-Tok no es de TikTok ni está afiliado con TikTok. Código abierto (la librería TikTokLive usa una licencia AGPL modificada).
+
+---
+
+💜 **EC-Tok es gratis y siempre lo será.** Sigue la cuenta [@imuxoficial](https://www.tiktok.com/@imuxoficial) en TikTok (Colab Claude AI).
