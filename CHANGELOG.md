@@ -1,5 +1,10 @@
 # Cambios de EC-Tok
 
+## 1.9.0 — Agrega tus animaciones al banco
+- En 🗂 Banco de animaciones, el botón **«➕ Agregar animaciones»** deja elegir una o varias de tu PC (hasta 20 a la vez). Se convierten a un formato ligero, aparecen en el banco y se muestran en la 👁 vista previa. Luego las usas en las reglas, los botones rápidos, «Ya regresamos» o las especiales.
+- Las tuyas tienen un 🗑 para quitarlas del banco (las de EC-Tok no se pueden borrar).
+- **Todos los 🗑 y «Empezar la cuenta de cero» preguntan antes** y explican qué se quita y qué se queda (por ejemplo: quitar una regla no borra la animación del banco).
+
 ## 1.8.1 — 👁 Vista previa
 - En 🎬 Animaciones hay una **pantallita tipo celular** abajo a la derecha: los botones ▶ (reglas, acceso rápido, especiales y el banco) muestran ahí la animación **sin que salga en tu live** y sin abrir el navegador ni LIVE Studio.
 - Si quieres que también salga en el live, prende «Que también salga en el live». La pantallita se puede minimizar.

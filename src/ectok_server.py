@@ -28,7 +28,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, unquote, urlsplit
 
-APP_VERSION = "1.8.1"
+APP_VERSION = "1.9.0"
 
 try:  # lo genera windows/build.ps1
     from ectok_build import BUILD_DATE  # type: ignore[import-not-found]
@@ -640,8 +640,8 @@ PICK_LOCK = threading.Lock()
 
 
 def pick_sound() -> str | None:
-    return _pick_file({"en": "Choose the sound", "pt": "Escolha o som"}.get(CONFIG["language"], "Elige el sonido"),
-                      {"en": "Sounds", "pt": "Sons"}.get(CONFIG["language"], "Sonidos"), SOUND_EXTS, Path.home() / "Music")
+    return (_pick_file({"en": "Choose the sound", "pt": "Escolha o som"}.get(CONFIG["language"], "Elige el sonido"),
+                      {"en": "Sounds", "pt": "Sons"}.get(CONFIG["language"], "Sonidos"), SOUND_EXTS, Path.home() / "Music") or [None])[0]
 
 
 def find_ffmpeg() -> str | None:
@@ -746,15 +746,15 @@ def _copy_unique(src: Path, folder: Path, stem: str, ext: str) -> Path:
     return target
 
 
-def pick_anim() -> str | None:
+def pick_anim(multi: bool = False) -> list[str]:
     return _pick_file({"en": "Choose your animation", "pt": "Escolha sua animação"}.get(CONFIG["language"], "Elige tu animación"),
                       {"en": "Animations and videos", "pt": "Animações e vídeos"}.get(CONFIG["language"], "Animaciones y videos"),
-                      IMPORT_EXTS, Path.home() / "Videos")
+                      IMPORT_EXTS, Path.home() / "Videos", multi=multi) or []
 
 
-def _pick_file(title: str, kind: str, exts, folder: Path) -> str | None:
+def _pick_file(title: str, kind: str, exts, folder: Path, multi: bool = False) -> list[str]:
     if not IS_WINDOWS:
-        return None
+        return []
     patterns = ";".join("*" + ext for ext in sorted(exts))
     q = lambda text: str(text).replace(chr(39), chr(39) * 2)  # noqa: E731
     script = (
@@ -764,13 +764,13 @@ def _pick_file(title: str, kind: str, exts, folder: Path) -> str | None:
         f"$d.Title = '{q(title)}';"
         f"$d.Filter = '{q(kind)}|{patterns}|*.*|*.*';"
         f"$d.InitialDirectory = '{q(folder)}';"
-        "if ($d.ShowDialog($owner) -eq 'OK') { [Console]::OutputEncoding = [Text.Encoding]::UTF8; $d.FileName }"
+        f"$d.Multiselect = ${'true' if multi else 'false'};"
+        "if ($d.ShowDialog($owner) -eq 'OK') { [Console]::OutputEncoding = [Text.Encoding]::UTF8; $d.FileNames }"
     )
     with PICK_LOCK:
         result = subprocess.run(["powershell", "-NoProfile", "-STA", "-Command", script], capture_output=True, text=True,
                                 encoding="utf-8", errors="replace", creationflags=_no_window_flags(), timeout=600)
-    chosen = result.stdout.strip().splitlines()[-1].strip() if result.stdout.strip() else ""
-    return chosen or None
+    return [line.strip() for line in result.stdout.splitlines() if line.strip()]
 
 
 def import_anim(path: Path) -> str:
@@ -1109,14 +1109,27 @@ class Handler(BaseHTTPRequestHandler):
             except (ValueError, OSError) as exc:
                 self.send_json({"ok": False, "error": str(exc)}, 400)
         elif path == "/api/anim/pick":
-            chosen = pick_anim()
-            if not chosen:
-                self.send_json({"ok": True, "file": None})
+            chosen = pick_anim(multi=bool(data.get("multi")))[:20]
+            files, errors = [], []
+            for item in chosen:
+                try:
+                    files.append(import_anim(Path(item)))
+                except (ValueError, OSError) as exc:
+                    errors.append(f"{Path(item).name}: {exc}")
+            if chosen and not files:
+                self.send_json({"ok": False, "error": errors[0] if errors else "No se pudo."}, 400)
                 return
-            try:
-                self.send_json({"ok": True, "file": import_anim(Path(chosen)), "animations": list_animations()})
-            except (ValueError, OSError) as exc:
-                self.send_json({"ok": False, "error": str(exc)}, 400)
+            self.send_json({"ok": True, "file": files[0] if files else None, "files": files, "errors": errors,
+                            "animations": list_animations()})
+        elif path == "/api/anim/delete":
+            # Solo las del streamer (su carpeta); las de EC-Tok no se borran.
+            name = Path(str(data.get("file") or "")).name
+            target = ANIM_USER / name
+            if not name or not target.is_file() or target.suffix.lower() not in ANIM_EXTS:
+                self.send_json({"ok": False, "error": "No encontré esa animación."}, 404)
+                return
+            target.unlink()
+            self.send_json({"ok": True, "animations": list_animations()})
         elif path == "/api/special/play":
             specials = CONFIG["anims"]["special"]
             i = int(_num(data.get("i"), -1, -1, SPECIAL_MAX))
