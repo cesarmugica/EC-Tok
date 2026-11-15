@@ -28,7 +28,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, unquote, urlsplit
 
-APP_VERSION = "1.5.3"
+APP_VERSION = "1.6.0"
 
 try:  # lo genera windows/build.ps1
     from ectok_build import BUILD_DATE  # type: ignore[import-not-found]
@@ -114,6 +114,7 @@ DEFAULT_CONFIG: dict = {
     "top": {"count": 5, "title": "Top donadores"},
     "likers": {"count": 5, "title": "Top likes"},
     "likes_rule_added": True,
+    "user_likes_migrated": True,
     "anims": {
         # trigger: any_gift | gift | min_diamonds | follow | share | likes | subscribe | superfan | envelope |
         #          battle_start | battle_end | booster
@@ -128,8 +129,8 @@ DEFAULT_CONFIG: dict = {
              "file": "confeti.webp", "seconds": 4, "name": True, "size": 90},
             {"id": "sub", "on": True, "trigger": "subscribe", "gift": "", "min_diamonds": 1, "every": 1000, "multiplier": 0,
              "file": "estrellas.webp", "seconds": 4, "name": True, "size": 80},
-            {"id": "likes", "on": True, "trigger": "likes", "gift": "", "min_diamonds": 1, "every": 1000, "multiplier": 0,
-             "file": "escena-chica.webp", "seconds": 5, "name": False, "size": 70, "text": ""},
+            {"id": "likes", "on": True, "trigger": "user_likes", "gift": "", "min_diamonds": 1, "every": 1000, "multiplier": 0,
+             "file": "escena-chica.webp", "seconds": 5, "name": True, "size": 70, "text": ""},
             {"id": "x2", "on": True, "trigger": "booster", "gift": "", "min_diamonds": 1, "every": 1000, "multiplier": 2,
              "file": "x2.webp", "seconds": 4, "name": False, "size": 70},
             {"id": "x3", "on": True, "trigger": "booster", "gift": "", "min_diamonds": 1, "every": 1000, "multiplier": 3,
@@ -170,11 +171,15 @@ def load_config() -> dict:
                     rule.update(file="globo-corazon.webp", seconds=2, size=80)
             if not saved.get("likes_rule_added"):  # 1.5.3: animación de fábrica cada 1000 likes
                 cfg["likes_rule_added"] = True
-                if not any(r.get("trigger") == "likes" for r in cfg["anims"]["rules"]):
-                    cfg["anims"]["rules"].append({"id": "likes", "on": True, "trigger": "likes", "gift": "", "min_diamonds": 1,
+                if not any(r.get("trigger") in ("likes", "user_likes") for r in cfg["anims"]["rules"]):
+                    cfg["anims"]["rules"].append({"id": "likes", "on": True, "trigger": "user_likes", "gift": "", "min_diamonds": 1,
                                                   "every": 1000, "multiplier": 0, "file": "escena-chica.webp", "seconds": 5,
-                                                  "name": False, "size": 70, "text": ""})
+                                                  "name": True, "size": 70, "text": ""})
             for rule in cfg["anims"]["rules"]:
+                # 1.6.0: la regla de likes de fábrica (1.5.3) ahora cuenta los likes de cada persona
+                if (rule.get("id") == "likes" and rule.get("trigger") == "likes" and not rule.get("text")
+                        and rule.get("file") == "escena-chica.webp" and not saved.get("user_likes_migrated")):
+                    rule.update(trigger="user_likes", name=True)
                 if "name" not in rule:  # 1.3.0: mostrar el nombre de quien lo mandó
                     rule["name"] = rule.get("id") in ("heartme", "follow", "big", "chest", "sub")
             return cfg
@@ -338,7 +343,7 @@ def clean_config(data: dict) -> dict:
     anims = data.get("anims")
     if isinstance(anims, dict):
         a = cfg["anims"]
-        triggers = ("any_gift", "gift", "min_diamonds", "follow", "share", "likes", "subscribe", "superfan", "envelope",
+        triggers = ("any_gift", "gift", "min_diamonds", "follow", "share", "likes", "user_likes", "subscribe", "superfan", "envelope",
                     "battle_start", "battle_end", "booster")
         if isinstance(anims.get("rules"), list):
             rules = []
@@ -417,6 +422,7 @@ from ectok_live import Live, new_event, test_event  # noqa: E402
 # Animaciones: banco (las de EC-Tok + las tuyas), reglas automáticas y «ya regresamos»
 # ---------------------------------------------------------------------------
 BRB = {"on": False}
+USER_LIKE_MARKS: dict[tuple, int] = {}
 LIKE_MARKS: dict[str, int] = {}
 
 
@@ -449,6 +455,7 @@ SIGN_DEFAULTS = {
     "follow": {"es": "¡Gracias por seguirme, {user}!", "en": "Thanks for following, {user}!", "pt": "Obrigado por me seguir, {user}!"},
     "share": {"es": "¡Gracias por compartir, {user}!", "en": "Thanks for sharing, {user}!", "pt": "Obrigado por compartilhar, {user}!"},
     "like": {"es": "¡Ya somos {likes} likes!", "en": "We hit {likes} likes!", "pt": "Já são {likes} curtidas!"},
+    "user_likes": {"es": "¡Gracias por tus {likes} likes, {user}!", "en": "Thanks for your {likes} likes, {user}!", "pt": "Obrigado pelas suas {likes} curtidas, {user}!"},
     "subscribe": {"es": "¡Gracias por suscribirte, {user}!", "en": "Thanks for subscribing, {user}!", "pt": "Obrigado por se inscrever, {user}!"},
     "superfan": {"es": "¡Gracias, súper fan {user}!", "en": "Thank you, super fan {user}!", "pt": "Obrigado, super fã {user}!"},
     "envelope": {"es": "¡Gracias por el cofre, {user}!", "en": "Thanks for the treasure chest, {user}!", "pt": "Obrigado pelo baú, {user}!"},
@@ -469,7 +476,8 @@ def sign_text(template: str, ev: dict | None, show_name: bool = True) -> str:
     gname = gift.get("name", "")
     if lang == "es":
         gname = GIFT_NAMES_ES.get(_norm(gname), gname)
-    values = {"{gift}": gname, "{count}": str(gift.get("count") or ""), "{likes}": f"{LIVE.stats.likes:,}",
+    likes = ev.get("milestone") or LIVE.stats.likes
+    values = {"{gift}": gname, "{count}": str(gift.get("count") or ""), "{likes}": f"{likes:,}",
               "{diamonds}": str(gift.get("total") or "")}
     for key, value in values.items():
         text = text.replace(key, value)
@@ -559,6 +567,28 @@ def anims_for(ev: dict) -> list[dict]:
                 elif mark > LIKE_MARKS[r["id"]]:
                     LIKE_MARKS[r["id"]] = mark
                     chosen.append(r)
+        # Likes de cada persona: «¡Gracias por tus 1000 likes!», luego 2000, 3000…
+        user = ev.get("user") or {}
+        key = user.get("id") or user.get("name")
+        liker = LIVE.stats.likers.get(key) if key else None
+        if liker:
+            out = []
+            for r in rules:
+                if r["trigger"] == "user_likes":
+                    mark = liker["likes"] // r["every"] * r["every"]
+                    seen = USER_LIKE_MARKS.get((r["id"], key), 0)
+                    if seen > mark:  # se reinició la cuenta (nuevo live o «empezar de cero»)
+                        seen = 0
+                    if mark > seen and mark > 0:
+                        USER_LIKE_MARKS[(r["id"], key)] = mark
+                        out.append((r, {**ev, "type": "user_likes", "milestone": mark}))
+            extra = [anim_event(r["file"], r["seconds"], r["size"], manual=False,
+                                who={"name": user.get("name", ""), "avatar": user.get("avatar", "")} if r.get("name") else None,
+                                caption=f"❤️ {e['milestone']:,} likes" if r.get("name") else "",
+                                sign=sign_text(r.get("text", ""), e, bool(r.get("name"))) if r["file"] in SCENES else "")
+                     for r, e in out]
+            if extra:
+                return [anim_event(r["file"], r["seconds"], r["size"], manual=False) for r in chosen] + extra
     user = ev.get("user") or {}
     who = {"name": user.get("name", ""), "avatar": user.get("avatar", "")} if user.get("name") else None
     return [anim_event(r["file"], r["seconds"], r["size"], manual=False,
@@ -888,7 +918,9 @@ class Handler(BaseHTTPRequestHandler):
                 return
             a = CONFIG["anims"]
             sample = {"name": _text(data.get("who"), "", 40), "avatar": ""} if data.get("who") else None
-            fake = {"type": _text(data.get("trigger"), "", 20).replace("any_gift", "gift").replace("min_diamonds", "gift").replace("likes", "like"),
+            trig = _text(data.get("trigger"), "", 20)
+            fake = {"type": {"any_gift": "gift", "min_diamonds": "gift", "likes": "like"}.get(trig, trig),
+                    "milestone": int(_num(data.get("every"), 0, 0, 10_000_000)) if trig == "user_likes" else 0,
                     "user": sample or {}, "gift": {"name": _text(data.get("caption"), "", 40) or "Heart Me", "count": 1, "total": 1}}
             label = _text(data.get("label"), "", 30)
             sign = sign_text(_text(data.get("text"), "", 120) or (label if data.get("quick") else ""), fake, bool(sample))

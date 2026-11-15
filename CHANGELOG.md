@@ -1,5 +1,9 @@
 # Cambios de EC-Tok
 
+## 1.6.0 — Reto de likes por persona ❤️
+- Nuevo tipo de animación automática: **«Cada N likes de una persona»**. Cada espectador junta sus propios likes y cuando llega a 1000, 2000, 3000… (o lo que pongas) sale la animación con su nombre: «¡Gracias por tus 2000 likes, Ana!». Así cada quien se anima a seguir tapeando.
+- La regla de likes de fábrica ahora es por persona (cada 1000, con la chica). La de «likes de todo el live» sigue disponible.
+
 ## 1.5.3
 - Nueva animación automática de fábrica: **cada 1000 likes** sale la chica con «¡Ya somos {likes} likes!» (cámbiale el número, la animación o el texto en 🎬 Animaciones). Se agrega sola si todavía no tenías una regla de likes.
 - Los overlays en LIVE Studio u OBS **se recargan solos cuando actualizas EC-Tok**, para que usen las animaciones nuevas sin tener que quitar y volver a poner la fuente.

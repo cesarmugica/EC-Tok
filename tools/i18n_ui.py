@@ -1,5 +1,7 @@
 """Traducciones de la ventana de EC-Tok (llave = texto en español)."""
 T = {
+'❤️ Cada N likes de una persona': ('❤️ Every N likes from one viewer', '❤️ A cada N curtidas de uma pessoa'),
+'❤️ Cada N likes (de todo el live)': ('❤️ Every N likes (whole LIVE)', '❤️ A cada N curtidas (da live toda)'),
 'Texto del letrero. Comodines: {user} {gift} {count} {likes} {diamonds}': ('Sign text. Placeholders: {user} {gift} {count} {likes} {diamonds}', 'Texto da placa. Curingas: {user} {gift} {count} {likes} {diamonds}'),
 '❤️ Top likes': ('❤️ Top likers', '❤️ Top curtidas'),
 'Todavía nadie ha dado likes.': ('Nobody has liked yet.', 'Ninguém curtiu ainda.'),
