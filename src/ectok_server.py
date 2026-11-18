@@ -28,7 +28,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, unquote, urlsplit
 
-APP_VERSION = "2.1.0"
+APP_VERSION = "2.2.0"
 
 try:  # lo genera windows/build.ps1
     from ectok_build import BUILD_DATE  # type: ignore[import-not-found]
@@ -499,6 +499,7 @@ SCENES = _load_scenes()
 # Banco completo de animaciones: se descarga aparte (un .zip en GitHub) para que el instalador siga ligero
 # ---------------------------------------------------------------------------
 BANK_VERSION = 1
+BANK_PUBLISHED = False  # se prende cuando el .zip del banco ya está en GitHub
 BANK_URL = f"https://github.com/cesarmugica/EC-Tok/releases/download/banco-{BANK_VERSION}/ectok-banco-{BANK_VERSION}.zip"
 BANK = {"state": "idle", "percent": 0.0, "error": ""}
 
@@ -511,7 +512,7 @@ def bank_installed() -> int:
 
 def bank_status() -> dict:
     count = sum(1 for p in ANIM_BANK.glob("*") if p.suffix.lower() in ANIM_EXTS) if ANIM_BANK.is_dir() else 0
-    return {**BANK, "installed": bank_installed(), "latest": BANK_VERSION, "count": count}
+    return {**BANK, "installed": bank_installed(), "latest": BANK_VERSION, "count": count, "published": BANK_PUBLISHED}
 
 
 def _bank_download() -> None:

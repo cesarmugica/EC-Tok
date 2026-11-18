@@ -1,5 +1,10 @@
 # Cambios de EC-Tok
 
+## 2.2.0
+- Nuevo pie de página: «💜 EC-Tok es gratis y siempre lo será. 💜», el Staff EC-Tok en TikTok (@deysyzoneu.u, @imuxoficial, @laurely_blog), «Colab CAI (Claude) – De código abierto» e «Invítanos un café (PayPal)».
+- 🎬 Animaciones → 🗂 Banco: botón **«📥 Descargar banco completo»** (personajes y efectos nuevos). El banco está por publicarse; mientras tanto el botón avisa que viene pronto.
+- Preparado para el banco nuevo de personajes en video: el texto del letrero sigue al personaje cuadro por cuadro.
+
 ## 2.1.0 — 🎛 Consola de sonidos y alertas con animación
 - **🎛 Consola de sonidos**: tus propios botones de sonido para tocarlos a mano durante el live. Se agregan desde tu PC (varios a la vez) o desde el 🎧 Banco con el botón 🎛. Se abre en una **ventanita flotante** con la casilla **«📌 Mantener encima de otras ventanas»** para que LIVE Studio no la tape. Clic para tocar, otra vez para parar; teclas 1 a 9; ⏹ Parar todo y volumen general. También hay un botón «🎛 Consola de sonidos» en 🔴 En vivo.
 - **🔔 Alertas con 📢 Alerta y/o 🎬 Animación**: cada alerta (regalos, follows, compartir, cada N likes) puede mostrar el cartelito de siempre, una animación del banco con el mismo texto en el letrero (por ejemplo un personaje que dice «¡Ya llevamos 5,000 likes!»), o las dos.
