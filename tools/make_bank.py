@@ -159,6 +159,12 @@ def character(src: Path, out_dir: Path, name: str) -> dict:
     for i, b in enumerate(boxes):  # cuadros donde una mano tapa el letrero: usar el anterior
         boxes[i] = last = b or last
     B = np.array(boxes, float)
+    # Cuadros sueltos donde se detectó otra cosa (p. ej. una raya roja del pantalón): si se aleja mucho
+    # de la mediana de sus vecinos, se cambia por esa mediana.
+    H = rgbas[0].shape[0]
+    med = np.array([np.median(B[max(0, i - 3): i + 4], axis=0) for i in range(len(B))])
+    bad = (np.abs(B[:, 1] - med[:, 1]) > H * 0.08) | (np.abs(B[:, 2] - med[:, 2]) > med[:, 2] * 0.25)
+    B[bad] = med[bad]
     for j in range(5):
         B[:, j] = ndi.uniform_filter1d(B[:, j], 3, mode="nearest")
     box = crop_box(rgbas)
