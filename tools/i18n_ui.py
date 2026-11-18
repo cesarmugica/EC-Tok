@@ -306,4 +306,12 @@ T = {
 'No se pudo descargar el banco (¿sin internet?).': ("Couldn't download the library (no internet?).", 'Não foi possível baixar o banco (sem internet?).'),
 '¿Quitar el banco completo?\n\nSe borran de esta PC los personajes y efectos que se descargaron. Las animaciones de fábrica, las tuyas, tus reglas y tus sonidos no cambian. Las reglas que usaban una animación del banco se quedan sin animación hasta que la vuelvas a descargar o elijas otra.': ("Remove the full library?\n\nThe downloaded characters and effects are deleted from this PC. The built-in animations, your own, your rules and your sounds don't change. Rules that used an animation from the library are left without animation until you download it again or choose another.", 'Tirar o banco completo?\n\nOs personagens e efeitos baixados são apagados deste PC. As animações de fábrica, as suas, suas regras e seus sons não mudam. As regras que usavam uma animação do banco ficam sem animação até você baixá-lo de novo ou escolher outra.'),
 '⏳ El banco completo está por publicarse; muy pronto lo podrás descargar desde aquí.': ('⏳ The full library is about to be published; very soon you can download it from here.', '⏳ O banco completo está para ser publicado; muito em breve você poderá baixá-lo daqui.'),
+'📥 Descargar banco de animaciones': ('📥 Download animation library', '📥 Baixar banco de animações'),
+'📥 Actualizar banco de animaciones': ('📥 Update animation library', '📥 Atualizar banco de animações'),
+'🔍 Buscar actualización': ('🔍 Check for update', '🔍 Procurar atualização'),
+'⏳ Buscando…': ('⏳ Checking…', '⏳ Procurando…'),
+'🆕 Hay una versión nueva del banco de animaciones (versión {0}).': ('🆕 There is a new version of the animation library (version {0}).', '🆕 Há uma versão nova do banco de animações (versão {0}).'),
+'✅ Banco de animaciones instalado (versión {0}, {1} animaciones).': ('✅ Animation library installed (version {0}, {1} animations).', '✅ Banco de animações instalado (versão {0}, {1} animações).'),
+'Es la más nueva.': ("It's the newest.", 'É a mais nova.'),
+'No se pudo buscar el banco (¿sin internet?).': ("Couldn't check for the library (no internet?).", 'Não foi possível procurar o banco (sem internet?).'),
 }

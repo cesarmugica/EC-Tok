@@ -28,7 +28,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, unquote, urlsplit
 
-APP_VERSION = "2.2.0"
+APP_VERSION = "2.2.1"
 
 try:  # lo genera windows/build.ps1
     from ectok_build import BUILD_DATE  # type: ignore[import-not-found]
@@ -498,10 +498,30 @@ SCENES = _load_scenes()
 # ---------------------------------------------------------------------------
 # Banco completo de animaciones: se descarga aparte (un .zip en GitHub) para que el instalador siga ligero
 # ---------------------------------------------------------------------------
-BANK_VERSION = 1
-BANK_PUBLISHED = False  # se prende cuando el .zip del banco ya está en GitHub
-BANK_URL = f"https://github.com/cesarmugica/EC-Tok/releases/download/banco-{BANK_VERSION}/ectok-banco-{BANK_VERSION}.zip"
-BANK = {"state": "idle", "percent": 0.0, "error": ""}
+# En GitHub cada banco es un release «banco-N» con un ectok-banco-N.zip; «Buscar actualización» busca el N más alto.
+BANK_RELEASES = "https://api.github.com/repos/cesarmugica/EC-Tok/releases?per_page=40"
+BANK = {"state": "idle", "percent": 0.0, "error": "", "latest": 0, "url": "", "size": 0, "checked": False}
+
+
+def bank_check() -> None:
+    import urllib.request
+
+    try:
+        request = urllib.request.Request(BANK_RELEASES, headers={"User-Agent": f"EC-Tok/{APP_VERSION}", "Accept": "application/vnd.github+json"})
+        with urllib.request.urlopen(request, timeout=20) as response:  # noqa: S310
+            releases = json.loads(response.read())
+        best = (0, "", 0)
+        for rel in releases:
+            tag = rel.get("tag_name") or ""
+            if not tag.startswith("banco-") or rel.get("draft") or not tag[6:].isdigit():
+                continue
+            zipa = next((a for a in rel.get("assets", []) if a["name"].lower().endswith(".zip")), None)
+            if zipa and int(tag[6:]) > best[0]:
+                best = (int(tag[6:]), zipa["browser_download_url"], int(zipa.get("size") or 0))
+        BANK.update(latest=best[0], url=best[1], size=best[2], checked=True, error="")
+    except Exception as exc:  # noqa: BLE001
+        BANK.update(checked=True, error="No se pudo buscar el banco (¿sin internet?).")
+        log(f"Banco de animaciones (buscar): {exc}")
 
 
 def bank_installed() -> int:
@@ -512,7 +532,7 @@ def bank_installed() -> int:
 
 def bank_status() -> dict:
     count = sum(1 for p in ANIM_BANK.glob("*") if p.suffix.lower() in ANIM_EXTS) if ANIM_BANK.is_dir() else 0
-    return {**BANK, "installed": bank_installed(), "latest": BANK_VERSION, "count": count, "published": BANK_PUBLISHED}
+    return {**BANK, "installed": bank_installed(), "count": count, "published": bool(BANK["url"])}
 
 
 def _bank_download() -> None:
@@ -524,7 +544,12 @@ def _bank_download() -> None:
     tmp = HOME / "banco-descarga.zip"
     try:
         HOME.mkdir(parents=True, exist_ok=True)
-        request = urllib.request.Request(BANK_URL, headers={"User-Agent": f"EC-Tok/{APP_VERSION}"})
+        if not BANK["url"]:
+            bank_check()
+        if not BANK["url"]:
+            raise RuntimeError("todavía no hay banco publicado")
+        version = BANK["latest"]
+        request = urllib.request.Request(BANK["url"], headers={"User-Agent": f"EC-Tok/{APP_VERSION}"})
         with urllib.request.urlopen(request, timeout=60) as response, tmp.open("wb") as out:  # noqa: S310
             total = int(response.headers.get("Content-Length") or 0)
             got = 0
@@ -543,14 +568,14 @@ def _bank_download() -> None:
                 new.mkdir(parents=True, exist_ok=True)
                 with zf.open(info) as src, (new / name).open("wb") as dst:
                     shutil.copyfileobj(src, dst)
-        (new / "version.txt").write_text(str(BANK_VERSION), encoding="utf-8")
+        (new / "version.txt").write_text(str(version), encoding="utf-8")
         shutil.rmtree(ANIM_BANK, ignore_errors=True)
         new.replace(ANIM_BANK)
         SCENES = _load_scenes()
         BANK.update(state="done", percent=100.0)
-        log(f"Banco de animaciones {BANK_VERSION} instalado")
+        log(f"Banco de animaciones {version} instalado")
     except Exception as exc:  # noqa: BLE001
-        BANK.update(state="error", error="No se pudo descargar el banco (¿sin internet?).")
+        BANK.update(state="error", error="No se pudo descargar el banco (¿sin internet?)." if BANK["url"] else "")
         log(f"Banco de animaciones: {exc}")
     finally:
         with contextlib.suppress(OSError):
@@ -1299,6 +1324,8 @@ class Handler(BaseHTTPRequestHandler):
             except (ValueError, OSError) as exc:
                 self.send_json({"ok": False, "error": str(exc)}, 400)
         elif path == "/api/bank/status":
+            if data.get("check") or not BANK["checked"]:
+                bank_check()
             self.send_json({"ok": True, "bank": bank_status()})
         elif path == "/api/bank/download":
             if BANK["state"] not in ("downloading", "installing"):

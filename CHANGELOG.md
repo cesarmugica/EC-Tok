@@ -1,5 +1,8 @@
 # Cambios de EC-Tok
 
+## 2.2.1
+- 🗂 Banco de animaciones: **«📥 Descargar banco de animaciones»** y **«🔍 Buscar actualización»** ahora están junto a «🔄 Actualizar lista». «Buscar actualización» revisa en GitHub si hay una versión nueva del banco (el banco se actualiza aparte de EC-Tok).
+
 ## 2.2.0
 - Nuevo pie de página: «💜 EC-Tok es gratis y siempre lo será. 💜», el Staff EC-Tok en TikTok (@deysyzoneu.u, @imuxoficial, @laurely_blog), «Colab CAI (Claude) – De código abierto» e «Invítanos un café (PayPal)».
 - 🎬 Animaciones → 🗂 Banco: botón **«📥 Descargar banco completo»** (personajes y efectos nuevos). El banco está por publicarse; mientras tanto el botón avisa que viene pronto.
