@@ -229,7 +229,9 @@
   function nextAnim() {
     if (animShowing || !animQueue.length) return;
     animShowing = true;
-    const a = animQueue.shift(), src = '/anim/' + encodeURIComponent(a.file) + '?t=' + Date.now();
+    const a = animQueue.shift(), isVid = a.video || !!(a.scene && a.scene.video);
+    // GIF/WebP necesitan «?t=» para empezar desde el inicio; los videos no (así el navegador los guarda y arrancan sin trabarse)
+    const src = '/anim/' + encodeURIComponent(a.file) + (isVid ? '' : '?t=' + Date.now());
     const media = document.createElement(a.video ? 'video' : 'img');
     const videoScene = !!(a.scene && a.scene.video);
     if (!videoScene) media.src = src;
@@ -322,7 +324,14 @@
     const finish = () => { if (done) return; done = true; el.className = outClass; setTimeout(() => { el.remove(); animShowing = false; nextAnim(); }, a.scene ? 520 : 400); };
     if (!videoScene) media.onerror = finish;
     $('#anim').appendChild(el);
-    setTimeout(finish, a.seconds * 1000);
+    // Los videos se ven completos al menos una vez (una explosión no se corta a la mitad);
+    // si la regla dura más que el video, se repite hasta cumplir el tiempo.
+    const vidEl = videoScene ? el.querySelector('video') : a.video ? media : null;
+    if (vidEl) {
+      let timer = setTimeout(finish, Math.max(a.seconds, 8) * 1000);  // por si el video no avisa su duración
+      const plan = () => { clearTimeout(timer); const d = vidEl.duration || 0; timer = setTimeout(finish, Math.max(a.seconds, d) * 1000 + 150); };
+      if (vidEl.readyState >= 1) plan(); else vidEl.addEventListener('loadedmetadata', plan, {once: true});
+    } else setTimeout(finish, a.seconds * 1000);
   }
   function showBrb(b) {
     const box = $('#brb');

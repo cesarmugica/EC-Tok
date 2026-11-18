@@ -28,7 +28,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, unquote, urlsplit
 
-APP_VERSION = "2.2.2"
+APP_VERSION = "2.2.3"
 
 try:  # lo genera windows/build.ps1
     from ectok_build import BUILD_DATE  # type: ignore[import-not-found]
@@ -1055,7 +1055,9 @@ class Handler(BaseHTTPRequestHandler):
     def end_headers(self) -> None:
         self.send_header("X-Content-Type-Options", "nosniff")
         self.send_header("Referrer-Policy", "no-referrer")
-        self.send_header("Cache-Control", "no-store")
+        path = urlsplit(self.path).path
+        # Los videos de animación se pueden guardar en caché: así arrancan al instante y no se traban.
+        self.send_header("Cache-Control", "max-age=86400" if path.startswith("/anim/") and path.lower().endswith(".webm") else "no-store")
         super().end_headers()
 
     def _local_request(self, overlay_ok: bool = False) -> bool:

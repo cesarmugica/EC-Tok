@@ -1,5 +1,10 @@
 # Cambios de EC-Tok
 
+## 2.2.3
+- Las animaciones en video (Animaciones Premium) se ven **completas** al menos una vez aunque la regla dure menos: una explosión ya no se corta a la mitad. Si la regla dura más que el video, se repite hasta cumplir el tiempo.
+- Los videos de animación se guardan en caché: arrancan al instante y no se traban.
+- «📥 Descargar Animaciones Premium»: si el banco se publicó después de abrir EC-Tok, lo vuelve a buscar en vez de decir que «está por publicarse».
+
 ## 2.2.2
 - 🏆 Top donadores: corona de **oro, plata y bronce** sobre la foto de los 3 primeros. ❤️ Top likes: **medalla** de oro, plata y bronce abajo a la derecha de la foto.
 - 🗂 Banco de animaciones: los botones van en dos renglones del mismo ancho; «📥 Descargar Animaciones Premium».
