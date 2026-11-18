@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>🎛 EC-Tok · Consola de sonidos</title>
+<link rel="icon" href="/img/ectok.png">
+<style>
+  :root { --bg: #121216; --card: #1c1c22; --border: #2c2c35; --text: #f4f4f6; --muted: #9a9aa6; --accent: #FE2C55; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 14px/1.4 "Segoe UI", system-ui, sans-serif; user-select: none; }
+  header { position: sticky; top: 0; z-index: 2; background: var(--bg); padding: 10px 12px 8px; border-bottom: 1px solid var(--border); }
+  h1 { margin: 0 0 6px; font-size: 16px; }
+  .bar { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; font-size: 13px; color: var(--muted); }
+  .bar label { display: inline-flex; gap: 6px; align-items: center; cursor: pointer; }
+  .bar input[type=range] { width: 110px; accent-color: var(--accent); }
+  button { font: inherit; cursor: pointer; }
+  #stop { background: #2c2c35; color: var(--text); border: 0; border-radius: 8px; padding: 5px 10px; }
+  #grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; padding: 12px; }
+  .pad { position: relative; min-height: 76px; border: 0; border-radius: 14px; color: #fff; font-weight: 700; font-size: 14px; padding: 10px 8px 14px;
+         text-shadow: 0 1px 2px rgba(0,0,0,.6); box-shadow: inset 0 -4px 0 rgba(0,0,0,.25); transition: transform .06s, filter .15s; overflow: hidden; word-break: break-word; }
+  .pad:hover { filter: brightness(1.12); } .pad:active { transform: scale(.96); }
+  .pad .key { position: absolute; top: 5px; left: 8px; font-size: 11px; opacity: .8; }
+  .pad .prog { position: absolute; left: 0; bottom: 0; height: 5px; width: 0; background: rgba(255,255,255,.85); }
+  .pad.playing { outline: 3px solid #fff; outline-offset: -3px; }
+  .empty { padding: 30px 16px; text-align: center; color: var(--muted); }
+</style>
+</head>
+<body>
+<header>
+  <h1>🎛 <span data-t>Consola de sonidos</span></h1>
+  <div class="bar">
+    <label title=""><input type="checkbox" id="ontop"> 📌 <span data-t>Mantener encima de otras ventanas</span></label>
+    <label>🔊 <input type="range" id="master" min="0" max="100" value="100"></label>
+    <button type="button" id="stop">⏹ <span data-t>Parar todo</span></button>
+  </div>
+</header>
+<div id="grid"></div>
+<script>
+(() => {
+  const I18N = {
+    en: {'Consola de sonidos': 'Sound console', 'Mantener encima de otras ventanas': 'Keep on top of other windows', 'Parar todo': 'Stop all',
+         'Todavía no hay sonidos. Agrégalos en EC-Tok → 🔊 Sonidos → 🎛 Consola de sonidos.': 'No sounds yet. Add them in EC-Tok → 🔊 Sounds → 🎛 Sound console.',
+         'EC-Tok está cerrado. Ábrelo para usar la consola.': 'EC-Tok is closed. Open it to use the console.', 'Clic para tocar; otra vez para parar. Teclas 1 a 9.': 'Click to play; again to stop. Keys 1 to 9.'},
+    pt: {'Consola de sonidos': 'Mesa de sons', 'Mantener encima de otras ventanas': 'Manter acima das outras janelas', 'Parar todo': 'Parar tudo',
+         'Todavía no hay sonidos. Agrégalos en EC-Tok → 🔊 Sonidos → 🎛 Consola de sonidos.': 'Ainda não há sons. Adicione em EC-Tok → 🔊 Sons → 🎛 Mesa de sons.',
+         'EC-Tok está cerrado. Ábrelo para usar la consola.': 'O EC-Tok está fechado. Abra-o para usar a mesa.', 'Clic para tocar; otra vez para parar. Teclas 1 a 9.': 'Clique para tocar; de novo para parar. Teclas 1 a 9.'},
+  };
+  const COLORS = ['#FE2C55', '#25F4EE', '#FFB020', '#7C5CFF', '#2ECC71', '#FF7AB6', '#3DA5FF', '#FF6B3D'];
+  let LANG = 'es', sounds = [], sig = '', version = null, ontopSent = null;
+  const t = s => (I18N[LANG] && I18N[LANG][s]) || s;
+  const esc = s => String(s).replace(/[&<>"']/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[c]));
+  const playing = new Map();  // id -> Audio
+  const grid = document.getElementById('grid'), master = document.getElementById('master'), ontop = document.getElementById('ontop');
+  try { master.value = localStorage.getItem('ectok-console-master') || 100; } catch (_) {}
+
+  function render() {
+    document.querySelectorAll('[data-t]').forEach(el => { el.dataset.es = el.dataset.es || el.textContent; el.textContent = t(el.dataset.es); });
+    document.title = '🎛 EC-Tok · ' + t('Consola de sonidos');
+    grid.title = t('Clic para tocar; otra vez para parar. Teclas 1 a 9.');
+    grid.innerHTML = !sounds.length ? `<div class="empty">${esc(t('Todavía no hay sonidos. Agrégalos en EC-Tok → 🔊 Sonidos → 🎛 Consola de sonidos.'))}</div>`
+      : sounds.map((x, i) => `<button type="button" class="pad${playing.has(x.id) ? ' playing' : ''}" data-id="${esc(x.id)}" style="background:${esc(x.color || COLORS[i % COLORS.length])}">
+          <span class="key">${i < 9 ? i + 1 : ''}</span>${esc(x.name)}<span class="prog"></span></button>`).join('');
+  }
+  function stop(id) { const a = playing.get(id); if (a) { a.pause(); playing.delete(id); } mark(id); }
+  function mark(id) { const el = grid.querySelector(`[data-id="${CSS.escape(id)}"]`); if (el) { el.classList.toggle('playing', playing.has(id)); if (!playing.has(id)) el.querySelector('.prog').style.width = 0; } }
+  function toggle(x) {
+    if (playing.has(x.id)) { stop(x.id); return; }
+    const a = new Audio('/sound/' + encodeURIComponent(x.file));
+    a.volume = Math.min(1, (x.volume / 100) * (master.value / 100));
+    a.ontimeupdate = () => { const el = grid.querySelector(`[data-id="${CSS.escape(x.id)}"] .prog`); if (el && a.duration) el.style.width = (100 * a.currentTime / a.duration) + '%'; };
+    a.onended = a.onerror = () => { playing.delete(x.id); mark(x.id); };
+    playing.set(x.id, a); mark(x.id); a.play().catch(() => { playing.delete(x.id); mark(x.id); });
+  }
+  grid.addEventListener('click', e => { const b = e.target.closest('.pad'); if (!b) return; const x = sounds.find(s => s.id === b.dataset.id); if (x) toggle(x); });
+  document.addEventListener('keydown', e => { const n = +e.key; if (n >= 1 && n <= 9 && sounds[n - 1]) toggle(sounds[n - 1]); if (e.key === 'Escape') [...playing.keys()].forEach(stop); });
+  document.getElementById('stop').addEventListener('click', () => [...playing.keys()].forEach(stop));
+  master.addEventListener('input', () => { try { localStorage.setItem('ectok-console-master', master.value); } catch (_) {} playing.forEach((a, id) => { const x = sounds.find(s => s.id === id); if (x) a.volume = Math.min(1, x.volume / 100 * master.value / 100); }); });
+  async function setOntop(on) {
+    ontopSent = on;
+    try { await fetch('/api/console/ontop', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({on})}); } catch (_) {}
+  }
+  ontop.addEventListener('change', () => setOntop(ontop.checked));
+
+  async function load(first) {
+    try {
+      const r = await fetch('/api/console', {cache: 'no-store'}); if (!r.ok) throw new Error(r.status);
+      const d = await r.json();
+      if (version && d.version !== version) { location.reload(); return; }  // se actualizó EC-Tok
+      version = d.version;
+      const newSig = JSON.stringify([d.lang, d.console.sounds]);
+      LANG = d.lang || 'es';
+      if (newSig !== sig) { sig = newSig; sounds = d.console.sounds || []; render(); }
+      if (first) { ontop.checked = !!d.console.ontop; if (ontop.checked) setTimeout(() => setOntop(true), 700); }
+    } catch (_) {
+      if (!sounds.length) grid.innerHTML = `<div class="empty">${esc(t('EC-Tok está cerrado. Ábrelo para usar la consola.'))}</div>`;
+    }
+  }
+  render(); load(true); setInterval(load, 3000);
+})();
+</script>
+</body>
+</html>

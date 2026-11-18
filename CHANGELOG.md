@@ -1,5 +1,10 @@
 # Cambios de EC-Tok
 
+## 2.1.0 — 🎛 Consola de sonidos y alertas con animación
+- **🎛 Consola de sonidos**: tus propios botones de sonido para tocarlos a mano durante el live. Se agregan desde tu PC (varios a la vez) o desde el 🎧 Banco con el botón 🎛. Se abre en una **ventanita flotante** con la casilla **«📌 Mantener encima de otras ventanas»** para que LIVE Studio no la tape. Clic para tocar, otra vez para parar; teclas 1 a 9; ⏹ Parar todo y volumen general. También hay un botón «🎛 Consola de sonidos» en 🔴 En vivo.
+- **🔔 Alertas con 📢 Alerta y/o 🎬 Animación**: cada alerta (regalos, follows, compartir, cada N likes) puede mostrar el cartelito de siempre, una animación del banco con el mismo texto en el letrero (por ejemplo un personaje que dice «¡Ya llevamos 5,000 likes!»), o las dos.
+- El banco de animaciones ahora se lista en orden alfabético, con nombres más legibles.
+
 ## 2.0.0
 - «➕ Agregar animaciones» y «📂 Subir la mía…»: mientras está abierto el explorador el botón dice **«📂 Elige el archivo…»**, y solo después de elegir dice **«⏳ Convirtiendo…»** (antes decía «Convirtiendo» sin haber elegido nada).
 - Numeración: de aquí en adelante cada número va de 0 a 9 (después de 1.9.x sigue 2.0.0).

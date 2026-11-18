@@ -154,13 +154,14 @@
   let showing = false;
   function wantAlert(ev) {
     const a = cfg.alerts;
-    if (ev.type === 'gift') return a.gift.on && ev.gift.total >= a.gift.min_diamonds ? a.gift : null;
-    if (ev.type === 'follow') return a.follow.on ? a.follow : null;
-    if (ev.type === 'share') return a.share.on ? a.share : null;
+    const show = c => c.on && c.banner !== false;  // «📢 Alerta» desmarcada = solo la animación
+    if (ev.type === 'gift') return show(a.gift) && ev.gift.total >= a.gift.min_diamonds ? a.gift : null;
+    if (ev.type === 'follow') return show(a.follow) ? a.follow : null;
+    if (ev.type === 'share') return show(a.share) ? a.share : null;
     return null;
   }
   function likeMilestone(total) {
-    const a = cfg.alerts.like; if (!a.on || !a.every) return;
+    const a = cfg.alerts.like; if (!a.on || !a.every || a.banner === false) return;
     const mark = Math.floor(total / a.every) * a.every;
     if (mark > likeMark && mark > 0) { queue.push({ev: {type: 'like', likes_total: mark}, conf: a}); likeMark = mark; next(); }
   }

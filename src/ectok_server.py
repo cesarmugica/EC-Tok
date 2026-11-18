@@ -28,7 +28,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, unquote, urlsplit
 
-APP_VERSION = "2.0.0"
+APP_VERSION = "2.1.0"
 
 try:  # lo genera windows/build.ps1
     from ectok_build import BUILD_DATE  # type: ignore[import-not-found]
@@ -103,11 +103,18 @@ DEFAULT_CONFIG: dict = {
     "euler_key": "",
     "autoconnect": False,
     "alerts": {
-        "gift": {"on": True, "min_diamonds": 1, "text": "{user} envió {count}× {gift}", "seconds": 6},
-        "follow": {"on": True, "text": "{user} te empezó a seguir", "seconds": 4},
-        "share": {"on": True, "text": "{user} compartió el live", "seconds": 4},
-        "like": {"on": False, "every": 1000, "text": "¡Ya llevamos {likes} likes!", "seconds": 4},
+        # banner = el cartelito de siempre; anim = además (o en su lugar) una animación del banco con el mismo texto
+        "gift": {"on": True, "min_diamonds": 1, "text": "{user} envió {count}× {gift}", "seconds": 6,
+                 "banner": True, "anim": False, "anim_file": "", "anim_size": 70},
+        "follow": {"on": True, "text": "{user} te empezó a seguir", "seconds": 4,
+                   "banner": True, "anim": False, "anim_file": "", "anim_size": 70},
+        "share": {"on": True, "text": "{user} compartió el live", "seconds": 4,
+                  "banner": True, "anim": False, "anim_file": "", "anim_size": 70},
+        "like": {"on": False, "every": 1000, "text": "¡Ya llevamos {likes} likes!", "seconds": 4,
+                 "banner": True, "anim": False, "anim_file": "", "anim_size": 70},
     },
+    # Consola de sonidos para tocar a mano durante el live (ventana flotante)
+    "console": {"sounds": [], "ontop": True},
     "style": {"color": "#FE2C55", "accent": "#25F4EE", "font_size": 34, "animation": "pop", "position": "top"},
     "sounds": [],  # [{id, on, trigger: any_gift|gift|min_diamonds|follow|share|likes, gift, min_diamonds, every, file, name, volume}]
     "sound_overlap": False,
@@ -299,6 +306,22 @@ def clean_config(data: dict) -> dict:
                     current["min_diamonds"] = int(_num(new.get("min_diamonds"), current["min_diamonds"], 0, 100000))
                 if "every" in current:
                     current["every"] = int(_num(new.get("every"), current["every"], 10, 10_000_000))
+                for flag in ("banner", "anim"):
+                    if isinstance(new.get(flag), bool):
+                        current[flag] = new[flag]
+                if "anim_file" in new:
+                    current["anim_file"] = Path(str(new.get("anim_file") or "")).name
+                current["anim_size"] = int(_num(new.get("anim_size"), current.get("anim_size", 70), 10, 100))
+    console = data.get("console")
+    if isinstance(console, dict):
+        c = cfg["console"]
+        if isinstance(console.get("ontop"), bool):
+            c["ontop"] = console["ontop"]
+        if isinstance(console.get("sounds"), list):
+            c["sounds"] = [{"id": _text(x.get("id"), uuid.uuid4().hex[:8], 20), "name": _text(x.get("name"), "Sonido", 40),
+                            "file": Path(str(x.get("file") or "")).name, "volume": int(_num(x.get("volume"), 100, 0, 100)),
+                            "color": x.get("color") if HEX.fullmatch(str(x.get("color") or "")) else ""}
+                           for x in console["sounds"][:CONSOLE_MAX] if isinstance(x, dict) and x.get("file")]
     style = data.get("style")
     if isinstance(style, dict):
         s = cfg["style"]
@@ -436,6 +459,14 @@ from ectok_live import Live, new_event, test_event  # noqa: E402
 BRB = {"on": False}
 USER_LIKE_MARKS: dict[tuple, int] = {}
 LIKE_MARKS: dict[str, int] = {}
+ALERT_LIKE_MARK = {"value": None}
+CONSOLE_MAX = 48
+
+
+def anim_label(stem: str) -> str:
+    """«Girl-Dey-Sign-Up» → «Girl Dey Sign Up»; «x2» → «X2»; «fuegos-artificiales» → «Fuegos artificiales»."""
+    text = re.sub(r"[-_]+", " ", stem).strip()
+    return text[:1].upper() + text[1:] if text else stem
 
 
 def list_animations() -> list[dict]:
@@ -444,10 +475,10 @@ def list_animations() -> list[dict]:
         if folder.is_dir():
             for path in sorted(folder.iterdir()):
                 if path.is_file() and path.suffix.lower() in ANIM_EXTS and "-parte-" not in path.name:
-                    found[path.name] = {"file": path.name, "name": path.stem.replace("-", " ").replace("_", " "),
+                    found[path.name] = {"file": path.name, "name": anim_label(path.stem),
                                         "source": source, "video": path.suffix.lower() in VIDEO_EXTS,
                                         "scene": path.name in SCENES}
-    return sorted(found.values(), key=lambda a: (a["source"] != "tuya", a["name"]))
+    return sorted(found.values(), key=lambda a: _norm(a["name"]))
 
 
 def _load_scenes() -> dict:
@@ -609,10 +640,40 @@ def anims_for(ev: dict) -> list[dict]:
             for r in chosen]
 
 
+def alert_anims(ev: dict) -> list[dict]:
+    """Alertas con «🎬 Animación» marcada: la animación elegida sale con el texto de la alerta en el letrero."""
+    kind = ev.get("type")
+    alerts = CONFIG["alerts"]
+    conf, data = None, ev
+    if kind == "gift" and (ev.get("gift") or {}).get("total", 0) >= alerts["gift"].get("min_diamonds", 1):
+        conf = alerts["gift"]
+    elif kind in ("follow", "share"):
+        conf = alerts[kind]
+    elif kind == "like":
+        a = alerts["like"]
+        if a.get("on") and a.get("anim") and a.get("every"):
+            likes = LIVE.stats.likes
+            mark = likes // a["every"] * a["every"]
+            if ALERT_LIKE_MARK["value"] is None or mark < ALERT_LIKE_MARK["value"]:
+                ALERT_LIKE_MARK["value"] = mark  # empezar a contar desde donde va el live
+            elif mark > ALERT_LIKE_MARK["value"]:
+                ALERT_LIKE_MARK["value"] = mark
+                conf, data = a, {"type": "like", "milestone": mark}
+    if not conf or not conf.get("on") or not conf.get("anim") or not conf.get("anim_file") or not anim_path(conf["anim_file"]):
+        return []
+    file = conf["anim_file"]
+    user = data.get("user") or {}
+    who = {"name": user.get("name", ""), "avatar": user.get("avatar", "")} if user.get("name") else None
+    text = sign_text(conf.get("text", ""), data, True)
+    if file in SCENES:
+        return [anim_event(file, conf.get("seconds", 5), conf.get("anim_size", 70), who=who, sign=text)]
+    return [anim_event(file, conf.get("seconds", 5), conf.get("anim_size", 70), who=who, caption=re.sub(r"\{user\}\s*", "", text).strip())]
+
+
 def live_emit(event: dict) -> None:
     BUS.emit(event)
     if event.get("type") in ("gift", "follow", "share", "like", "subscribe", "superfan", "envelope", "battle", "booster"):
-        for anim in anims_for(event):
+        for anim in anims_for(event) + alert_anims(event):
             BUS.emit(anim)
 
 
@@ -836,15 +897,44 @@ def _app_browser() -> str | None:
     return None
 
 
-def open_app_window(url: str) -> None:
+def open_app_window(url: str, size: str = "1180,860") -> None:
     browser = _app_browser()
     if browser:
         with contextlib.suppress(OSError):
             # Sin «autoplay policy»: la ventana tiene que poder sonar alertas y leer el chat sin que des clic.
-            subprocess.Popen([browser, f"--app={url}", "--window-size=1180,860",
+            subprocess.Popen([browser, f"--app={url}", f"--window-size={size}",
                               "--autoplay-policy=no-user-gesture-required"], close_fds=True)
             return
     webbrowser.open(url)
+
+
+CONSOLE_TITLE = "🎛 EC-Tok"  # la consola siempre se titula así (en cualquier idioma)
+
+
+def set_topmost(title_prefix: str, on: bool) -> int:
+    """Poner (o quitar) «siempre encima» a las ventanas cuyo título empieza así. Solo Windows."""
+    if not IS_WINDOWS:
+        return 0
+    import ctypes
+    from ctypes import wintypes
+
+    user32 = ctypes.windll.user32  # type: ignore[attr-defined]
+    found: list = []
+
+    @ctypes.WINFUNCTYPE(wintypes.BOOL, wintypes.HWND, wintypes.LPARAM)
+    def each(hwnd, _lparam):
+        length = user32.GetWindowTextLengthW(hwnd)
+        if length and user32.IsWindowVisible(hwnd):
+            buf = ctypes.create_unicode_buffer(length + 1)
+            user32.GetWindowTextW(hwnd, buf, length + 1)
+            if buf.value.startswith(title_prefix):
+                found.append(hwnd)
+        return True
+
+    user32.EnumWindows(each, 0)
+    for hwnd in found:  # HWND_TOPMOST = -1, HWND_NOTOPMOST = -2; SWP_NOSIZE | SWP_NOMOVE | SWP_NOACTIVATE
+        user32.SetWindowPos(hwnd, -1 if on else -2, 0, 0, 0, 0, 0x0001 | 0x0002 | 0x0010)
+    return len(found)
 
 
 # ---------------------------------------------------------------------------
@@ -939,6 +1029,9 @@ class Handler(BaseHTTPRequestHandler):
             self.send_file(WEB_ROOT / "index.html", html.encode("utf-8"))
         elif path in ("/overlay", "/overlay.html"):
             self.send_file(WEB_ROOT / "overlay.html")
+        elif path in ("/consola", "/consola.html"):
+            html = (WEB_ROOT / "consola.html").read_text(encoding="utf-8").replace('<html lang="es">', f'<html lang="{CONFIG["language"]}">', 1)
+            self.send_file(WEB_ROOT / "consola.html", html.encode("utf-8"))
         elif path.startswith("/img/") and re.fullmatch(r"/img/[\w.-]+", path):
             target = WEB_ROOT / "img" / path.rsplit("/", 1)[-1]
             if target.is_file():
@@ -955,6 +1048,8 @@ class Handler(BaseHTTPRequestHandler):
             self.send_json({"ok": True, "animations": list_animations()})
         elif path.startswith("/sound/"):
             self._send_sound(unquote(path[len("/sound/"):]))
+        elif path == "/api/console":  # la consola flotante (no cuenta como «ventana abierta» para el actualizador)
+            self.send_json({"console": CONFIG["console"], "lang": CONFIG["language"], "version": APP_VERSION})
         elif path == "/api/info":
             LAST_PING = time.time()
             self.send_json({"version": APP_VERSION, "build_date": BUILD_DATE, "config": CONFIG, "brb": BRB, "aliases": aliases_payload(),
@@ -1112,6 +1207,18 @@ class Handler(BaseHTTPRequestHandler):
             open_in_explorer(ANIM_USER)
             self.send_json({"ok": True})
         elif path == "/api/sound/pick":
+            if data.get("multi"):  # consola: varios a la vez
+                chosen = _pick_file({"en": "Choose the sounds", "pt": "Escolha os sons"}.get(CONFIG["language"], "Elige los sonidos"),
+                                    {"en": "Sounds", "pt": "Sons"}.get(CONFIG["language"], "Sonidos"), SOUND_EXTS,
+                                    Path.home() / "Music", multi=True)[:CONSOLE_MAX]
+                done, errors = [], []
+                for item in chosen:
+                    try:
+                        done.append(import_sound(Path(item)))
+                    except (ValueError, OSError) as exc:
+                        errors.append(f"{Path(item).name}: {exc}")
+                self.send_json({"ok": True, "sounds": done, "errors": errors})
+                return
             chosen = pick_sound()
             if not chosen:
                 self.send_json({"ok": True, "sound": None})
@@ -1120,6 +1227,15 @@ class Handler(BaseHTTPRequestHandler):
                 self.send_json({"ok": True, "sound": import_sound(Path(chosen))})
             except (ValueError, OSError) as exc:
                 self.send_json({"ok": False, "error": str(exc)}, 400)
+        elif path == "/api/console/open":
+            open_app_window(f"http://127.0.0.1:{self.port}/consola", "440,640")
+            self.send_json({"ok": True})
+        elif path == "/api/console/ontop":
+            on = bool(data.get("on"))
+            with CONFIG_LOCK:
+                CONFIG["console"]["ontop"] = on
+            save_config(CONFIG)
+            self.send_json({"ok": True, "windows": set_topmost(CONSOLE_TITLE, on)})
         elif path == "/api/anim/pick":
             # Paso 1: solo elegir (la ventana dice «elige el archivo»); paso 2: /api/anim/import convierte.
             chosen = pick_anim(multi=bool(data.get("multi")))[:20]
