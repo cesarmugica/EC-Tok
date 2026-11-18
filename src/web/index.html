@@ -987,7 +987,7 @@
   });
   $('#openAnims').addEventListener('click', () => api('/api/anims/open', {}).catch(() => {}));
   // ---------- banco completo (descarga aparte) ----------
-  let bankTimer = null, bankInfo = {};
+  let bankTimer = null, bankInfo = {}, bankStarted = false;
   function showBank(b, checked = false) {
     bankInfo = b;
     const busy = b.state === 'downloading' || b.state === 'installing', mb = b.size ? ` (${Math.round(b.size / 1048576)} MB)` : '';
@@ -1006,7 +1006,7 @@
     $('#bankDlText').textContent = msg;
     clearTimeout(bankTimer);
     if (busy) bankTimer = setTimeout(pollBank, 800);
-    else if (b.state === 'done' && !b._reloaded) { b._reloaded = true; reloadAnims(); }
+    else if (b.state === 'done' && bankStarted) { bankStarted = false; setTimeout(() => location.reload(), 1200); }  // trae también la regla y el botón de batalla
   }
   async function pollBank() { try { showBank((await api('/api/bank/status', {})).bank); } catch (_) {} }
   $('#bankCheck').addEventListener('click', async () => {
@@ -1014,6 +1014,7 @@
     try { showBank((await api('/api/bank/status', {check: true})).bank, true); } catch (err) { alert(t(err.message)); } finally { b.disabled = false; b.textContent = old; }
   });
   $('#bankDlBtn').addEventListener('click', async () => {
+    bankStarted = true;
     if (!bankInfo.published) {  // quizá se publicó después de abrir EC-Tok: volver a buscar antes de avisar
       try { bankInfo = (await api('/api/bank/status', {check: true})).bank; } catch (_) {}
       if (!bankInfo.published) { showBank(bankInfo, true); return; }

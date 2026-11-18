@@ -279,13 +279,16 @@
       inner.appendChild(span); sign.appendChild(inner); body.appendChild(sign);
       if (vid) {
         const fps = sc.video.fps || 16, n = sc.track.length;
-        const tick = () => {
-          if (!el.isConnected) return;
-          place(sc.track[Math.min(n - 1, Math.floor(vid.currentTime * fps)) % n] || sc.track[0]);
+        const at = t => sc.track[Math.min(n - 1, Math.max(0, Math.round(t * fps)))] || sc.track[0];
+        if (vid.requestVideoFrameCallback) {
+          // Sincronía exacta: se mueve el letrero justo cuando el navegador pinta cada cuadro del video (el texto no «bota»).
+          const onFrame = (_now, meta) => { if (!el.isConnected) return; place(at(meta.mediaTime)); vid.requestVideoFrameCallback(onFrame); };
+          vid.requestVideoFrameCallback(onFrame);
+        } else {
+          const tick = () => { if (!el.isConnected) return; place(at(vid.currentTime)); requestAnimationFrame(tick); };
           requestAnimationFrame(tick);
-        };
+        }
         vid.play().catch(() => {});
-        requestAnimationFrame(tick);
       }
       if (frames) {
         let i = 0;

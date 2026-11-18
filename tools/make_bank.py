@@ -70,7 +70,38 @@ def _norm_rect(cx, cy, w, h, ang):
     return [cx, cy, w, h, ang]
 
 
+def flat_white_box(rgba: np.ndarray):
+    """El interior del letrero es blanco y LISO; el pelaje o las plumas blancas tienen textura.
+    La envolvente convexa recupera las esquinas que tapan las patas o las manos."""
+    rgb = rgba[..., :3].astype(np.float32)
+    gray = rgb.mean(axis=2)
+    mu = cv2.blur(gray, (7, 7))
+    std = np.sqrt(np.maximum(cv2.blur(gray * gray, (7, 7)) - mu * mu, 0))
+    flat = ((rgb.min(axis=2) > 205) & (std < 6) & (rgba[..., 3] > 200)).astype(np.uint8)
+    flat = cv2.morphologyEx(flat, cv2.MORPH_OPEN, np.ones((5, 5), np.uint8))
+    n, lab, st, _ = cv2.connectedComponentsWithStats(flat)
+    if n < 2:
+        return None
+    i = 1 + int(np.argmax(st[1:, cv2.CC_STAT_AREA]))
+    if st[i, cv2.CC_STAT_AREA] < 3000:
+        return None
+    cnts, _ = cv2.findContours((lab == i).astype(np.uint8), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    hull = cv2.convexHull(max(cnts, key=cv2.contourArea))
+    (cx, cy), (w, h), ang = cv2.minAreaRect(hull)
+    box = _norm_rect(cx, cy, w, h, ang)
+    if not 1.5 < box[2] / max(box[3], 1) < 3.0 or st[i, cv2.CC_STAT_AREA] < 0.6 * box[2] * box[3]:
+        return None
+    return box
+
+
 def sign_box(rgba: np.ndarray):
+    box = flat_white_box(rgba)
+    if box:
+        return box
+    return _sign_box_frame(rgba)
+
+
+def _sign_box_frame(rgba: np.ndarray):
     """Dónde está el letrero blanco. 1) la mancha blanca que de verdad sea un rectángulo;
     2) si el letrero se pega con pelaje o plumas blancas, se busca por su marco naranja
     (y se comprueba que por dentro sea blanco)."""
@@ -82,12 +113,23 @@ def sign_box(rgba: np.ndarray):
     orange = cv2.morphologyEx(orange, cv2.MORPH_CLOSE, np.ones((7, 7), np.uint8))
     n, lab, st, _ = cv2.connectedComponentsWithStats(orange)
     for i in sorted(range(1, n), key=lambda k: -st[k, cv2.CC_STAT_AREA])[:4]:
-        ys, xs = np.where(lab == i)
-        if len(xs) < 800:
+        if st[i, cv2.CC_STAT_AREA] < 800:
             break
+        # Las patas o manos tapan las esquinas y el marco se parte en pedazos: juntar los pedazos de marco
+        # que estén alrededor del pedazo más grande (hasta 45 % de su ancho arriba y abajo).
+        x, y, w0, h0 = st[i, cv2.CC_STAT_LEFT], st[i, cv2.CC_STAT_TOP], st[i, cv2.CC_STAT_WIDTH], st[i, cv2.CC_STAT_HEIGHT]
+        pad = int(w0 * 0.45)
+        keep = np.zeros(lab.shape, bool)
+        for j in range(1, n):
+            if st[j, cv2.CC_STAT_AREA] < 60:
+                continue
+            jx, jy, jw, jh = st[j, cv2.CC_STAT_LEFT], st[j, cv2.CC_STAT_TOP], st[j, cv2.CC_STAT_WIDTH], st[j, cv2.CC_STAT_HEIGHT]
+            if jx >= x - 10 and jx + jw <= x + w0 + 10 and jy >= y - pad and jy + jh <= y + h0 + pad:
+                keep |= lab == j
+        ys, xs = np.where(keep)
         (cx, cy), (w, h), ang = cv2.minAreaRect(np.column_stack([xs, ys]).astype(np.float32))
         box = _norm_rect(cx, cy, w, h, ang)
-        if not 1.5 < box[2] / max(box[3], 1) < 4.5:
+        if not 1.5 < box[2] / max(box[3], 1) < 3.4:
             continue
         inner = np.zeros(white.shape, np.uint8)
         pts = cv2.boxPoints(((box[0], box[1]), (box[2] * 0.8, box[3] * 0.7), box[4])).astype(np.int32)
@@ -165,8 +207,13 @@ def character(src: Path, out_dir: Path, name: str) -> dict:
     med = np.array([np.median(B[max(0, i - 3): i + 4], axis=0) for i in range(len(B))])
     bad = (np.abs(B[:, 1] - med[:, 1]) > H * 0.08) | (np.abs(B[:, 2] - med[:, 2]) > med[:, 2] * 0.25)
     B[bad] = med[bad]
-    for j in range(5):
-        B[:, j] = ndi.uniform_filter1d(B[:, j], 3, mode="nearest")
+    # Suavizado (Savitzky-Golay): quita el temblor sin atrasar el brinco; el tamaño casi no cambia, así que se suaviza más.
+    from scipy.signal import savgol_filter
+    n = len(B)
+    for j, win in ((0, 9), (1, 9), (2, 15), (3, 15), (4, 11)):
+        win = min(win, n - (1 - n % 2))
+        if win >= 5:
+            B[:, j] = savgol_filter(B[:, j], win, 2, mode="nearest")
     box = crop_box(rgbas)
     x0, y0, x1, y1 = box
     w, h = x1 - x0, y1 - y0

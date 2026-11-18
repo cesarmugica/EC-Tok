@@ -572,6 +572,7 @@ def _bank_download() -> None:
         shutil.rmtree(ANIM_BANK, ignore_errors=True)
         new.replace(ANIM_BANK)
         SCENES = _load_scenes()
+        bank_defaults()
         BANK.update(state="done", percent=100.0)
         log(f"Banco de animaciones {version} instalado")
     except Exception as exc:  # noqa: BLE001
@@ -580,6 +581,22 @@ def _bank_download() -> None:
     finally:
         with contextlib.suppress(OSError):
             tmp.unlink()
+
+
+def bank_defaults() -> None:
+    """Con el banco instalado: una regla para cuando empieza una batalla y un botón rápido «⚔ Batalla» (una sola vez)."""
+    duel = "Duel-Boy-Viking.webm"
+    if CONFIG.get("battle_defaults") or not (ANIM_BANK / duel).is_file():
+        return
+    with CONFIG_LOCK:
+        a = CONFIG["anims"]
+        if not any(r.get("trigger") == "battle_start" for r in a["rules"]):
+            a["rules"].append({"id": "battle", "on": True, "trigger": "battle_start", "gift": "", "min_diamonds": 1, "every": 1000,
+                               "multiplier": 0, "file": duel, "seconds": 6, "size": 80, "name": False, "text": ""})
+        if len(a["quick"]) < 12 and not any(q.get("file", "").startswith("Duel-") for q in a["quick"]):
+            a["quick"].append({"id": "battle", "label": "⚔ Batalla", "file": duel})
+        CONFIG["battle_defaults"] = True
+    save_config(CONFIG)
 
 
 def bank_remove() -> None:
@@ -1442,6 +1459,8 @@ def main() -> int:
             open_app_window(url)  # ya estaba abierto: solo mostrar la ventana
         return 0
     server.daemon_threads = True
+    with contextlib.suppress(Exception):
+        bank_defaults()  # quien ya tenía el banco instalado también recibe la regla y el botón de batalla
     log(f"EC-Tok {APP_VERSION} ({BUILD_DATE or 'desarrollo'}) en {url}")
     with contextlib.suppress(OSError):
         ANIM_USER.mkdir(parents=True, exist_ok=True)
