@@ -62,6 +62,7 @@ SOUNDS_DIR = HOME / "sounds"
 SOUND_BANK = WEB_ROOT / "sonidos"  # sonidos de fábrica (CC0), ver tools/make_sounds.py
 ANIM_USER = HOME / "animaciones"     # las tuyas (GIF, WebP, APNG o WebM con transparencia)
 ANIM_DEFAULT = WEB_ROOT / "anim"     # las que trae EC-Tok
+ANIM_BANK = HOME / "banco"           # el banco completo que se descarga aparte (personajes y efectos)
 ANIM_EXTS = {".gif": "image/gif", ".webp": "image/webp", ".png": "image/png", ".apng": "image/apng", ".webm": "video/webm",
              ".mp4": "video/mp4"}
 VIDEO_EXTS = (".webm", ".mp4")
@@ -471,7 +472,7 @@ def anim_label(stem: str) -> str:
 
 def list_animations() -> list[dict]:
     found: dict[str, dict] = {}
-    for folder, source in ((ANIM_DEFAULT, "ec-tok"), (ANIM_USER, "tuya")):
+    for folder, source in ((ANIM_DEFAULT, "ec-tok"), (ANIM_BANK, "ec-tok"), (ANIM_USER, "tuya")):
         if folder.is_dir():
             for path in sorted(folder.iterdir()):
                 if path.is_file() and path.suffix.lower() in ANIM_EXTS and "-parte-" not in path.name:
@@ -483,14 +484,83 @@ def list_animations() -> list[dict]:
 
 def _load_scenes() -> dict:
     """Escenas: un personaje con letrero (el texto lo pone EC-Tok) y partes que se mueven aparte."""
-    with contextlib.suppress(OSError, ValueError):
-        data = json.loads((ANIM_DEFAULT / "escenas.json").read_text(encoding="utf-8"))
-        if isinstance(data, dict):
-            return data
-    return {}
+    scenes: dict = {}
+    for folder in (ANIM_DEFAULT, ANIM_BANK):
+        with contextlib.suppress(OSError, ValueError):
+            data = json.loads((folder / "escenas.json").read_text(encoding="utf-8"))
+            if isinstance(data, dict):
+                scenes.update(data)
+    return scenes
 
 
 SCENES = _load_scenes()
+
+# ---------------------------------------------------------------------------
+# Banco completo de animaciones: se descarga aparte (un .zip en GitHub) para que el instalador siga ligero
+# ---------------------------------------------------------------------------
+BANK_VERSION = 1
+BANK_URL = f"https://github.com/cesarmugica/EC-Tok/releases/download/banco-{BANK_VERSION}/ectok-banco-{BANK_VERSION}.zip"
+BANK = {"state": "idle", "percent": 0.0, "error": ""}
+
+
+def bank_installed() -> int:
+    with contextlib.suppress(OSError, ValueError):
+        return int((ANIM_BANK / "version.txt").read_text(encoding="utf-8").strip())
+    return 0
+
+
+def bank_status() -> dict:
+    count = sum(1 for p in ANIM_BANK.glob("*") if p.suffix.lower() in ANIM_EXTS) if ANIM_BANK.is_dir() else 0
+    return {**BANK, "installed": bank_installed(), "latest": BANK_VERSION, "count": count}
+
+
+def _bank_download() -> None:
+    import urllib.request
+    import zipfile
+
+    global SCENES
+    BANK.update(state="downloading", percent=0.0, error="")
+    tmp = HOME / "banco-descarga.zip"
+    try:
+        HOME.mkdir(parents=True, exist_ok=True)
+        request = urllib.request.Request(BANK_URL, headers={"User-Agent": f"EC-Tok/{APP_VERSION}"})
+        with urllib.request.urlopen(request, timeout=60) as response, tmp.open("wb") as out:  # noqa: S310
+            total = int(response.headers.get("Content-Length") or 0)
+            got = 0
+            while chunk := response.read(256 * 1024):
+                out.write(chunk)
+                got += len(chunk)
+                BANK["percent"] = round(got * 100 / total, 1) if total else 0.0
+        BANK.update(state="installing")
+        new = HOME / "banco-nuevo"
+        shutil.rmtree(new, ignore_errors=True)
+        with zipfile.ZipFile(tmp) as zf:
+            for info in zf.infolist():
+                name = Path(info.filename).name  # sin carpetas (y sin «../»)
+                if not name or info.is_dir() or (Path(name).suffix.lower() not in ANIM_EXTS and name not in ("escenas.json", "version.txt")):
+                    continue
+                new.mkdir(parents=True, exist_ok=True)
+                with zf.open(info) as src, (new / name).open("wb") as dst:
+                    shutil.copyfileobj(src, dst)
+        (new / "version.txt").write_text(str(BANK_VERSION), encoding="utf-8")
+        shutil.rmtree(ANIM_BANK, ignore_errors=True)
+        new.replace(ANIM_BANK)
+        SCENES = _load_scenes()
+        BANK.update(state="done", percent=100.0)
+        log(f"Banco de animaciones {BANK_VERSION} instalado")
+    except Exception as exc:  # noqa: BLE001
+        BANK.update(state="error", error="No se pudo descargar el banco (¿sin internet?).")
+        log(f"Banco de animaciones: {exc}")
+    finally:
+        with contextlib.suppress(OSError):
+            tmp.unlink()
+
+
+def bank_remove() -> None:
+    global SCENES
+    shutil.rmtree(ANIM_BANK, ignore_errors=True)
+    SCENES = _load_scenes()
+    BANK.update(state="idle", percent=0.0, error="")
 
 # Texto de fábrica del letrero, según lo que pasó (cada regla puede poner el suyo).
 SIGN_DEFAULTS = {
@@ -531,7 +601,7 @@ def sign_text(template: str, ev: dict | None, show_name: bool = True) -> str:
 
 def anim_path(name: str) -> Path | None:
     name = Path(name).name
-    for folder in (ANIM_USER, ANIM_DEFAULT):
+    for folder in (ANIM_USER, ANIM_BANK, ANIM_DEFAULT):
         target = folder / name
         if target.is_file() and target.suffix.lower() in ANIM_EXTS:
             return target
@@ -1227,6 +1297,16 @@ class Handler(BaseHTTPRequestHandler):
                 self.send_json({"ok": True, "sound": import_sound(Path(chosen))})
             except (ValueError, OSError) as exc:
                 self.send_json({"ok": False, "error": str(exc)}, 400)
+        elif path == "/api/bank/status":
+            self.send_json({"ok": True, "bank": bank_status()})
+        elif path == "/api/bank/download":
+            if BANK["state"] not in ("downloading", "installing"):
+                threading.Thread(target=_bank_download, daemon=True).start()
+                BANK.update(state="downloading", percent=0.0, error="")
+            self.send_json({"ok": True, "bank": bank_status()})
+        elif path == "/api/bank/remove":
+            bank_remove()
+            self.send_json({"ok": True, "bank": bank_status(), "animations": list_animations()})
         elif path == "/api/console/open":
             open_app_window(f"http://127.0.0.1:{self.port}/consola", "440,640")
             self.send_json({"ok": True})
