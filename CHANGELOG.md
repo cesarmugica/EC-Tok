@@ -1,5 +1,11 @@
 # Cambios de EC-Tok
 
+## 2.2.4
+- ⚔ **Batallas**: al instalar las Animaciones Premium se agregan solas una animación automática «Empieza una batalla» (sale cuando TikTok inicia la batalla) y un botón rápido **«⚔ Batalla»**. Puedes cambiarles la animación o quitarlas en 🎬 Animaciones.
+- El texto del letrero sigue al personaje **cuadro por cuadro** (ya no rebota dentro del letrero).
+- Con el **banco 2**: el letrero blanco se detecta completo en todas las mascotas (antes en algunas el texto quedaba solo en la parte de abajo) y su movimiento es más suave.
+- Al terminar de instalar el banco, la página se actualiza sola para mostrar las animaciones nuevas.
+
 ## 2.2.3
 - Las animaciones en video (Animaciones Premium) se ven **completas** al menos una vez aunque la regla dure menos: una explosión ya no se corta a la mitad. Si la regla dura más que el video, se repite hasta cumplir el tiempo.
 - Los videos de animación se guardan en caché: arrancan al instante y no se traban.
