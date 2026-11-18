@@ -31,11 +31,22 @@ Alertas, sonidos, lectura de chat y metas para tus **lives de TikTok** — grati
 
 ## Cómo funciona por dentro
 
-TikTok no tiene una conexión oficial para esto. EC-Tok usa la librería libre
-[TikTokLive](https://github.com/isaackogan/TikTokLive) (no oficial), que se conecta con solo el @usuario (sin contraseña)
-y usa el servicio de firma de [Euler Stream](https://www.eulerstream.com) (gratis, con límite de conexiones por hora; con
-una clave propia el límite es más alto — se pone en ⚙ Ajustes). Si TikTok cambia algo, puede dejar de conectar unas horas
-hasta que se actualice la librería.
+TikTok no tiene una forma oficial para que un programa "escuche" tu live. EC-Tok lo logra así:
+
+- **La conexión.** EC-Tok usa la librería libre [TikTokLive](https://github.com/isaackogan/TikTokLive) (no oficial).
+  Se conecta a tu live como lo haría un espectador más, **solo con tu @usuario**: no pide tu contraseña ni entra a tu
+  cuenta. Únicamente lee lo que pasa en el live (regalos, likes, comentarios, seguidores…).
+- **La "firma".** TikTok no deja que cualquier programa se conecte: cada conexión necesita un código de seguridad
+  (una "firma") que demuestra que viene de su app o de su página, y TikTok cambia y esconde cómo se calcula.
+  [Euler Stream](https://www.eulerstream.com) es un servicio externo que genera esa firma; EC-Tok se la pide y con ella
+  se conecta a TikTok.
+- **El límite.** Euler Stream es gratis, pero limita cuántas firmas se pueden pedir por hora. La firma solo se pide al
+  **conectarse o reconectarse** (no por cada regalo o like), así que para un live normal sobra.
+- **La clave propia (opcional).** Si EC-Tok avisa que se alcanzó el límite, crea una cuenta gratis en eulerstream.com,
+  copia tu clave y pégala en **⚙ Ajustes → Clave de Euler Stream**. Con clave, el límite es más alto. Si nunca ves el
+  aviso, no necesitas hacer nada.
+- **Si deja de conectar.** Como nada de esto es oficial, si TikTok cambia su sistema EC-Tok puede dejar de conectar unas
+  horas o días, hasta que se actualicen la librería o Euler Stream. Les pasa igual a TikFinity y a todas las apps de este tipo.
 
 El programa es un servidor local (solo en tu PC, puerto `8795`; los overlays en `http://localtest.me:8795/overlay?w=…`) con la ventana y los overlays.
 Los datos se guardan en `%LOCALAPPDATA%\EC-Tok` (ajustes y sonidos).
