@@ -177,8 +177,27 @@ def character(src: Path, out_dir: Path, name: str) -> dict:
     return {file: {"ratio": round(w / h, 4), "video": {"fps": FPS}, "track": track, "parts": []}}
 
 
+def whiten_steam(rgb: np.ndarray, rgba: np.ndarray) -> np.ndarray:
+    """Vapor sobre verde: en el original es blanco-verdoso y al quitar el verde casi desaparece.
+    Lo blanquecino (rojo y azul altos aunque el verde domine) se recupera como vapor blanco semitransparente,
+    solo lejos de las orillas de los objetos sólidos para no hacer halos."""
+    a = rgb.astype(float)
+    rb = np.minimum(a[..., 0], a[..., 2])
+    steam_al = np.clip((rb - 40) / 170, 0, 1) * 0.9
+    al = rgba[..., 3].astype(float) / 255
+    solid = (al > 0.9).astype(np.uint8)
+    far = cv2.distanceTransform(1 - solid, cv2.DIST_L2, 3) > 5
+    use = far & (steam_al > al)
+    out = rgba.copy()
+    out[use, 0:3] = 245
+    out[use, 3] = (steam_al[use] * 255).astype(np.uint8)
+    return out
+
+
 def effect(src: Path, out_dir: Path, name: str, bg: str = "negro") -> str:
-    rgbas = [(key_black if bg == "negro" else key_green)(f) for f in frames(src)]
+    rgbas = [] if bg == "vapor" else [(key_black if bg == "negro" else key_green)(f) for f in frames(src)]
+    if bg == "vapor":  # fondo verde con vapor (tazas de café)
+        rgbas = [whiten_steam(f, key_green(f)) for f in frames(src)]
     if bg == "negro":
         rgbas = trim_reappear(rgbas)
     box = crop_box(rgbas, 0.01)
