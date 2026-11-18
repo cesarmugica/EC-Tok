@@ -314,4 +314,9 @@ T = {
 '✅ Banco de animaciones instalado (versión {0}, {1} animaciones).': ('✅ Animation library installed (version {0}, {1} animations).', '✅ Banco de animações instalado (versão {0}, {1} animações).'),
 'Es la más nueva.': ("It's the newest.", 'É a mais nova.'),
 'No se pudo buscar el banco (¿sin internet?).': ("Couldn't check for the library (no internet?).", 'Não foi possível procurar o banco (sem internet?).'),
+'📥 Descargar Animaciones Premium': ('📥 Download Premium Animations', '📥 Baixar Animações Premium'),
+'📥 Actualizar Animaciones Premium': ('📥 Update Premium Animations', '📥 Atualizar Animações Premium'),
+'✅ Animaciones Premium instaladas': ('✅ Premium Animations installed', '✅ Animações Premium instaladas'),
+'🗑 Quitar animaciones premium': ('🗑 Remove premium animations', '🗑 Tirar animações premium'),
+'¿Quitar las Animaciones Premium?\n\nSe borran de esta PC los personajes y efectos que se descargaron. Las animaciones de fábrica, las tuyas, tus reglas y tus sonidos no cambian. Las reglas que usaban una animación del banco se quedan sin animación hasta que la vuelvas a descargar o elijas otra.': ("Remove the Premium Animations?\n\nThe downloaded characters and effects are deleted from this PC. The built-in animations, your own, your rules and your sounds don't change. Rules that used one of these animations are left without animation until you download them again or choose another.", 'Tirar as Animações Premium?\n\nOs personagens e efeitos baixados são apagados deste PC. As animações de fábrica, as suas, suas regras e seus sons não mudam. As regras que usavam uma dessas animações ficam sem animação até você baixá-las de novo ou escolher outra.'),
 }

@@ -1,5 +1,10 @@
 # Cambios de EC-Tok
 
+## 2.2.2
+- 🏆 Top donadores: corona de **oro, plata y bronce** sobre la foto de los 3 primeros. ❤️ Top likes: **medalla** de oro, plata y bronce abajo a la derecha de la foto.
+- 🗂 Banco de animaciones: los botones van en dos renglones del mismo ancho; «📥 Descargar Animaciones Premium».
+- 🎛 Consola de sonidos: marco de color alrededor de la ventana para que se distinga encima de fondos oscuros.
+
 ## 2.2.1
 - 🗂 Banco de animaciones: **«📥 Descargar banco de animaciones»** y **«🔍 Buscar actualización»** ahora están junto a «🔄 Actualizar lista». «Buscar actualización» revisa en GitHub si hay una versión nueva del banco (el banco se actualiza aparte de EC-Tok).
 

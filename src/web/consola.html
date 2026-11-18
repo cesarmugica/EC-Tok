@@ -8,7 +8,11 @@
 <style>
   :root { --bg: #121216; --card: #1c1c22; --border: #2c2c35; --text: #f4f4f6; --muted: #9a9aa6; --accent: #FE2C55; }
   * { box-sizing: border-box; }
+  html, body { height: 100%; }
   body { margin: 0; background: var(--bg); color: var(--text); font: 14px/1.4 "Segoe UI", system-ui, sans-serif; user-select: none; }
+  /* marco para que la ventana se distinga encima de fondos oscuros (crece y se encoge con la ventana) */
+  body::after { content: ""; position: fixed; inset: 0; border: 3px solid var(--accent); border-radius: 6px; pointer-events: none; z-index: 10;
+                box-shadow: inset 0 0 0 1px rgba(255,255,255,.18), inset 0 0 18px rgba(254,44,85,.35); }
   header { position: sticky; top: 0; z-index: 2; background: var(--bg); padding: 10px 12px 8px; border-bottom: 1px solid var(--border); }
   h1 { margin: 0 0 6px; font-size: 16px; }
   .bar { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; font-size: 13px; color: var(--muted); }
@@ -23,7 +27,7 @@
   .pad .key { position: absolute; top: 5px; left: 8px; font-size: 11px; opacity: .8; }
   .pad .prog { position: absolute; left: 0; bottom: 0; height: 5px; width: 0; background: rgba(255,255,255,.85); }
   .pad.playing { outline: 3px solid #fff; outline-offset: -3px; }
-  .empty { padding: 30px 16px; text-align: center; color: var(--muted); }
+  .empty { grid-column: 1 / -1; padding: 30px 16px; text-align: center; color: var(--muted); }
 </style>
 </head>
 <body>
