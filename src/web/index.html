@@ -1014,7 +1014,10 @@
     try { showBank((await api('/api/bank/status', {check: true})).bank, true); } catch (err) { alert(t(err.message)); } finally { b.disabled = false; b.textContent = old; }
   });
   $('#bankDlBtn').addEventListener('click', async () => {
-    if (!bankInfo.published) { showBank(bankInfo, true); return; }
+    if (!bankInfo.published) {  // quizá se publicó después de abrir EC-Tok: volver a buscar antes de avisar
+      try { bankInfo = (await api('/api/bank/status', {check: true})).bank; } catch (_) {}
+      if (!bankInfo.published) { showBank(bankInfo, true); return; }
+    }
     try { showBank((await api('/api/bank/download', {})).bank); } catch (err) { alert(t(err.message)); } });
   $('#bankDlDel').addEventListener('click', async () => {
     if (!confirm(t('¿Quitar las Animaciones Premium?\n\nSe borran de esta PC los personajes y efectos que se descargaron. Las animaciones de fábrica, las tuyas, tus reglas y tus sonidos no cambian. Las reglas que usaban una animación del banco se quedan sin animación hasta que la vuelvas a descargar o elijas otra.'))) return;
