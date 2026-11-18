@@ -59,32 +59,55 @@ def key_black(rgb: np.ndarray) -> np.ndarray:
     return np.dstack([col.clip(0, 255), al * 255]).astype(np.uint8)
 
 
+def _norm_rect(cx, cy, w, h, ang):
+    if w < h:
+        w, h = h, w
+        ang += 90
+    while ang > 45:
+        ang -= 180
+    while ang < -45:
+        ang += 180
+    return [cx, cy, w, h, ang]
+
+
 def sign_box(rgba: np.ndarray):
-    """El letrero = la mancha blanca más grande que de verdad parezca rectángulo (no el pelaje o las plumas blancas)."""
+    """Dónde está el letrero blanco. 1) la mancha blanca que de verdad sea un rectángulo;
+    2) si el letrero se pega con pelaje o plumas blancas, se busca por su marco naranja
+    (y se comprueba que por dentro sea blanco)."""
     r, g, b, a = [rgba[..., i].astype(int) for i in range(4)]
     white = ((r > 200) & (g > 200) & (b > 200) & (a > 200)).astype(np.uint8)
     white = cv2.morphologyEx(white, cv2.MORPH_OPEN, np.ones((3, 3), np.uint8))
+    orange = ((r > 150) & (r - g > 40) & (g > 40) & (b < 130) & (a > 150)).astype(np.uint8)
+    # marco naranja
+    orange = cv2.morphologyEx(orange, cv2.MORPH_CLOSE, np.ones((7, 7), np.uint8))
+    n, lab, st, _ = cv2.connectedComponentsWithStats(orange)
+    for i in sorted(range(1, n), key=lambda k: -st[k, cv2.CC_STAT_AREA])[:4]:
+        ys, xs = np.where(lab == i)
+        if len(xs) < 800:
+            break
+        (cx, cy), (w, h), ang = cv2.minAreaRect(np.column_stack([xs, ys]).astype(np.float32))
+        box = _norm_rect(cx, cy, w, h, ang)
+        if not 1.5 < box[2] / max(box[3], 1) < 4.5:
+            continue
+        inner = np.zeros(white.shape, np.uint8)
+        pts = cv2.boxPoints(((box[0], box[1]), (box[2] * 0.8, box[3] * 0.7), box[4])).astype(np.int32)
+        cv2.fillPoly(inner, [pts], 1)
+        if inner.any() and white[inner > 0].mean() > 0.45:
+            return [box[0], box[1], box[2] * 0.94, box[3] * 0.88, box[4]]  # por dentro del marco
     n, lab, st, _ = cv2.connectedComponentsWithStats(white)
-    best = None
     for i in sorted(range(1, n), key=lambda k: -st[k, cv2.CC_STAT_AREA])[:6]:
         area = st[i, cv2.CC_STAT_AREA]
         if area < 1500:
             break
-        cnts, _ = cv2.findContours((lab == i).astype(np.uint8), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        mask = (lab == i).astype(np.uint8)
+        cnts, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         (cx, cy), (w, h), ang = cv2.minAreaRect(max(cnts, key=cv2.contourArea))
-        if w < h:
-            w, h = h, w
-            ang += 90
-        fill = area / max(w * h, 1)
-        if fill < 0.8 or not 1.15 < w / max(h, 1) < 4.5:
-            continue  # no es rectangular: pelaje, plumas, ropa blanca…
-        while ang > 45:
-            ang -= 180
-        while ang < -45:
-            ang += 180
-        best = [cx, cy, w, h, ang]
-        break
-    return best
+        box = _norm_rect(cx, cy, w, h, ang)
+        ring = cv2.dilate(mask, np.ones((9, 9), np.uint8)) - mask
+        framed = orange[ring > 0].mean() if ring.any() else 0
+        if area / max(w * h, 1) >= 0.78 and 1.15 < box[2] / max(box[3], 1) < 4.5 and framed >= 0.12:
+            return box
+    return None
 
 
 def crop_box(rgbas: list, margin: float = 0.02):
