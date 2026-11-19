@@ -28,7 +28,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, unquote, urlsplit
 
-APP_VERSION = "2.2.5"
+APP_VERSION = "2.3.0"
 
 try:  # lo genera windows/build.ps1
     from ectok_build import BUILD_DATE  # type: ignore[import-not-found]
@@ -149,10 +149,20 @@ DEFAULT_CONFIG: dict = {
             {"id": "x3", "on": True, "trigger": "booster", "gift": "", "min_diamonds": 1, "every": 1000, "multiplier": 3,
              "file": "x3.webp", "seconds": 4, "name": False, "size": 70},
         ],
+        # Botones de acceso rápido con texto: el texto sale en el letrero del personaje (o como alerta si no hay personaje).
+        "custom": [
+            {"id": "c1", "text": "¡Gracias!", "file": "escena-chica.webp", "char": True, "key": "1"},
+            {"id": "c2", "text": "¡Bienvenidos!", "file": "escena-chico.webp", "char": True, "key": "2"},
+            {"id": "c3", "text": "¡Síganme!", "file": "escena-chica.webp", "char": True, "key": "3"},
+            {"id": "c4", "text": "¡Compartan el live!", "file": "escena-chico.webp", "char": True, "key": "4"},
+            {"id": "c5", "text": "¡Toquen la pantalla!", "file": "escena-chica.webp", "char": True, "key": "5"},
+        ],
+        # Botones de acceso rápido normales: solo la animación (efectos, sin letrero).
         "quick": [
-            {"id": "q1", "label": "Corazones", "file": "corazones.webp"}, {"id": "q2", "label": "Confeti", "file": "confeti.webp"},
-            {"id": "q3", "label": "¡Gracias!", "file": "gracias.webp"}, {"id": "q4", "label": "x2", "file": "x2.webp"},
-            {"id": "q5", "label": "x3", "file": "x3.webp"}, {"id": "q6", "label": "Fuegos", "file": "fuegos-artificiales.webp"},
+            {"id": "q1", "label": "Corazones", "file": "corazones.webp", "key": "6"},
+            {"id": "q4", "label": "x2", "file": "x2.webp", "key": "7"},
+            {"id": "q5", "label": "x3", "file": "x3.webp", "key": "8"},
+            {"id": "q6", "label": "Fuegos", "file": "fuegos-artificiales.webp", "key": "9"},
         ],
         "quick_seconds": 4,
         "quick_size": 70,
@@ -176,6 +186,67 @@ def _merge(base: dict, saved: dict) -> dict:
     return out
 
 
+HOTKEY_KEYS = [*"1234567890", *(f"F{n}" for n in range(1, 13))]  # se usan con Ctrl+Alt
+
+
+def _scene_files() -> set:
+    """Las animaciones que son personajes con letrero (de fábrica y del banco)."""
+    names: set = set()
+    for folder in (ANIM_DEFAULT, ANIM_BANK):
+        with contextlib.suppress(OSError, ValueError):
+            data = json.loads((folder / "escenas.json").read_text(encoding="utf-8"))
+            if isinstance(data, dict):
+                names.update(data)
+    return names
+
+
+def assign_keys(a: dict) -> None:
+    """Cada botón con una tecla distinta (Ctrl+Alt+tecla); los que no tienen, la siguiente libre."""
+    used: set = set()
+    items = [*a.get("custom", []), *a.get("quick", [])]
+    for item in items:
+        key = item.get("key") or ""
+        if key not in HOTKEY_KEYS or key in used:
+            item["key"] = ""
+        else:
+            used.add(key)
+    for item in items:
+        if item.get("_auto") and not item.get("key"):
+            free = next((k for k in HOTKEY_KEYS if k not in used), "")
+            item["key"] = free
+            if free:
+                used.add(free)
+        item.pop("_auto", None)
+
+
+def _split_quick(cfg: dict, saved: dict) -> None:
+    """2.3.0: los botones rápidos se separan en Personalizados (personaje con letrero) y normales. No se borra ninguno."""
+    a = cfg["anims"]
+    old_quick = (saved.get("anims") or {}).get("quick")
+    if not isinstance(old_quick, list):
+        return  # nunca guardó botones: se quedan los de fábrica
+    scenes = _scene_files()
+    custom, quick = [], []
+    for q in old_quick:
+        if not isinstance(q, dict):
+            continue
+        if q.get("file") in scenes:
+            custom.append({"id": str(q.get("id") or uuid.uuid4().hex[:8])[:20], "text": str(q.get("label") or "")[:60],
+                           "file": q["file"], "char": True, "_auto": True})
+        else:
+            quick.append({**q, "_auto": True})
+    for d in DEFAULT_CONFIG["anims"]["custom"]:  # completar hasta 5 personalizados con los de fábrica
+        if len(custom) >= 5:
+            break
+        texts = DEFAULT_LIST_TEXTS.get(("custom", d["id"], "text"), {})
+        custom.append({**d, "id": d["id"] if all(c["id"] != d["id"] for c in custom) else uuid.uuid4().hex[:8],
+                       "text": texts.get(cfg.get("language", "es"), d["text"]), "_auto": True})
+    for item in [*custom, *quick]:
+        item["key"] = ""
+    a["custom"], a["quick"] = custom, quick
+    assign_keys(a)
+
+
 def load_config() -> dict:
     with contextlib.suppress(OSError, json.JSONDecodeError):
         saved = json.loads(CONFIG_PATH.read_text(encoding="utf-8"))
@@ -197,6 +268,8 @@ def load_config() -> dict:
                     rule.update(trigger="user_likes", name=True)
                 if "name" not in rule:  # 1.3.0: mostrar el nombre de quien lo mandó
                     rule["name"] = rule.get("id") in ("heartme", "follow", "big", "chest", "sub")
+            if "custom" not in (saved.get("anims") or {}):
+                _split_quick(cfg, saved)
             return cfg
     return _merge(DEFAULT_CONFIG, {})
 
@@ -231,11 +304,16 @@ DEFAULT_LIST_TEXTS = {  # (lista, id, campo)
     ("quick", "q2", "label"): {"es": "Confeti", "en": "Confetti", "pt": "Confete"},
     ("quick", "q3", "label"): {"es": "¡Gracias!", "en": "Thank you!", "pt": "Obrigado!"},
     ("quick", "q6", "label"): {"es": "Fuegos", "en": "Fireworks", "pt": "Fogos"},
+    ("custom", "c1", "text"): {"es": "¡Gracias!", "en": "Thank you!", "pt": "Obrigado!"},
+    ("custom", "c2", "text"): {"es": "¡Bienvenidos!", "en": "Welcome!", "pt": "Bem-vindos!"},
+    ("custom", "c3", "text"): {"es": "¡Síganme!", "en": "Follow me!", "pt": "Me sigam!"},
+    ("custom", "c4", "text"): {"es": "¡Compartan el live!", "en": "Share the LIVE!", "pt": "Compartilhem a live!"},
+    ("custom", "c5", "text"): {"es": "¡Toquen la pantalla!", "en": "Tap the screen!", "pt": "Toquem na tela!"},
 }
 
 
 def _list_for(cfg: dict, name: str) -> list:
-    return cfg["goals"] if name == "goals" else cfg["anims"]["quick"]
+    return cfg["goals"] if name == "goals" else cfg["anims"][name]
 
 
 def set_language(cfg: dict, old: str, new: str) -> None:
@@ -391,7 +469,13 @@ def clean_config(data: dict) -> dict:
             a["rules"] = rules
         if isinstance(anims.get("quick"), list):
             a["quick"] = [{"id": _text(q.get("id"), uuid.uuid4().hex[:8], 20), "label": _text(q.get("label"), "Animación", 30),
-                           "file": Path(str(q.get("file") or "")).name} for q in anims["quick"][:12] if isinstance(q, dict)]
+                           "file": Path(str(q.get("file") or "")).name, "key": _text(q.get("key"), "", 4)}
+                          for q in anims["quick"][:12] if isinstance(q, dict)]
+        if isinstance(anims.get("custom"), list):
+            a["custom"] = [{"id": _text(q.get("id"), uuid.uuid4().hex[:8], 20), "text": _text(q.get("text"), "", 60),
+                            "file": Path(str(q.get("file") or "")).name, "char": q.get("char") is not False,
+                            "key": _text(q.get("key"), "", 4)} for q in anims["custom"][:12] if isinstance(q, dict)]
+        assign_keys(a)
         a["quick_seconds"] = float(_num(anims.get("quick_seconds"), a["quick_seconds"], 1, 30))
         a["quick_size"] = int(_num(anims.get("quick_size"), a["quick_size"], 10, 100))
         if isinstance(anims.get("special"), list):
@@ -573,6 +657,8 @@ def _bank_download() -> None:
         new.replace(ANIM_BANK)
         SCENES = _load_scenes()
         bank_defaults()
+        bank_custom_defaults()
+        HOTKEYS.refresh()
         BANK.update(state="done", percent=100.0)
         log(f"Banco de animaciones {version} instalado")
     except Exception as exc:  # noqa: BLE001
@@ -594,8 +680,26 @@ def bank_defaults() -> None:
             a["rules"].append({"id": "battle", "on": True, "trigger": "battle_start", "gift": "", "min_diamonds": 1, "every": 1000,
                                "multiplier": 0, "file": duel, "seconds": 6, "size": 80, "name": False, "text": ""})
         if len(a["quick"]) < 12 and not any(q.get("file", "").startswith("Duel-") for q in a["quick"]):
-            a["quick"].append({"id": "battle", "label": "⚔ Batalla", "file": duel})
+            a["quick"].append({"id": "battle", "label": "⚔ Batalla", "file": duel, "key": "", "_auto": True})
+            assign_keys(a)
         CONFIG["battle_defaults"] = True
+    save_config(CONFIG)
+
+
+BANK_CUSTOM_CHARS = {"c1": "Girl-Dey-Sign-Up.webm", "c2": "Boy-Mat-Jumping.webm", "c3": "Pet-Mon-Sign-Up.webm",
+                     "c4": "Girl-Lau-Jumping.webm", "c5": "Pet-Cat-Jumping.webm"}
+
+
+def bank_custom_defaults() -> None:
+    """Con el banco instalado, los personalizados de fábrica usan personajes del banco (una sola vez; los que cambiaste se quedan)."""
+    if CONFIG.get("custom_bank_defaults") or not all((ANIM_BANK / f).is_file() for f in BANK_CUSTOM_CHARS.values()):
+        return
+    with CONFIG_LOCK:
+        for item in CONFIG["anims"].get("custom", []):
+            new = BANK_CUSTOM_CHARS.get(item.get("id"))
+            if new and item.get("file") in ("escena-chica.webp", "escena-chico.webp"):
+                item["file"] = new
+        CONFIG["custom_bank_defaults"] = True
     save_config(CONFIG)
 
 
@@ -659,6 +763,133 @@ def anim_event(file: str, seconds: float, size: int, label: str = "", manual: bo
                          scene=scene, sign=sign, user=(who or {}).get("name", ""))
     return new_event("anim", file=file, video=file.lower().endswith(VIDEO_EXTS), seconds=seconds, size=size,
                      label=label, manual=manual, who=who, caption=caption)
+
+
+def fire_button(kind: str, item_id: str, preview: bool = False) -> str:
+    """Lanzar un botón de acceso rápido (clic o Ctrl+Alt+tecla). Regresa el error, o "" si salió."""
+    a = CONFIG["anims"]
+    item = next((q for q in a.get(kind, []) if q.get("id") == item_id), None) if kind in ("custom", "quick") else None
+    if not item:
+        return "No encontré ese botón."
+    secs, size = a["quick_seconds"], a["quick_size"]
+    if kind == "custom":
+        text = (item.get("text") or "").strip()
+        file = item.get("file") or ""
+        if item.get("char") and file in SCENES and anim_path(file):  # el texto en el letrero del personaje
+            ev = anim_event(file, secs, size, text, manual=True, sign=sign_text(text, {}, False))
+        else:  # sin personaje: el texto sale como alerta
+            if not text:
+                return "Escribe el texto del botón."
+            ev = new_event("custom", text=text, seconds=secs)
+    else:
+        file = item.get("file") or ""
+        if not anim_path(file):
+            return "Ese botón no tiene animación."
+        ev = anim_event(file, secs, size, item.get("label", ""), manual=True)
+    BUS.emit(ev | {"preview": bool(preview)})
+    return ""
+
+
+class Hotkeys:
+    """Ctrl+Alt+tecla en cualquier ventana (Windows): lanza los botones de acceso rápido aunque estés en LIVE Studio."""
+    MOD = 0x0002 | 0x0001 | 0x4000  # MOD_CONTROL | MOD_ALT | MOD_NOREPEAT
+    WM_HOTKEY, WM_REFRESH = 0x0312, 0x8001
+
+    def __init__(self) -> None:
+        self.thread_id = 0
+        self.ids: dict[int, tuple[str, str]] = {}
+        self.problems: dict[str, str] = {}  # tecla -> «ocupada» o el carácter que escribe en este teclado
+        self.active = False
+
+    @staticmethod
+    def vk(key: str) -> int:
+        return 0x6F + int(key[1:]) if key.startswith("F") else ord(key)
+
+    def start(self) -> None:
+        if IS_WINDOWS:
+            threading.Thread(target=self._run, daemon=True, name="hotkeys").start()
+
+    def refresh(self) -> None:
+        if IS_WINDOWS and self.thread_id:
+            import ctypes
+
+            ctypes.windll.user32.PostThreadMessageW(self.thread_id, self.WM_REFRESH, 0, 0)  # type: ignore[attr-defined]
+
+    def _typed_char(self, user32, vk: int) -> str:
+        """Lo que escribe Ctrl+Alt+tecla en este teclado (AltGr = Ctrl+Alt: en algunos teclados Ctrl+Alt+2 es «@»)."""
+        import ctypes
+
+        from ctypes import wintypes
+
+        user32.GetKeyboardLayout.restype = ctypes.c_void_p
+        user32.GetKeyboardLayout.argtypes = [wintypes.DWORD]
+        user32.ToUnicodeEx.restype = ctypes.c_int
+        user32.ToUnicodeEx.argtypes = [wintypes.UINT, wintypes.UINT, ctypes.POINTER(ctypes.c_ubyte), wintypes.LPWSTR,
+                                       ctypes.c_int, wintypes.UINT, ctypes.c_void_p]
+        state = (ctypes.c_ubyte * 256)()
+        state[0x11] = state[0x12] = 0x80  # VK_CONTROL y VK_MENU presionadas
+        buf = ctypes.create_unicode_buffer(8)
+        try:
+            hkl = user32.GetKeyboardLayout(0)
+            n = user32.ToUnicodeEx(vk, user32.MapVirtualKeyW(vk, 0), state, buf, 8, 0x4, hkl)  # 0x4: no cambiar el estado del teclado
+        except Exception:  # noqa: BLE001
+            return ""
+        return buf.value[:n].strip() if n > 0 else ""
+
+    def _register(self, user32) -> None:
+        for hid in list(self.ids):
+            user32.UnregisterHotKey(None, hid)
+        self.ids.clear()
+        self.problems = {}
+        a = CONFIG["anims"]
+        hid = 1
+        for kind in ("custom", "quick"):
+            for item in a.get(kind, []):
+                key = item.get("key") or ""
+                if key not in HOTKEY_KEYS:
+                    continue
+                vk = self.vk(key)
+                typed = self._typed_char(user32, vk) if not key.startswith("F") else ""
+                if typed:  # registrarla te dejaría sin poder escribir ese carácter
+                    self.problems[key] = typed
+                    continue
+                if user32.RegisterHotKey(None, hid, self.MOD, vk):
+                    self.ids[hid] = (kind, item["id"])
+                    hid += 1
+                else:
+                    self.problems[key] = "ocupada"
+        self.active = True
+
+    def _run(self) -> None:
+        import ctypes
+        from ctypes import wintypes
+
+        user32 = ctypes.windll.user32  # type: ignore[attr-defined]
+        user32.RegisterHotKey.argtypes = [wintypes.HWND, ctypes.c_int, wintypes.UINT, wintypes.UINT]
+        user32.UnregisterHotKey.argtypes = [wintypes.HWND, ctypes.c_int]
+        user32.GetMessageW.argtypes = [ctypes.POINTER(wintypes.MSG), wintypes.HWND, wintypes.UINT, wintypes.UINT]
+        user32.PostThreadMessageW.argtypes = [wintypes.DWORD, wintypes.UINT, wintypes.WPARAM, wintypes.LPARAM]
+        self.thread_id = ctypes.windll.kernel32.GetCurrentThreadId()  # type: ignore[attr-defined]
+        try:
+            self._register(user32)
+            msg = wintypes.MSG()
+            while user32.GetMessageW(ctypes.byref(msg), None, 0, 0) > 0:
+                if msg.message == self.WM_HOTKEY and msg.wParam in self.ids:
+                    kind, item_id = self.ids[msg.wParam]
+                    err = fire_button(kind, item_id)
+                    if err:
+                        log(f"Tecla rápida: {err}")
+                elif msg.message == self.WM_REFRESH:
+                    self._register(user32)
+        except Exception as exc:  # noqa: BLE001
+            log(f"Teclas rápidas: {exc}")
+            self.active = False
+
+    def status(self) -> dict:
+        return {"global": self.active, "problems": self.problems}
+
+
+HOTKEYS = Hotkeys()
 
 
 def anim_caption(ev: dict) -> str:
@@ -1274,6 +1505,7 @@ class Handler(BaseHTTPRequestHandler):
         if path == "/api/settings":
             CONFIG = clean_config(data)
             save_config(CONFIG)
+            HOTKEYS.refresh()
             ectok_live.LANG["value"] = CONFIG["language"]
             BUS.emit(new_event("config", overlay=overlay_payload()))
             self.send_json({"ok": True, "config": CONFIG})
@@ -1314,6 +1546,11 @@ class Handler(BaseHTTPRequestHandler):
                                 int(_num(data.get("size"), a["quick_size"], 10, 100)), label, manual=True,
                                 who=sample, caption=_text(data.get("caption"), "", 40), sign=sign) | {"preview": bool(data.get("preview"))})
             self.send_json({"ok": True})
+        elif path == "/api/quick/fire":
+            err = fire_button(_text(data.get("kind"), "", 10), _text(data.get("id"), "", 20), bool(data.get("preview")))
+            self.send_json({"ok": not err, "error": err}, 404 if err else 200)
+        elif path == "/api/hotkeys":
+            self.send_json({"ok": True, **HOTKEYS.status()})
         elif path == "/api/brb":
             BRB["on"] = bool(data.get("on"))
             BUS.emit(new_event("brb", brb={**CONFIG["anims"]["brb"], **BRB}))
@@ -1461,6 +1698,8 @@ def main() -> int:
     server.daemon_threads = True
     with contextlib.suppress(Exception):
         bank_defaults()  # quien ya tenía el banco instalado también recibe la regla y el botón de batalla
+        bank_custom_defaults()
+    HOTKEYS.start()
     log(f"EC-Tok {APP_VERSION} ({BUILD_DATE or 'desarrollo'}) en {url}")
     with contextlib.suppress(OSError):
         ANIM_USER.mkdir(parents=True, exist_ok=True)

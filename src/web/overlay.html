@@ -140,11 +140,13 @@
   let cfg = null, stats = null, likeMark = 0, LOC = 'es-MX';
   const EMPTY_TOP = {es: 'Todavía nadie… ¡manda el primer regalo!', en: 'Nobody yet… send the first gift!', pt: 'Ninguém ainda… mande o primeiro presente!'};
   const EMPTY_LIKES = {es: 'Todavía nadie… ¡dale tap a la pantalla!', en: 'Nobody yet… tap the screen!', pt: 'Ninguém ainda… toque na tela!'};
-  const EMOJI = {gift: '🎁', follow: '💖', share: '📣', like: '❤️'};
+  const EMOJI = {gift: '🎁', follow: '💖', share: '📣', like: '❤️', custom: '💬'};
 
   function applyStyle() {
     const s = cfg.style, r = document.documentElement.style;
-    r.setProperty('--c1', s.color); r.setProperty('--c2', s.accent); r.setProperty('--fs', (+params.get('size') || s.font_size) + 'px');
+    let fs = +params.get('size') || s.font_size;
+    if (params.has('preview')) fs = Math.min(fs, innerWidth * 0.075);  // la vista previa de EC-Tok es angosta: que la alerta quepa
+    r.setProperty('--c1', s.color); r.setProperty('--c2', s.accent); r.setProperty('--fs', fs + 'px');
     $('#alerts').className = s.position;
   }
   function fill(tpl, ev) {
@@ -163,6 +165,7 @@
     if (ev.type === 'gift') return show(a.gift) && ev.gift.total >= a.gift.min_diamonds ? a.gift : null;
     if (ev.type === 'follow') return show(a.follow) ? a.follow : null;
     if (ev.type === 'share') return show(a.share) ? a.share : null;
+    if (ev.type === 'custom') return {on: true, text: ev.text || '', seconds: ev.seconds || 4};  // botón personalizado sin personaje
     return null;
   }
   function likeMilestone(total) {

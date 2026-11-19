@@ -1,5 +1,13 @@
 # Cambios de EC-Tok
 
+## 2.3.0
+- ⚡ **Botones de acceso rápido en dos bloques**:
+  - **✍ Personalizados**: escribes el texto y sale en el letrero del personaje (solo se eligen personajes con letrero). Si quitas la palomita «Personaje», el texto sale como alerta. Vienen 5 listos y puedes agregar más con «➕ Agregar personalizado».
+  - **⚡ Acceso rápido**: solo la animación (corazones, x2, x3, fuegos, batalla…), sin texto. Aquí no aparecen los personajes con letrero.
+- ⌨ **Ctrl + Alt + tecla** para cada botón (1 a 0 y F1 a F12, la eliges tú). En Windows funcionan **aunque estés en otra ventana**, como LIVE Studio. Si una combinación ya la usa otro programa, o en tu teclado escribe un carácter (por ejemplo «@»), EC-Tok te avisa para que elijas otra.
+- Tus botones de antes se acomodan solos: los que tienen personaje pasan a Personalizados y los demás a Acceso rápido. No se borra ninguno.
+- La vista previa también muestra las alertas (para probar los personalizados sin personaje).
+
 ## 2.2.5
 - **Vista previa**: las animaciones se ven completas al darle «Probar». El tiempo se cuenta desde que la animación de verdad empieza a moverse, no desde que se pidió (antes, si tardaba en cargar, se veía solo el final y se quitaba).
 - El banco de animaciones ya no mueve todas las miniaturas a la vez: cada una muestra un cuadro y se mueve al pasar el mouse. Se cargan solo las que se ven en pantalla. La app va más ligera y la vista previa carga rápido.

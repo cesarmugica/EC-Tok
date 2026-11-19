@@ -17,7 +17,7 @@ Alertas, sonidos, lectura de chat y metas para tus **lives de TikTok** — grati
 - **🎛 Consola de sonidos**: tus botones de sonido para tocarlos a mano durante el live, en una ventanita flotante que puede quedarse encima de LIVE Studio.
 - **🔊 Sonidos por regalo**: elige qué sonido toca con cada regalo (uno en especial, regalos de N 💎 o más, cualquier regalo), con follows, compartidos o cada N likes.
 - **🗣 Leer el chat**: una voz de Windows lee los comentarios (y si quieres también regalos, follows y compartidos).
-- **🎬 Animaciones**: automáticas (Heart Me, follow, cofre, suscripción, batallas, x2/x3…), botones de acceso rápido y pantalla «Ya regresamos». Trae un banco de animaciones y puedes agregar las tuyas (WebM/WebP con transparencia, APNG o GIF).
+- **🎬 Animaciones**: automáticas (Heart Me, follow, cofre, suscripción, batallas, x2/x3…), botones de acceso rápido con tu propio texto en el letrero (también con **Ctrl + Alt + tecla**, aunque estés en LIVE Studio) y pantalla «Ya regresamos». Trae un banco de animaciones y puedes agregar las tuyas (WebM/WebP con transparencia, APNG o GIF).
 - **🎯 Metas y 🏆 top donadores**: barras de progreso (likes, diamantes, regalos, follows, compartidos) y el ranking de quién más dona.
 - **Modo prueba**: botones para ver alertas, sonidos y voz sin estar en vivo.
 
