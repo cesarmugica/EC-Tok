@@ -191,29 +191,110 @@ def trim_reappear(rgbas: list) -> list:
     return rgbas
 
 
-def character(src: Path, out_dir: Path, name: str) -> dict:
-    rgbas = [key_green(f) for f in frames(src)]
-    boxes = [sign_box(x) for x in rgbas]
+def _smooth_detections(rgbas: list, boxes: list, smooth: bool = True) -> np.ndarray:
+    """Respaldo: las detecciones cuadro por cuadro, sin cuadros sueltos raros y suavizadas."""
     good = [b for b in boxes if b]
-    if not good:
-        raise RuntimeError(f"{src}: no encontré el letrero")
     last = good[0]
+    boxes = list(boxes)
     for i, b in enumerate(boxes):  # cuadros donde una mano tapa el letrero: usar el anterior
         boxes[i] = last = b or last
     B = np.array(boxes, float)
-    # Cuadros sueltos donde se detectó otra cosa (p. ej. una raya roja del pantalón): si se aleja mucho
-    # de la mediana de sus vecinos, se cambia por esa mediana.
     H = rgbas[0].shape[0]
     med = np.array([np.median(B[max(0, i - 3): i + 4], axis=0) for i in range(len(B))])
     bad = (np.abs(B[:, 1] - med[:, 1]) > H * 0.08) | (np.abs(B[:, 2] - med[:, 2]) > med[:, 2] * 0.25)
     B[bad] = med[bad]
-    # Suavizado (Savitzky-Golay): quita el temblor sin atrasar el brinco; el tamaño casi no cambia, así que se suaviza más.
+    if not smooth:
+        return B
     from scipy.signal import savgol_filter
     n = len(B)
     for j, win in ((0, 9), (1, 9), (2, 15), (3, 15), (4, 11)):
         win = min(win, n - (1 - n % 2))
         if win >= 5:
             B[:, j] = savgol_filter(B[:, j], win, 2, mode="nearest")
+    return B
+
+
+def track_board(rgbas: list, boxes: list):
+    """Sigue el letrero «pegado» sin atraso y sin temblor. Se combinan dos cosas:
+    - el movimiento exacto del letrero entre un cuadro y el siguiente (ECC, precisión de subpíxel), que da el «pegado»;
+    - la detección del letrero en cada cuadro, que evita que se vaya desviando.
+    Se resuelve todo junto por mínimos cuadrados (sin suavizar en el tiempo, así no se atrasa en los brincos)."""
+    from scipy.sparse import diags
+    from scipy.sparse.linalg import spsolve
+    n = len(rgbas)
+    clean = _smooth_detections(rgbas, boxes, smooth=False)  # detecciones sin cuadros sueltos raros (sin suavizar)
+    has = np.array([b is not None for b in boxes])
+    ok = np.flatnonzero(has)
+    aspect = float(np.median([boxes[i][2] / boxes[i][3] for i in ok]))
+    S = 0.5
+    gray = [cv2.GaussianBlur(cv2.resize(cv2.cvtColor(np.ascontiguousarray(x[..., :3]), cv2.COLOR_RGB2GRAY), None, fx=S, fy=S,
+                                        interpolation=cv2.INTER_AREA), (3, 3), 0).astype(np.float32) for x in rgbas]
+    Hh, Ww = gray[0].shape
+    crit = (cv2.TERM_CRITERIA_EPS | cv2.TERM_CRITERIA_COUNT, 60, 1e-5)
+    # movimiento entre cuadros consecutivos: d[i] = (dx, dy, log escala, giro) de i-1 a i
+    mot = np.zeros((n, 4))
+    good = np.zeros(n, bool)
+    for i in range(1, n):
+        cx, cy, w, h, a = clean[i - 1]
+        m = np.zeros((Hh, Ww), np.uint8)
+        cv2.fillPoly(m, [cv2.boxPoints(((cx * S, cy * S), (w * S * 1.05, w / aspect * S * 1.1), a)).astype(np.int32)], 255)
+        c2 = clean[i]
+        t0 = np.array([[1, 0, (c2[0] - cx) * S], [0, 1, (c2[1] - cy) * S]], np.float32)
+        best, bcc = None, 0.0
+        for init in (np.eye(2, 3, dtype=np.float32), t0):
+            try:
+                cc, M = cv2.findTransformECC(gray[i - 1], gray[i], init.copy(), cv2.MOTION_AFFINE, crit, m, 1)
+            except cv2.error:
+                continue
+            if cc > bcc:
+                best, bcc = M, cc
+        if best is None or bcc < 0.85:
+            continue
+        ar = np.radians(a)
+        c = best @ np.array([cx * S, cy * S, 1.0]) / S
+        ux = best[:, :2] @ np.array([np.cos(ar), np.sin(ar)])
+        sc = np.linalg.norm(ux)
+        if abs(np.log(sc)) > 0.15:
+            continue
+        mv = [c[0] - cx, c[1] - cy, np.log(sc), np.degrees(np.arctan2(ux[1], ux[0])) - a]
+        if has[i] and has[i - 1]:  # en movimientos muy rápidos ECC puede equivocarse: debe cuadrar con lo detectado
+            dd = [c2[0] - cx, c2[1] - cy, np.log(c2[2] / w), c2[4] - a]
+            if np.hypot(mv[0] - dd[0], mv[1] - dd[1]) > 0.04 * w or abs(mv[2] - dd[2]) > 0.06 or abs(mv[3] - dd[3]) > 3:
+                continue
+        mot[i] = mv
+        good[i] = True
+    # mínimos cuadrados: wd·(p_i − det_i)² + wm·(p_i − p_{i−1} − mov_i)²
+    det = np.c_[clean[:, 0], clean[:, 1], np.log(clean[:, 2]), clean[:, 4]]
+    out = np.zeros((n, 4))
+    wm = np.where(good, 400.0, 0.0)
+    wd = np.where(has, 1.0, 0.0)
+    if not wd.any():
+        wd[:] = 1.0
+    for j in range(4):
+        wmj = wm.copy()
+        for _ in range(4):  # los movimientos que no cuadran con las detecciones pesan menos
+            main = wd.copy()
+            main[1:] += wmj[1:]
+            main[:-1] += wmj[1:]
+            A = diags([main + 1e-9, -wmj[1:], -wmj[1:]], [0, -1, 1], format="csc")
+            rhs = wd * det[:, j]
+            rhs[1:] += wmj[1:] * mot[1:, j]
+            rhs[:-1] -= wmj[1:] * mot[1:, j]
+            x = spsolve(A, rhs)
+            r = np.abs(np.diff(x) - mot[1:, j])
+            tol = {0: 0.004 * clean[1:, 2], 1: 0.004 * clean[1:, 2], 2: np.full(n - 1, 0.005), 3: np.full(n - 1, 0.2)}[j]
+            wmj[1:] = wm[1:] * np.where(r > tol, (tol / np.maximum(r, 1e-9)) ** 2, 1.0)
+        out[:, j] = x
+    w = np.exp(out[:, 2])
+    return np.c_[out[:, 0], out[:, 1], w, w / aspect, out[:, 3]]
+
+
+def character(src: Path, out_dir: Path, name: str) -> dict:
+    rgbas = [key_green(f) for f in frames(src)]
+    boxes = [sign_box(x) for x in rgbas]
+    if not any(boxes):
+        raise RuntimeError(f"{src}: no encontré el letrero")
+    B = track_board(rgbas, boxes)
     box = crop_box(rgbas)
     x0, y0, x1, y1 = box
     w, h = x1 - x0, y1 - y0
