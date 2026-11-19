@@ -828,9 +828,45 @@
   let animations = [], brbOn = false;
   const animSrc = f => '/anim/' + encodeURIComponent(f);
   const thumb = (f, cls = '') => !f ? '<span class="thumb"></span>' : f.toLowerCase().endsWith('.webm')
-    ? `<video class="${cls}" src="${animSrc(f)}" autoplay muted loop playsinline></video>`
+    ? `<video class="${cls}" data-src="${animSrc(f)}#t=1.5" muted loop playsinline preload="none" data-hov></video>`
     : f.toLowerCase().endsWith('.mp4') ? `<video class="${cls}" src="${animSrc(f)}#t=1" muted playsinline preload="metadata"></video>`
     : `<img class="${cls}" src="${animSrc(f)}" alt="" loading="lazy">`;
+  // Las miniaturas en video se quedan quietas (un cuadro) y solo se mueven al pasar el mouse:
+  // con más de 100 animaciones moviéndose a la vez, la vista previa no alcanzaba a cargar.
+  // Además se cargan solo las que se ven en pantalla, de pocas en pocas.
+  const thumbQueue = [];
+  let thumbLoading = 0;
+  const thumbLoad = v => { if (v.getAttribute('src') || v.dataset.queued) return; v.dataset.queued = '1'; thumbQueue.push(v); thumbPump(); };
+  const thumbPump = () => {
+    while (thumbLoading < 4 && thumbQueue.length) {
+      const v = thumbQueue.shift();
+      if (!v.isConnected || v.getAttribute('src')) continue;
+      thumbLoading++;
+      let done = false;
+      const end = () => { if (done) return; done = true; thumbLoading--; thumbPump(); };
+      v.addEventListener('loadeddata', end, {once: true});
+      v.addEventListener('error', end, {once: true});
+      setTimeout(end, 5000);
+      v.preload = 'auto'; v.src = v.dataset.src;
+    }
+  };
+  const thumbSeen = 'IntersectionObserver' in window
+    ? new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { thumbSeen.unobserve(e.target); thumbLoad(e.target); } }), {rootMargin: '200px'})
+    : null;
+  new MutationObserver(() => document.querySelectorAll('video[data-src]:not([data-seen])').forEach(v => {
+    v.dataset.seen = '1';
+    if (thumbSeen) thumbSeen.observe(v); else thumbLoad(v);
+  })).observe(document.body, {childList: true, subtree: true});
+  let hovVid = null;
+  const hovStop = () => { if (hovVid) { hovVid.pause(); try { hovVid.currentTime = 1.5; } catch (_) {} hovVid = null; } };
+  document.addEventListener('mouseover', e => {
+    const box = e.target.closest && e.target.closest('.it, button, td, .row, label, span');
+    const v = box && box.querySelector('video[data-hov]');
+    if (v === hovVid) return;
+    hovStop();
+    if (v) { hovVid = v; if (!v.getAttribute('src')) { v.preload = 'auto'; v.src = v.dataset.src; } v.play().catch(() => {}); }
+  });
+  document.addEventListener('mouseleave', hovStop);
   const animOptions = (sel, empty = false) => (empty ? `<option value="" ${sel ? '' : 'selected'}>${t('(elige o sube la tuya)')}</option>` : '') + animations.map(a => `<option value="${esc(a.file)}" ${a.file === sel ? 'selected' : ''}>${esc(a.name)}${a.source === 'tuya' ? ' (' + t('tuya') + ')' : ''}</option>`).join('');
   const ANIM_TRIGGERS = {any_gift: '🎁 Cualquier regalo', gift: '🎁 Un regalo en especial', min_diamonds: '💎 Regalo de N 💎 o más', follow: '💖 Follow',
     share: '📣 Compartir', user_likes: '❤️ Cada N likes de una persona', likes: '❤️ Cada N likes (de todo el live)', subscribe: '⭐ Suscripción', superfan: '🌟 Super Fan', envelope: '🎉 Regalo de la comunidad (cofre)',

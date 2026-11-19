@@ -1,5 +1,10 @@
 # Cambios de EC-Tok
 
+## 2.2.5
+- **Vista previa**: las animaciones se ven completas al darle «Probar». El tiempo se cuenta desde que la animación de verdad empieza a moverse, no desde que se pidió (antes, si tardaba en cargar, se veía solo el final y se quitaba).
+- El banco de animaciones ya no mueve todas las miniaturas a la vez: cada una muestra un cuadro y se mueve al pasar el mouse. Se cargan solo las que se ven en pantalla. La app va más ligera y la vista previa carga rápido.
+- En el live, una animación que dura más que la regla ya no repite el inicio al salir: se queda en su último cuadro mientras se desvanece.
+
 ## 2.2.4
 - ⚔ **Batallas**: al instalar las Animaciones Premium se agregan solas una animación automática «Empieza una batalla» (sale cuando TikTok inicia la batalla) y un botón rápido **«⚔ Batalla»**. Puedes cambiarles la animación o quitarlas en 🎬 Animaciones.
 - El texto del letrero sigue al personaje **cuadro por cuadro** (ya no rebota dentro del letrero).

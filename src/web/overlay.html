@@ -331,9 +331,24 @@
     // si la regla dura más que el video, se repite hasta cumplir el tiempo.
     const vidEl = videoScene ? el.querySelector('video') : a.video ? media : null;
     if (vidEl) {
-      let timer = setTimeout(finish, Math.max(a.seconds, 8) * 1000);  // por si el video no avisa su duración
-      const plan = () => { clearTimeout(timer); const d = vidEl.duration || 0; timer = setTimeout(finish, Math.max(a.seconds, d) * 1000 + 150); };
+      // Se cuenta el tiempo que el video de verdad se reprodujo (no desde que se pidió): si tarda en cargar
+      // o se traba, la animación no se corta antes de verse completa.
+      let played = 0, last = null, need = null;
+      const safety = setTimeout(finish, 60000);  // por si el video nunca arranca
+      const plan = () => {
+        const d = vidEl.duration || 0;
+        need = Math.max(a.seconds, d);
+        if (d && a.seconds <= d + 0.05) vidEl.loop = false;  // una sola vuelta: se queda en el último cuadro al salir
+      };
       if (vidEl.readyState >= 1) plan(); else vidEl.addEventListener('loadedmetadata', plan, {once: true});
+      vidEl.addEventListener('ended', () => { clearTimeout(safety); finish(); });
+      vidEl.addEventListener('timeupdate', () => {
+        const t = vidEl.currentTime, d = vidEl.duration || 0;
+        if (last !== null) played += t >= last ? t - last : (d - last) + t;  // t < last: dio la vuelta
+        last = t;
+        if (need !== null && played >= need - 0.05) { clearTimeout(safety); finish(); }
+      });
+      vidEl.addEventListener('error', () => { clearTimeout(safety); finish(); });
     } else setTimeout(finish, a.seconds * 1000);
   }
   function showBrb(b) {
