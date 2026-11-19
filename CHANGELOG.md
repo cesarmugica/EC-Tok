@@ -1,5 +1,8 @@
 # Cambios de EC-Tok
 
+## 2.3.4
+- «Duran» y «Tamaño» de los botones de acceso rápido ahora están en su propio renglón, «⚙ Para todos los botones de acceso rápido», porque aplican a los personalizados y a los normales (antes parecía que solo eran del segundo bloque).
+
 ## 2.3.3
 - 🔄 Después de actualizar, **la ventana de EC-Tok y los overlays (LIVE Studio / OBS) se recargan solos** con la versión nueva. Antes, a veces la ventana se quedaba mostrando la versión anterior aunque la nueva ya estuviera instalada.
 

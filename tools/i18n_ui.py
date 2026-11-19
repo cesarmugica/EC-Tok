@@ -344,4 +344,6 @@ T = {
 '📥 Actualizar animaciones': ('📥 Update animations', '📥 Atualizar animações'),
 '🎬 Descarga gratis las Animaciones Premium ({0} MB): personajes con tu texto en el letrero, efectos y batallas.': ('🎬 Download the Premium Animations for free ({0} MB): characters with your text on the sign, effects and battles.', '🎬 Baixe grátis as Animações Premium ({0} MB): personagens com seu texto na placa, efeitos e batalhas.'),
 '📥 Descargar': ('📥 Download', '📥 Baixar'),
+'⚙ Para todos los botones de acceso rápido': ('⚙ For all quick buttons', '⚙ Para todos os botões de acesso rápido'),
+'Los personajes y efectos en video siempre se ven completos al menos una vez; si pones más segundos, se repiten hasta cumplir el tiempo. Los personalizados sin personaje usan este tiempo para la alerta.': ('Video characters and effects always play fully at least once; if you set more seconds, they repeat until the time is up. Custom buttons without a character use this time for the alert.', 'Personagens e efeitos em vídeo sempre aparecem completos pelo menos uma vez; se você puser mais segundos, eles se repetem até completar o tempo. Os personalizados sem personagem usam este tempo para o alerta.'),
 }
