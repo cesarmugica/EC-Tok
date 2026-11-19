@@ -28,7 +28,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, unquote, urlsplit
 
-APP_VERSION = "2.3.1"
+APP_VERSION = "2.3.2"
 
 try:  # lo genera windows/build.ps1
     from ectok_build import BUILD_DATE  # type: ignore[import-not-found]
@@ -128,6 +128,10 @@ DEFAULT_CONFIG: dict = {
     "likers": {"count": 5, "title": "Top likes"},
     "likes_rule_added": True,
     "user_likes_migrated": True,
+    # Cosas que se hacen una sola vez (tienen que estar aquí para que se guarden entre reinicios).
+    "battle_defaults": False,
+    "custom_bank_defaults": False,
+    "bank_dismissed": 0,  # «Ahora no» en la invitación a bajar el banco: hasta qué versión ya no se avisa
     "anims": {
         # trigger: any_gift | gift | min_diamonds | follow | share | likes | subscribe | superfan | envelope |
         #          battle_start | battle_end | booster
@@ -584,7 +588,7 @@ SCENES = _load_scenes()
 # ---------------------------------------------------------------------------
 # En GitHub cada banco es un release «banco-N» con un ectok-banco-N.zip; «Buscar actualización» busca el N más alto.
 BANK_RELEASES = "https://api.github.com/repos/cesarmugica/EC-Tok/releases?per_page=40"
-BANK = {"state": "idle", "percent": 0.0, "error": "", "latest": 0, "url": "", "size": 0, "checked": False}
+BANK = {"state": "idle", "percent": 0.0, "error": "", "latest": 0, "url": "", "size": 0, "checked": False, "checked_at": 0.0}
 
 
 def bank_check() -> None:
@@ -602,9 +606,9 @@ def bank_check() -> None:
             zipa = next((a for a in rel.get("assets", []) if a["name"].lower().endswith(".zip")), None)
             if zipa and int(tag[6:]) > best[0]:
                 best = (int(tag[6:]), zipa["browser_download_url"], int(zipa.get("size") or 0))
-        BANK.update(latest=best[0], url=best[1], size=best[2], checked=True, error="")
+        BANK.update(latest=best[0], url=best[1], size=best[2], checked=True, checked_at=time.time(), error="")
     except Exception as exc:  # noqa: BLE001
-        BANK.update(checked=True, error="No se pudo buscar el banco (¿sin internet?).")
+        BANK.update(checked=True, checked_at=time.time(), error="No se pudo buscar el banco (¿sin internet?).")
         log(f"Banco de animaciones (buscar): {exc}")
 
 
@@ -616,7 +620,8 @@ def bank_installed() -> int:
 
 def bank_status() -> dict:
     count = sum(1 for p in ANIM_BANK.glob("*") if p.suffix.lower() in ANIM_EXTS) if ANIM_BANK.is_dir() else 0
-    return {**BANK, "installed": bank_installed(), "count": count, "published": bool(BANK["url"])}
+    return {**BANK, "installed": bank_installed(), "count": count, "published": bool(BANK["url"]),
+            "dismissed": int(CONFIG.get("bank_dismissed") or 0)}
 
 
 def _bank_download() -> None:
@@ -1581,8 +1586,13 @@ class Handler(BaseHTTPRequestHandler):
             except (ValueError, OSError) as exc:
                 self.send_json({"ok": False, "error": str(exc)}, 400)
         elif path == "/api/bank/status":
-            if data.get("check") or not BANK["checked"]:
-                bank_check()
+            busy = BANK["state"] in ("downloading", "installing")
+            if not busy and (data.get("check") or not BANK["checked"] or time.time() - BANK["checked_at"] > 3600):
+                bank_check()  # al abrir la ventana, con el botón, y cada hora mientras está abierta
+            self.send_json({"ok": True, "bank": bank_status()})
+        elif path == "/api/bank/dismiss":  # «Ahora no»: no volver a invitar hasta que salga un banco más nuevo
+            CONFIG["bank_dismissed"] = int(BANK["latest"] or 0)
+            save_config(CONFIG)
             self.send_json({"ok": True, "bank": bank_status()})
         elif path == "/api/bank/download":
             if BANK["state"] not in ("downloading", "installing"):

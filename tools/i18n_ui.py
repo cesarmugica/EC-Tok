@@ -337,4 +337,11 @@ T = {
 'No encontré ese botón.': ("I couldn't find that button.", 'Não encontrei esse botão.'),
 'Escribe el texto del botón.': ('Type the button text.', 'Escreva o texto do botão.'),
 'Ese botón no tiene animación.': ("That button doesn't have an animation.", 'Esse botão não tem animação.'),
+'Ahora no': ('Not now', 'Agora não'),
+'⏳ Instalando las Animaciones Premium…': ('⏳ Installing the Premium Animations…', '⏳ Instalando as Animações Premium…'),
+'⏳ Descargando las Animaciones Premium… {0}%': ('⏳ Downloading the Premium Animations… {0}%', '⏳ Baixando as Animações Premium… {0}%'),
+'🆕 Hay animaciones nuevas (banco {0}).': ('🆕 New animations are available (library {0}).', '🆕 Há animações novas (banco {0}).'),
+'📥 Actualizar animaciones': ('📥 Update animations', '📥 Atualizar animações'),
+'🎬 Descarga gratis las Animaciones Premium ({0} MB): personajes con tu texto en el letrero, efectos y batallas.': ('🎬 Download the Premium Animations for free ({0} MB): characters with your text on the sign, effects and battles.', '🎬 Baixe grátis as Animações Premium ({0} MB): personagens com seu texto na placa, efeitos e batalhas.'),
+'📥 Descargar': ('📥 Download', '📥 Baixar'),
 }

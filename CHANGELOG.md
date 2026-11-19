@@ -1,5 +1,12 @@
 # Cambios de EC-Tok
 
+## 2.3.2
+- 🎬 **Aviso de animaciones arriba, en cualquier pestaña**:
+  - Si ya tienes las Animaciones Premium y sale un banco nuevo: «🆕 Hay animaciones nuevas · Actualizar animaciones».
+  - Si nunca las has bajado: una invitación a descargarlas gratis. Con «Ahora no» deja de salir hasta que haya un banco más nuevo.
+  - Se busca banco nuevo al abrir la ventana y cada hora. Si también hay versión nueva de EC-Tok, primero sale esa.
+- Arreglado: si quitabas el botón «⚔ Batalla», volvía a aparecer al abrir EC-Tok otra vez.
+
 ## 2.3.1
 - 🔄 EC-Tok busca actualización **cada vez que abres la ventana** (aunque ya estuviera corriendo) y, si lo dejas abierto, **cada hora**. Si hay versión nueva, aparece arriba la barra «Hay una versión nueva» sin tener que entrar a Ajustes.
 
