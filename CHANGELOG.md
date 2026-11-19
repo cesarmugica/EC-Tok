@@ -1,5 +1,8 @@
 # Cambios de EC-Tok
 
+## 2.3.3
+- 🔄 Después de actualizar, **la ventana de EC-Tok y los overlays (LIVE Studio / OBS) se recargan solos** con la versión nueva. Antes, a veces la ventana se quedaba mostrando la versión anterior aunque la nueva ya estuviera instalada.
+
 ## 2.3.2
 - 🎬 **Aviso de animaciones arriba, en cualquier pestaña**:
   - Si ya tienes las Animaciones Premium y sale un banco nuevo: «🆕 Hay animaciones nuevas · Actualizar animaciones».

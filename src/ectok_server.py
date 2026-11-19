@@ -28,7 +28,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, unquote, urlsplit
 
-APP_VERSION = "2.3.2"
+APP_VERSION = "2.3.3"
 
 try:  # lo genera windows/build.ps1
     from ectok_build import BUILD_DATE  # type: ignore[import-not-found]
@@ -1434,6 +1434,8 @@ class Handler(BaseHTTPRequestHandler):
             self.end_headers()
             self.close_connection = True
             self.wfile.write(b"retry: 2000\n\n")
+            # La versión que está corriendo: si la ventana o un overlay traen otra (se actualizó EC-Tok), se recargan solos.
+            self.wfile.write(f"data: {json.dumps(new_event('hello', version=APP_VERSION))}\n\n".encode("utf-8"))
             self.wfile.flush()
             while True:
                 try:

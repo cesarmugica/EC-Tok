@@ -387,7 +387,10 @@
   }
 
   const isPreview = params.has('preview');
+  let runningVersion = '';
   function onEvent(ev) {
+    // Si EC-Tok se actualizó mientras el overlay estaba abierto en LIVE Studio u OBS, recargarlo con la versión nueva.
+    if (ev.type === 'hello') { if (runningVersion && ev.version !== runningVersion) location.reload(); runningVersion = ev.version; return; }
     if (ev.preview && !isPreview) return;  // pruebas desde la vista previa de EC-Tok: no salen en el live
     if (ev.type === 'special') { if (which.includes('special')) showSpecial(ev); return; }
     if (ev.type === 'special_stop') { if (which.includes('special')) stopSpecial(); return; }
