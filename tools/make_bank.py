@@ -266,7 +266,7 @@ def track_board(rgbas: list, boxes: list):
     # mínimos cuadrados: wd·(p_i − det_i)² + wm·(p_i − p_{i−1} − mov_i)²
     det = np.c_[clean[:, 0], clean[:, 1], np.log(clean[:, 2]), clean[:, 4]]
     out = np.zeros((n, 4))
-    wm = np.where(good, 400.0, 0.0)
+    wm = np.where(good, 60.0, 0.0)
     wd = np.where(has, 1.0, 0.0)
     if not wd.any():
         wd[:] = 1.0
