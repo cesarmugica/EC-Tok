@@ -28,7 +28,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, unquote, urlsplit
 
-APP_VERSION = "2.3.0"
+APP_VERSION = "2.3.1"
 
 try:  # lo genera windows/build.ps1
     from ectok_build import BUILD_DATE  # type: ignore[import-not-found]
@@ -1413,6 +1413,7 @@ class Handler(BaseHTTPRequestHandler):
         elif path == "/api/stream":
             self._stream(query.get("who", ["panel"])[0][:20])
         elif path == "/api/update":
+            UPDATER.check()  # si ya pasó una hora desde la última vez, vuelve a buscar (la ventana pregunta cada 10 min)
             self.send_json(UPDATER.public())
         else:
             self.send_json({"ok": False, "error": "No encontrado."}, 404)

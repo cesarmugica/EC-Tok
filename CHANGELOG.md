@@ -1,5 +1,8 @@
 # Cambios de EC-Tok
 
+## 2.3.1
+- 🔄 EC-Tok busca actualización **cada vez que abres la ventana** (aunque ya estuviera corriendo) y, si lo dejas abierto, **cada hora**. Si hay versión nueva, aparece arriba la barra «Hay una versión nueva» sin tener que entrar a Ajustes.
+
 ## 2.3.0
 - ⚡ **Botones de acceso rápido en dos bloques**:
   - **✍ Personalizados**: escribes el texto y sale en el letrero del personaje (solo se eligen personajes con letrero). Si quitas la palomita «Personaje», el texto sale como alerta. Vienen 5 listos y puedes agregar más con «➕ Agregar personalizado».

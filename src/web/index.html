@@ -1209,7 +1209,8 @@
     const es = new EventSource('/api/stream?who=panel');
     es.onmessage = m => { try { onEvent(JSON.parse(m.data)); } catch (_) {} };
     setInterval(() => fetch('/api/ping').catch(() => {}), 20000);
-    checkUpdate(); setInterval(checkUpdate, 10 * 60 * 1000);
+    // Cada vez que se abre la ventana se busca actualización (aunque EC-Tok ya estuviera corriendo), y luego cada hora.
+    api('/api/update/check', {}).catch(() => {}).finally(() => setTimeout(checkUpdate, 2500)); setInterval(checkUpdate, 10 * 60 * 1000);
     try { const tab = localStorage.getItem('ectok-tab'); if (tab) document.querySelector(`nav.tabs button[data-tab="${tab}"]`)?.click(); } catch (_) {}
   }).catch(() => { $('#liveMsg').textContent = t('No se pudo conectar con EC-Tok. Ciérralo y vuelve a abrirlo.'); });
 </script>
