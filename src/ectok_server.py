@@ -28,7 +28,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, unquote, urlsplit
 
-APP_VERSION = "2.4.2"
+APP_VERSION = "2.4.3"
 
 try:  # lo genera windows/build.ps1
     from ectok_build import BUILD_DATE  # type: ignore[import-not-found]
@@ -127,7 +127,9 @@ DEFAULT_CONFIG: dict = {
     "top": {"count": 5, "title": "Top donadores"},
     "likers": {"count": 5, "title": "Top likes"},
     # Metas de acción: lista fija (hasta 10) de imagen + texto, ej. «🌌 Baile con canto»
-    "actions": {"title": "", "layout": "side", "size": 100, "circle": False, "items": []},
+    "actions": {"title": "", "layout": "side", "size": 100, "circle": False, "items": [],
+                # colores: vacío = el de siempre (título en el color de acento, texto blanco con sombra)
+                "title_color": "", "title_outline": "", "text_color": "", "text_outline": ""},
     "likes_rule_added": True,
     "user_likes_migrated": True,
     # Cosas que se hacen una sola vez (tienen que estar aquí para que se guarden entre reinicios).
@@ -513,6 +515,10 @@ def clean_config(data: dict) -> dict:
         a["size"] = int(_num(actions.get("size"), a["size"], 40, 250))
         if isinstance(actions.get("circle"), bool):
             a["circle"] = actions["circle"]
+        for key in ("title_color", "title_outline", "text_color", "text_outline"):
+            if key in actions:
+                value = str(actions.get(key) or "")
+                a[key] = value.upper() if HEX.fullmatch(value) else ""
         if isinstance(actions.get("items"), list):
             items = []
             for item in actions["items"][:10]:

@@ -1,5 +1,8 @@
 # Cambios de EC-Tok
 
+## 2.4.3
+- 🎯 Metas de acción: ahora eliges el **color del título** y el **color del texto de las metas**, cada uno con letra y orilla. Hay estilos listos (blanco, amarillo o cian con orilla negra; negro con orilla amarilla o blanca; morado o rosa con orilla blanca) o puedes poner tus propios colores. «Normal» deja el de siempre.
+
 ## 2.4.2
 - Arreglado: en LIVE Studio, OBS o el navegador (dirección localtest.me) las imágenes de las 🎯 Metas de acción no aparecían; solo se veían en la vista previa de EC-Tok.
 

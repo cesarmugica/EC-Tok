@@ -248,10 +248,14 @@
   function drawActions() {
     if (!which.includes('actions') || !cfg) return;
     const a = cfg.actions || {items: []}, box = $('#actions'), stack = a.layout === 'stack';
-    box.className = (stack ? 'stack' : '') + (a.circle ? ' circle' : ''); box.style.setProperty('--asz', (a.size || 100) / 100);
+    box.className = (stack ? 'stack' : '') + (a.circle ? ' circle' : '');
+    // colores elegidos: letra y orilla (la orilla se hace con sombras alrededor, como en los subtítulos)
+    const ring = c => { const o = []; for (let g = 0; g < 360; g += 30) o.push(`${(Math.cos(g * Math.PI / 180) * 0.06).toFixed(3)}em ${(Math.sin(g * Math.PI / 180) * 0.06).toFixed(3)}em 0 ${c}`); return o.join(',') + ',0 .1em .25em rgba(0,0,0,.5)'; };
+    const paint = (color, outline) => (color ? `color:${color};` : '') + (outline ? `text-shadow:${ring(outline)};` : ''); box.style.setProperty('--asz', (a.size || 100) / 100);
     const items = (a.items || []).filter(i => i.url || i.text);
-    box.innerHTML = (a.title ? `<h1 class="shadow">${esc(a.title)}</h1>` : '') + items.map(i =>
-      `<div class="${stack ? 'st' : 'side'}">${i.url ? `<img src="${esc(i.url)}" alt="">` : '<div class="ph">🎁</div>'}${i.text ? `<span class="tx shadow">${esc(i.text)}</span>` : ''}</div>`).join('');
+    const tStyle = paint(a.title_color, a.title_outline), xStyle = paint(a.text_color, a.text_outline);
+    box.innerHTML = (a.title ? `<h1 class="${a.title_outline ? '' : 'shadow'}" style="${tStyle}">${esc(a.title)}</h1>` : '') + items.map(i =>
+      `<div class="${stack ? 'st' : 'side'}">${i.url ? `<img src="${esc(i.url)}" alt="">` : '<div class="ph">🎁</div>'}${i.text ? `<span class="tx ${a.text_outline ? '' : 'shadow'}" style="${xStyle}">${esc(i.text)}</span>` : ''}</div>`).join('');
   }
 
   // ---------- animaciones (una a la vez, en fila) ----------
