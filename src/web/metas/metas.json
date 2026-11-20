@@ -254,11 +254,6 @@
 "en": "Taco",
 "pt": "Taco"
 },
-"pizza": {
-"es": "Pizza",
-"en": "Pizza",
-"pt": "Pizza"
-},
 "cafe": {
 "es": "Café",
 "en": "Coffee",
@@ -298,5 +293,15 @@
 "es": "Aplausos",
 "en": "Applause",
 "pt": "Aplausos"
+},
+"coral": {
+"es": "Coral",
+"en": "Coral",
+"pt": "Coral"
+},
+"corazon-manos": {
+"es": "Corazón con manos",
+"en": "Hand heart",
+"pt": "Coração com as mãos"
 }
 }

@@ -1,9 +1,12 @@
 # Cambios de EC-Tok
 
+## 2.4.1
+- 🎯 Banco de Metas de acción: nuevas **Coral** y **Corazón con manos**; delfín y «me gusta» mejorados; se quitó la pizza. Ahora son 61 imágenes. Para un regalo nuevo o que no esté en el banco usa la **caja de regalo** con tu texto (ej. «340 Coins - Baile»).
+
 ## 2.4.0 — 🎯 Metas de acción
 - **🎯 Metas de acción** (en «Metas y top»): una lista fija de hasta **10** cosas que haces en tu live, cada una con **imagen y texto**, por ejemplo «🌌 Baile con canto», «🪟 Canto canción norteña», «🐶 Como huevo crudo». No se mueven ni cuentan nada: se quedan en pantalla, como un cintillo.
   - Dos diseños: **imagen y texto al lado** o **imagen arriba y texto abajo** (tipo etiqueta), con título opcional y tamaño.
-  - **Banco de 60 imágenes propias de EC-Tok en HD** (rosa, corazón, galaxia, ventana cósmica, corgi, león, corona, dona, taco…). Son originales, no las de TikTok, y vienen incluidas.
+  - **Banco de imágenes propias de EC-Tok en HD** (rosa, corazón, galaxia, ventana cósmica, corgi, león, corona, dona, taco…). Son originales, no las de TikTok, y vienen incluidas.
   - **Tus propias imágenes**: «📂 Agregar mis imágenes…» (PNG, WebP, JPG o GIF).
   - Nueva dirección para LIVE Studio / OBS: **🎯 Metas de acción** (antes de 🌟 Especiales).
 - 🔄 Al abrir la ventana, la barra de «versión nueva» aparece en cuanto GitHub responde.
