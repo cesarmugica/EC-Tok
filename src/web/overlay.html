@@ -121,6 +121,24 @@
   .topbox li .pic .crown { width: 80%; left: 10%; top: -48%; }
   .topbox li .pic .medal { width: 62%; right: -22%; bottom: -22%; }
   .topbox .empty { opacity: .6; font-size: calc(var(--fs) * .5); }
+
+  /* ---------- metas de acción (lista fija: imagen + texto) ---------- */
+  #actions { margin: 12px; display: inline-flex; flex-direction: column; gap: calc(var(--au) * .18); --au: calc(var(--fs) * var(--asz, 1)); }
+  #actions h1 { margin: 0 0 calc(var(--au) * .1); font-size: calc(var(--au) * .62); color: var(--c2); }
+  #actions .side { display: flex; align-items: center; gap: calc(var(--au) * .22); padding: calc(var(--au) * .1) calc(var(--au) * .42) calc(var(--au) * .1) calc(var(--au) * .1);
+    border-radius: 999px; background: rgba(15,15,22,.55); border: 1px solid rgba(255,255,255,.14); width: fit-content; max-width: 92vw; }
+  #actions .side img, #actions .side .ph { width: calc(var(--au) * 1.25); height: calc(var(--au) * 1.25); object-fit: contain; flex: none; filter: drop-shadow(0 2px 3px rgba(0,0,0,.5)); }
+  #actions .side .tx { font-size: calc(var(--au) * .58); font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  #actions.stack { gap: calc(var(--au) * .12); align-items: center; }
+  #actions .st { display: flex; flex-direction: column; align-items: center; }
+  #actions .st img, #actions .st .ph { width: calc(var(--au) * 2.3); height: calc(var(--au) * 2.3); object-fit: contain; filter: drop-shadow(0 3px 5px rgba(0,0,0,.55)); }
+  #actions .st .tx { margin-top: calc(var(--au) * -.28); padding: calc(var(--au) * .05) calc(var(--au) * .38); border-radius: 999px; background: rgba(20,20,20,.82);
+    border: calc(var(--au) * .07) solid #E9B949; font-size: calc(var(--au) * .5); font-weight: 800; white-space: nowrap; max-width: 60vw; overflow: hidden; text-overflow: ellipsis; position: relative; }
+  #actions .ph { display: grid; place-items: center; font-size: calc(var(--au) * .8); }
+  #actions .st .ph { font-size: calc(var(--au) * 1.5); } #actions .side .ph { font-size: calc(var(--au) * .95); }
+  /* imagen dentro de un círculo oscuro semitransparente (opcional) */
+  #actions.circle .side img, #actions.circle .side .ph { padding: calc(var(--au) * .14); border-radius: 50%; background: rgba(0,0,0,.5); box-sizing: border-box; width: calc(var(--au) * 1.45); height: calc(var(--au) * 1.45); }
+  #actions.circle .st img, #actions.circle .st .ph { padding: calc(var(--au) * .26); border-radius: 50%; background: rgba(0,0,0,.5); box-sizing: border-box; }
 </style>
 </head>
 <body>
@@ -131,6 +149,7 @@
 <div id="goal" hidden></div>
 <div id="top" hidden></div>
 <div id="likers" hidden></div>
+<div id="actions" hidden></div>
 <script>
   const params = new URLSearchParams(location.search);
   const which = (params.get('w') || 'alerts').split(',');
@@ -223,6 +242,16 @@
     };
     if (which.includes('top')) board($('#top'), '🏆 ' + esc(cfg.top.title), stats.top.slice(0, cfg.top.count), '💎', d => d.diamonds, EMPTY_TOP, crown);
     if (which.includes('likes') && cfg.likers) board($('#likers'), '❤️ ' + esc(cfg.likers.title), (stats.likers || []).slice(0, cfg.likers.count), '❤️', d => d.likes, EMPTY_LIKES, medal);
+  }
+
+  // ---------- metas de acción ----------
+  function drawActions() {
+    if (!which.includes('actions') || !cfg) return;
+    const a = cfg.actions || {items: []}, box = $('#actions'), stack = a.layout === 'stack';
+    box.className = (stack ? 'stack' : '') + (a.circle ? ' circle' : ''); box.style.setProperty('--asz', (a.size || 100) / 100);
+    const items = (a.items || []).filter(i => i.url || i.text);
+    box.innerHTML = (a.title ? `<h1 class="shadow">${esc(a.title)}</h1>` : '') + items.map(i =>
+      `<div class="${stack ? 'st' : 'side'}">${i.url ? `<img src="${esc(i.url)}" alt="">` : '<div class="ph">🎁</div>'}${i.text ? `<span class="tx shadow">${esc(i.text)}</span>` : ''}</div>`).join('');
   }
 
   // ---------- animaciones (una a la vez, en fila) ----------
@@ -397,7 +426,7 @@
     if (ev.type === 'anim') { if (which.includes('anim')) playAnim(ev); return; }
     if (ev.type === 'brb') { if (which.includes('anim')) showBrb(ev.brb); return; }
     if (ev.stats) stats = ev.stats;
-    if (ev.type === 'config') { cfg = ev.overlay; stats = ev.overlay.stats; applyStyle(); if (which.includes('anim')) showBrb(cfg.brb); }
+    if (ev.type === 'config') { cfg = ev.overlay; stats = ev.overlay.stats; applyStyle(); drawActions(); if (which.includes('anim')) showBrb(cfg.brb); }
     if (ev.type === 'stats_reset') { load(); return; }
     if (which.includes('alerts')) {
       const conf = wantAlert(ev); if (conf) { queue.push({ev, conf}); next(); }
@@ -415,7 +444,8 @@
     applyStyle();
     if (which.includes('anim')) showBrb(data.brb);
     $('#goal').hidden = !which.includes('goal'); $('#top').hidden = !which.includes('top'); $('#likers').hidden = !which.includes('likes'); $('#alerts').hidden = !which.includes('alerts');
-    drawGoals(); drawTop();
+    $('#actions').hidden = !which.includes('actions');
+    drawGoals(); drawTop(); drawActions();
   }
   load().then(() => {
     const es = new EventSource('/api/stream?who=overlay');

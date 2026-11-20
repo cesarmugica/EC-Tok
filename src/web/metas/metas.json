@@ -1,0 +1,302 @@
+{
+"rosa": {
+"es": "Rosa",
+"en": "Rose",
+"pt": "Rosa"
+},
+"corazon": {
+"es": "Corazón",
+"en": "Heart",
+"pt": "Coração"
+},
+"corazones": {
+"es": "Corazones",
+"en": "Hearts",
+"pt": "Corações"
+},
+"dona": {
+"es": "Dona",
+"en": "Donut",
+"pt": "Rosquinha"
+},
+"perfume": {
+"es": "Perfume",
+"en": "Perfume",
+"pt": "Perfume"
+},
+"helado": {
+"es": "Helado",
+"en": "Ice cream",
+"pt": "Sorvete"
+},
+"pastel": {
+"es": "Pastel",
+"en": "Cake",
+"pt": "Bolo"
+},
+"galaxia": {
+"es": "Galaxia",
+"en": "Galaxy",
+"pt": "Galáxia"
+},
+"ventana-cosmica": {
+"es": "Ventana cósmica",
+"en": "Cosmic window",
+"pt": "Janela cósmica"
+},
+"planeta": {
+"es": "Planeta",
+"en": "Planet",
+"pt": "Planeta"
+},
+"universo": {
+"es": "Universo",
+"en": "Universe",
+"pt": "Universo"
+},
+"corona": {
+"es": "Corona",
+"en": "Crown",
+"pt": "Coroa"
+},
+"diamante": {
+"es": "Diamante",
+"en": "Diamond",
+"pt": "Diamante"
+},
+"estrella": {
+"es": "Estrella",
+"en": "Star",
+"pt": "Estrela"
+},
+"trofeo": {
+"es": "Trofeo",
+"en": "Trophy",
+"pt": "Troféu"
+},
+"leon": {
+"es": "León",
+"en": "Lion",
+"pt": "Leão"
+},
+"corgi": {
+"es": "Corgi",
+"en": "Corgi",
+"pt": "Corgi"
+},
+"gatito": {
+"es": "Gatito",
+"en": "Kitten",
+"pt": "Gatinho"
+},
+"perrito": {
+"es": "Perrito",
+"en": "Puppy",
+"pt": "Cachorrinho"
+},
+"osito": {
+"es": "Osito",
+"en": "Teddy bear",
+"pt": "Ursinho"
+},
+"panda": {
+"es": "Panda",
+"en": "Panda",
+"pt": "Panda"
+},
+"unicornio": {
+"es": "Unicornio",
+"en": "Unicorn",
+"pt": "Unicórnio"
+},
+"ballena": {
+"es": "Ballena",
+"en": "Whale",
+"pt": "Baleia"
+},
+"delfin": {
+"es": "Delfín",
+"en": "Dolphin",
+"pt": "Golfinho"
+},
+"mariposa": {
+"es": "Mariposa",
+"en": "Butterfly",
+"pt": "Borboleta"
+},
+"pinguino": {
+"es": "Pingüino",
+"en": "Penguin",
+"pt": "Pinguim"
+},
+"dinosaurio": {
+"es": "Dinosaurio",
+"en": "Dinosaur",
+"pt": "Dinossauro"
+},
+"rana": {
+"es": "Rana",
+"en": "Frog",
+"pt": "Sapo"
+},
+"cohete": {
+"es": "Cohete",
+"en": "Rocket",
+"pt": "Foguete"
+},
+"avion": {
+"es": "Avión",
+"en": "Airplane",
+"pt": "Avião"
+},
+"auto": {
+"es": "Auto deportivo",
+"en": "Sports car",
+"pt": "Carro esportivo"
+},
+"moto": {
+"es": "Moto",
+"en": "Motorcycle",
+"pt": "Moto"
+},
+"yate": {
+"es": "Yate",
+"en": "Yacht",
+"pt": "Iate"
+},
+"castillo": {
+"es": "Castillo",
+"en": "Castle",
+"pt": "Castelo"
+},
+"microfono": {
+"es": "Micrófono",
+"en": "Microphone",
+"pt": "Microfone"
+},
+"guitarra": {
+"es": "Guitarra",
+"en": "Guitar",
+"pt": "Violão"
+},
+"lentes": {
+"es": "Lentes",
+"en": "Sunglasses",
+"pt": "Óculos"
+},
+"gorra": {
+"es": "Gorra",
+"en": "Cap",
+"pt": "Boné"
+},
+"sombrero": {
+"es": "Sombrero",
+"en": "Sombrero",
+"pt": "Sombrero"
+},
+"globo": {
+"es": "Globo",
+"en": "Balloon",
+"pt": "Balão"
+},
+"regalo": {
+"es": "Regalo",
+"en": "Gift box",
+"pt": "Presente"
+},
+"cofre": {
+"es": "Cofre",
+"en": "Treasure chest",
+"pt": "Baú"
+},
+"dinero": {
+"es": "Dinero",
+"en": "Money",
+"pt": "Dinheiro"
+},
+"anillo": {
+"es": "Anillo",
+"en": "Ring",
+"pt": "Anel"
+},
+"beso": {
+"es": "Beso",
+"en": "Kiss",
+"pt": "Beijo"
+},
+"fuego": {
+"es": "Fuego",
+"en": "Fire",
+"pt": "Fogo"
+},
+"rayo": {
+"es": "Rayo",
+"en": "Lightning",
+"pt": "Raio"
+},
+"arcoiris": {
+"es": "Arcoíris",
+"en": "Rainbow",
+"pt": "Arco-íris"
+},
+"sol": {
+"es": "Sol",
+"en": "Sun",
+"pt": "Sol"
+},
+"luna": {
+"es": "Luna",
+"en": "Moon",
+"pt": "Lua"
+},
+"taco": {
+"es": "Taco",
+"en": "Taco",
+"pt": "Taco"
+},
+"pizza": {
+"es": "Pizza",
+"en": "Pizza",
+"pt": "Pizza"
+},
+"cafe": {
+"es": "Café",
+"en": "Coffee",
+"pt": "Café"
+},
+"chile": {
+"es": "Chile",
+"en": "Chili",
+"pt": "Pimenta"
+},
+"huevo": {
+"es": "Huevo",
+"en": "Egg",
+"pt": "Ovo"
+},
+"discoball": {
+"es": "Bola disco",
+"en": "Disco ball",
+"pt": "Globo de discoteca"
+},
+"fuegos": {
+"es": "Fuegos artificiales",
+"en": "Fireworks",
+"pt": "Fogos de artifício"
+},
+"confeti": {
+"es": "Confeti",
+"en": "Confetti",
+"pt": "Confete"
+},
+"pulgar": {
+"es": "Me gusta",
+"en": "Like",
+"pt": "Curtir"
+},
+"aplausos": {
+"es": "Aplausos",
+"en": "Applause",
+"pt": "Aplausos"
+}
+}

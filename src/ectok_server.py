@@ -126,6 +126,8 @@ DEFAULT_CONFIG: dict = {
     "goals": [{"id": "likes", "on": True, "kind": "likes", "target": 10000, "title": "Meta de likes"}],
     "top": {"count": 5, "title": "Top donadores"},
     "likers": {"count": 5, "title": "Top likes"},
+    # Metas de acción: lista fija (hasta 10) de imagen + texto, ej. «🌌 Baile con canto»
+    "actions": {"title": "", "layout": "side", "size": 100, "circle": False, "items": []},
     "likes_rule_added": True,
     "user_likes_migrated": True,
     # Cosas que se hacen una sola vez (tienen que estar aquí para que se guarden entre reinicios).
@@ -502,6 +504,23 @@ def clean_config(data: dict) -> dict:
     if isinstance(likers, dict):
         cfg["likers"]["count"] = int(_num(likers.get("count"), cfg["likers"]["count"], 1, 10))
         cfg["likers"]["title"] = _text(likers.get("title"), cfg["likers"]["title"], 60)
+    actions = data.get("actions")
+    if isinstance(actions, dict):
+        a = cfg["actions"]
+        a["title"] = _text(actions.get("title"), a["title"], 60)
+        if actions.get("layout") in ("side", "stack"):
+            a["layout"] = actions["layout"]
+        a["size"] = int(_num(actions.get("size"), a["size"], 40, 250))
+        if isinstance(actions.get("circle"), bool):
+            a["circle"] = actions["circle"]
+        if isinstance(actions.get("items"), list):
+            items = []
+            for item in actions["items"][:10]:
+                if isinstance(item, dict):
+                    image = str(item.get("image") or "")
+                    items.append({"id": re.sub(r"[^\w-]", "", str(item.get("id") or uuid.uuid4().hex[:8]))[:12] or uuid.uuid4().hex[:8],
+                                  "image": image if action_image_path(image) else "", "text": _text(item.get("text"), "", 60)})
+            a["items"] = items
     return cfg
 
 
@@ -1032,10 +1051,15 @@ import ectok_live  # noqa: E402
 ectok_live.LANG["value"] = CONFIG["language"]
 
 
+def overlay_actions() -> dict:
+    a = CONFIG["actions"]
+    return {**a, "items": [{**i, "url": action_image_url(i["image"])} for i in a["items"]]}
+
+
 def overlay_payload() -> dict:
     """Lo que necesitan los overlays: estilos, alertas, metas y el estado del live."""
     return {"style": CONFIG["style"], "alerts": CONFIG["alerts"], "goals": CONFIG["goals"], "top": CONFIG["top"], "likers": CONFIG["likers"],
-            "stats": LIVE.stats.public(CONFIG["top"]["count"]), "brb": {**CONFIG["anims"]["brb"], **BRB},
+            "actions": overlay_actions(), "stats": LIVE.stats.public(CONFIG["top"]["count"]), "brb": {**CONFIG["anims"]["brb"], **BRB},
             "lang": CONFIG["language"], "version": APP_VERSION}
 
 
@@ -1048,6 +1072,75 @@ def aliases_payload() -> list[list[str]]:
 # ---------------------------------------------------------------------------
 SOUND_EXTS = {".mp3", ".wav", ".ogg", ".m4a", ".aac", ".opus", ".flac", ".webm"}
 PICK_LOCK = threading.Lock()
+
+
+# ---------- imágenes de las metas de acción ----------
+ACTION_BANK = WEB_ROOT / "metas"          # banco de fábrica (imágenes propias de EC-Tok, en HD)
+ACTION_USER = HOME / "metas"              # las que sube cada quien
+ACTION_EXTS = {".png", ".webp", ".jpg", ".jpeg", ".gif"}
+
+
+def action_image_path(image_id: str) -> Path | None:
+    kind, _, name = str(image_id).partition("/")
+    if not name or "/" in name or "\\" in name or name.startswith("."):
+        return None
+    folder = {"b": ACTION_BANK, "u": ACTION_USER}.get(kind)
+    path = folder / name if folder else None
+    return path if path and path.is_file() and path.suffix.lower() in ACTION_EXTS else None
+
+
+def action_image_url(image_id: str) -> str:
+    kind, _, name = str(image_id).partition("/")
+    if not action_image_path(image_id):
+        return ""
+    return ("/metas/" if kind == "b" else "/mis-metas/") + name.replace("%", "%25").replace(" ", "%20").replace("#", "%23")
+
+
+def action_images() -> dict:
+    names = {}
+    with contextlib.suppress(OSError, ValueError):
+        names = json.loads((ACTION_BANK / "metas.json").read_text(encoding="utf-8"))
+    lang = CONFIG.get("language") or "es"
+    bank = []
+    if ACTION_BANK.is_dir():
+        for p in sorted(ACTION_BANK.iterdir()):
+            if p.suffix.lower() in ACTION_EXTS:
+                n = names.get(p.stem) or {}
+                bank.append({"id": f"b/{p.name}", "name": n.get(lang) or n.get("es") or anim_label(p.stem), "url": action_image_url(f"b/{p.name}")})
+    mine = []
+    if ACTION_USER.is_dir():
+        for p in sorted(ACTION_USER.iterdir(), key=lambda x: x.name.lower()):
+            if p.suffix.lower() in ACTION_EXTS:
+                mine.append({"id": f"u/{p.name}", "name": p.stem, "url": action_image_url(f"u/{p.name}")})
+    return {"bank": bank, "mine": mine}
+
+
+def import_action_image(path: Path) -> str:
+    """Traer una imagen del streamer (se guarda en PNG de máximo 512 px; las GIF/WebP se quedan como vienen)."""
+    ext = path.suffix.lower()
+    if ext not in ACTION_EXTS:
+        raise ValueError("Esa imagen no es compatible (PNG, WebP, JPG o GIF).")
+    if path.stat().st_size > 30 * 1024 * 1024:
+        raise ValueError("La imagen pesa más de 30 MB.")
+    ACTION_USER.mkdir(parents=True, exist_ok=True)
+    safe = re.sub(r"[^\w\-. ()]+", "_", path.stem)[:60].strip() or "imagen"
+    keep = ext in (".gif", ".webp")
+    out_ext = ext if keep else ".png"
+    target = ACTION_USER / f"{safe}{out_ext}"
+    n = 2
+    while target.exists():
+        target = ACTION_USER / f"{safe} ({n}){out_ext}"
+        n += 1
+    if keep or not FFMPEG:
+        shutil.copy2(path, target)
+    else:
+        result = subprocess.run([FFMPEG, "-hide_banner", "-nostdin", "-loglevel", "error", "-y", "-i", str(path), "-frames:v", "1",
+                                 "-vf", "scale='min(512,iw)':'min(512,ih)':force_original_aspect_ratio=decrease", str(target)],
+                                capture_output=True, creationflags=_no_window_flags())
+        if result.returncode != 0 or not target.exists():
+            shutil.copy2(path, target.with_suffix(ext))
+            target = target.with_suffix(ext)
+    return f"u/{target.name}"
 
 
 def pick_sound() -> str | None:
@@ -1389,6 +1482,14 @@ class Handler(BaseHTTPRequestHandler):
                 self.send_file(target)
             else:
                 self.send_error(404)
+        elif path.startswith(("/metas/", "/mis-metas/")):
+            target = action_image_path(("b/" if path.startswith("/metas/") else "u/") + unquote(path.rsplit("/", 1)[-1]))
+            if target:
+                self._send_bytes(target, mimetypes.guess_type(target.name)[0] or "image/png")
+            else:
+                self.send_error(404)
+        elif path == "/api/actions/images":
+            self.send_json({"ok": True, **action_images()})
         elif path.startswith("/anim/"):
             target = anim_path(unquote(path[len("/anim/"):]))
             if target:
@@ -1587,6 +1688,30 @@ class Handler(BaseHTTPRequestHandler):
                 self.send_json({"ok": True, "sound": import_sound(Path(chosen))})
             except (ValueError, OSError) as exc:
                 self.send_json({"ok": False, "error": str(exc)}, 400)
+        elif path == "/api/actions/add-images":
+            chosen = _pick_file({"en": "Choose your images", "pt": "Escolha suas imagens"}.get(CONFIG["language"], "Elige tus imágenes"),
+                                {"en": "Images", "pt": "Imagens"}.get(CONFIG["language"], "Imágenes"), ACTION_EXTS, Path.home() / "Pictures", multi=True)
+            added, errors = [], []
+            for item in chosen:
+                try:
+                    added.append(import_action_image(Path(item)))
+                except (ValueError, OSError) as exc:
+                    errors.append(f"{Path(item).name}: {exc}")
+            self.send_json({"ok": True, "added": added, "errors": errors, **action_images()})
+        elif path == "/api/actions/remove-image":
+            image = str(data.get("id") or "")
+            target = action_image_path(image)
+            if not target or target.parent != ACTION_USER:
+                self.send_json({"ok": False, "error": "Esa imagen no es tuya (las de fábrica no se borran)."}, 400)
+                return
+            with contextlib.suppress(OSError):
+                target.unlink()
+            for item in CONFIG["actions"]["items"]:
+                if item["image"] == image:
+                    item["image"] = ""
+            save_config(CONFIG)
+            BUS.emit(new_event("config", overlay=overlay_payload()))
+            self.send_json({"ok": True, "config": CONFIG, **action_images()})
         elif path == "/api/bank/status":
             busy = BANK["state"] in ("downloading", "installing")
             if not busy and (data.get("check") or not BANK["checked"] or time.time() - BANK["checked_at"] > 3600):

@@ -1,5 +1,13 @@
 # Cambios de EC-Tok
 
+## 2.4.0 — 🎯 Metas de acción
+- **🎯 Metas de acción** (en «Metas y top»): una lista fija de hasta **10** cosas que haces en tu live, cada una con **imagen y texto**, por ejemplo «🌌 Baile con canto», «🪟 Canto canción norteña», «🐶 Como huevo crudo». No se mueven ni cuentan nada: se quedan en pantalla, como un cintillo.
+  - Dos diseños: **imagen y texto al lado** o **imagen arriba y texto abajo** (tipo etiqueta), con título opcional y tamaño.
+  - **Banco de 60 imágenes propias de EC-Tok en HD** (rosa, corazón, galaxia, ventana cósmica, corgi, león, corona, dona, taco…). Son originales, no las de TikTok, y vienen incluidas.
+  - **Tus propias imágenes**: «📂 Agregar mis imágenes…» (PNG, WebP, JPG o GIF).
+  - Nueva dirección para LIVE Studio / OBS: **🎯 Metas de acción** (antes de 🌟 Especiales).
+- 🔄 Al abrir la ventana, la barra de «versión nueva» aparece en cuanto GitHub responde.
+
 ## 2.3.4
 - «Duran» y «Tamaño» de los botones de acceso rápido ahora están en su propio renglón, «⚙ Para todos los botones de acceso rápido», porque aplican a los personalizados y a los normales (antes parecía que solo eran del segundo bloque).
 
