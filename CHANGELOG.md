@@ -1,5 +1,8 @@
 # Cambios de EC-Tok
 
+## 2.4.2
+- Arreglado: en LIVE Studio, OBS o el navegador (dirección localtest.me) las imágenes de las 🎯 Metas de acción no aparecían; solo se veían en la vista previa de EC-Tok.
+
 ## 2.4.1
 - 🎯 Banco de Metas de acción: nuevas **Coral** y **Corazón con manos**; delfín y «me gusta» mejorados; se quitó la pizza. Ahora son 61 imágenes. Para un regalo nuevo o que no esté en el banco usa la **caja de regalo** con tu texto (ej. «340 Coins - Baile»).
 

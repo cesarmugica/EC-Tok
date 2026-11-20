@@ -28,7 +28,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, unquote, urlsplit
 
-APP_VERSION = "2.4.1"
+APP_VERSION = "2.4.2"
 
 try:  # lo genera windows/build.ps1
     from ectok_build import BUILD_DATE  # type: ignore[import-not-found]
@@ -43,7 +43,7 @@ LOCAL_HOSTS = {"127.0.0.1", "localhost", "[::1]", "::1"}
 # «localhost» ni «127.0.0.1» (TikTok LIVE Studio). Solo sirven los overlays.
 OVERLAY_HOSTS = {"ectok.localhost", "localtest.me", "ectok.localtest.me", "127.0.0.1.nip.io"}
 OVERLAY_PATHS = ("/overlay", "/overlay.html", "/api/overlay", "/api/stream")
-OVERLAY_PREFIXES = ("/img/", "/anim/", "/sound/")
+OVERLAY_PREFIXES = ("/img/", "/anim/", "/sound/", "/metas/", "/mis-metas/")
 IS_WINDOWS = os.name == "nt"
 
 
