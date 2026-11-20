@@ -387,4 +387,8 @@ T = {
 'Morado · orilla blanca': ('Purple · white outline', 'Roxo · contorno branco'),
 'Rosa · orilla blanca': ('Pink · white outline', 'Rosa · contorno branco'),
 'Cian · orilla negra': ('Cyan · black outline', 'Ciano · contorno preto'),
+'Entendido': ('Got it', 'Entendi'),
+'Sí, continuar': ('Yes, continue', 'Sim, continuar'),
+'Sí': ('Yes', 'Sim'),
+'Cancelar': ('Cancel', 'Cancelar'),
 }

@@ -1,5 +1,8 @@
 # Cambios de EC-Tok
 
+## 2.4.4
+- Las preguntas («¿Quitar…?», «¿Borrar…?», «¿Empezar la cuenta de cero?») y los avisos de error ahora salen en una **ventanita con el estilo de EC-Tok**, en vez del aviso del navegador. Arriba va la pregunta, después lo que se pierde, y en verde lo que **NO** se borra. Botones Cancelar / Sí, continuar (Esc cancela, Enter acepta). Los avisos solo tienen «Entendido».
+
 ## 2.4.3
 - 🎯 Metas de acción: ahora eliges el **color del título** y el **color del texto de las metas**, cada uno con letra y orilla. Hay estilos listos (blanco, amarillo o cian con orilla negra; negro con orilla amarilla o blanca; morado o rosa con orilla blanca) o puedes poner tus propios colores. «Normal» deja el de siempre.
 
