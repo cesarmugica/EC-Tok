@@ -1,5 +1,11 @@
 # Cambios de EC-Tok
 
+## 2.6.0 — 🎛 Consola de sonidos lista para usar
+- La **consola de sonidos ya viene llena** con los 63 sonidos del banco (festejo, risas, efectos y voces, cada grupo con su color). Solo quitas los que no quieras.
+- 🗑 en la consola **solo los quita de la consola**: el sonido no se borra, sigue en el banco. «🎧 Poner todos los del banco» vuelve a poner los que falten (sin repetir ni quitar los tuyos).
+- **🎵 Tus sonidos** en el banco: los que agregas de tu PC (desde la consola o con «📂 Mío…» en una regla) aparecen ahí, con ▶, ➕ regla, 🎛 consola y 🗑 (este sí borra el archivo y avisa antes). También se pueden elegir en las reglas y en las animaciones especiales.
+- En el banco, ✓🎛 marca los que ya están en la consola, y la consola ya no deja agregar el mismo sonido dos veces.
+
 ## 2.5.5
 - Arreglado: la 🎛 consola de sonidos con «📌 Mantener encima» se iba para atrás al darle clic a otra ventana (por ejemplo, la barra de título de LIVE Studio). Ahora se vuelve a poner encima sola en cuanto pierde el foco, y al abrirla espera a que Windows tenga lista la ventana antes de fijarla.
 

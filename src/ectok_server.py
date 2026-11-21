@@ -28,7 +28,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, unquote, urlsplit
 
-APP_VERSION = "2.5.5"
+APP_VERSION = "2.6.0"
 
 try:  # lo genera windows/build.ps1
     from ectok_build import BUILD_DATE  # type: ignore[import-not-found]
@@ -117,6 +117,7 @@ DEFAULT_CONFIG: dict = {
     # Consola de sonidos para tocar a mano durante el live (ventana flotante)
     "console": {"sounds": [], "ontop": True},
     "keys_for_all": False,
+    "console_seeded": False,
     "style": {"color": "#FE2C55", "accent": "#25F4EE", "font_size": 34, "animation": "pop", "position": "top"},
     "sounds": [],  # [{id, on, trigger: any_gift|gift|min_diamonds|follow|share|likes, gift, min_diamonds, every, file, name, volume}]
     "sound_overlap": False,
@@ -280,10 +281,46 @@ def load_config() -> dict:
             if "custom" not in (saved.get("anims") or {}):
                 _split_quick(cfg, saved)
             _keys_for_all(cfg, saved)
+            _seed_console(cfg, saved)
             return cfg
     cfg = _merge(DEFAULT_CONFIG, {})
     _keys_for_all(cfg, {})
+    _seed_console(cfg, {})
     return cfg
+
+
+def _seed_console(cfg: dict, saved: dict) -> None:
+    """2.6.0: la consola de sonidos viene con los sonidos del banco (una sola vez; si luego los quitas, no regresan solos)."""
+    if saved.get("console_seeded"):
+        return
+    cfg["console_seeded"] = True
+    if not cfg["console"]["sounds"]:
+        cfg["console"]["sounds"] = bank_console_items(cfg.get("language", "es"))
+
+
+def bank_console_items(lang: str, skip: set | None = None) -> list[dict]:
+    colors = ["#FE2C55", "#25F4EE", "#FFB020", "#7C5CFF", "#2ECC71", "#FF7AB6", "#3DA5FF", "#FF6B3D"]
+    order = {"fiesta": 0, "risas": 1, "efectos": 2, "voces": 3}
+    bank: list = []
+    with contextlib.suppress(OSError, ValueError):  # (se usa al cargar la configuración, antes de sound_bank())
+        bank = json.loads((SOUND_BANK / "sonidos.json").read_text(encoding="utf-8"))
+    bank = sorted(bank, key=lambda b: order.get(b.get("cat"), 9))
+    items = []
+    for b in bank:
+        if skip and b["file"] in skip:
+            continue
+        name = (b.get("name") or {}).get(lang) or (b.get("name") or {}).get("es") or Path(b["file"]).stem
+        items.append({"id": uuid.uuid4().hex[:8], "name": name[:40], "file": b["file"], "volume": 100,
+                      "color": colors[order.get(b.get("cat"), 0) * 2 % len(colors)]})
+    return items
+
+
+def my_sounds() -> list[dict]:
+    """Los sonidos que tú agregaste (tu carpeta de sonidos)."""
+    if not SOUNDS_DIR.is_dir():
+        return []
+    return [{"file": p.name, "name": re.sub(r"[_]+", " ", p.stem).strip(), "cat": "tuyos", "mine": True}
+            for p in sorted(SOUNDS_DIR.iterdir(), key=lambda p: p.name.lower()) if p.is_file() and p.suffix.lower() in SOUND_EXTS]
 
 
 def _keys_for_all(cfg: dict, saved: dict) -> None:
@@ -611,7 +648,7 @@ BRB = {"on": False}
 USER_LIKE_MARKS: dict[tuple, int] = {}
 LIKE_MARKS: dict[str, int] = {}
 ALERT_LIKE_MARK = {"value": None}
-CONSOLE_MAX = 48
+CONSOLE_MAX = 100
 
 
 def anim_label(stem: str) -> str:
@@ -1605,7 +1642,7 @@ class Handler(BaseHTTPRequestHandler):
         elif path == "/api/info":
             LAST_PING = time.time()
             self.send_json({"version": APP_VERSION, "build_date": BUILD_DATE, "config": CONFIG, "brb": BRB, "aliases": aliases_payload(),
-                            "animations": list_animations(), "sound_bank": sound_bank(),
+                            "animations": list_animations(), "sound_bank": sound_bank(), "my_sounds": my_sounds(),
                             "live": LIVE.public(CONFIG["top"]["count"]), "port": self.port,
                             "recent": list(LIVE.recent)[-60:]})
         elif path == "/api/overlay":
@@ -1778,6 +1815,26 @@ class Handler(BaseHTTPRequestHandler):
         elif path == "/api/anims/open":
             open_in_explorer(ANIM_USER)
             self.send_json({"ok": True})
+        elif path == "/api/sound/delete":
+            # Solo los tuyos (tu carpeta de sonidos); los del banco de EC-Tok no se borran.
+            name = Path(str(data.get("file") or "")).name
+            target = SOUNDS_DIR / name
+            if not name or not target.is_file() or target.suffix.lower() not in SOUND_EXTS:
+                self.send_json({"ok": False, "error": "No encontré ese sonido."}, 404)
+                return
+            target.unlink()
+            with CONFIG_LOCK:
+                CONFIG["console"]["sounds"] = [x for x in CONFIG["console"]["sounds"] if x.get("file") != name]
+            save_config(CONFIG)
+            self.send_json({"ok": True, "my_sounds": my_sounds(), "config": CONFIG})
+        elif path == "/api/console/bank":
+            # Volver a poner en la consola los sonidos del banco que falten (no duplica ni quita los tuyos).
+            with CONFIG_LOCK:
+                c = CONFIG["console"]["sounds"]
+                c += bank_console_items(CONFIG.get("language", "es"), {x.get("file") for x in c})
+                del c[CONSOLE_MAX:]
+            save_config(CONFIG)
+            self.send_json({"ok": True, "config": CONFIG})
         elif path == "/api/sound/pick":
             if data.get("multi"):  # consola: varios a la vez
                 chosen = _pick_file({"en": "Choose the sounds", "pt": "Escolha os sons"}.get(CONFIG["language"], "Elige los sonidos"),
