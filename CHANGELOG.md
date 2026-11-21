@@ -1,5 +1,8 @@
 # Cambios de EC-Tok
 
+## 2.5.4
+- Abajo dice ahora «¿Te ha servido EC-Tok? Invítanos un café (PayPal): @blukastle».
+
 ## 2.5.3 — ☕ «Ya regresamos» con tecla y fuente propia
 - **Tecla Ctrl+Alt+…** para «Ya regresamos»: la misma tecla lo pone y lo quita, aunque estés en LIVE Studio. Al actualizar toma sola la siguiente tecla libre (y las animaciones especiales que no tenían, también). El botón dice cuál es.
 - **Su propia fuente** ☕ Ya regresamos (pestaña 🔴 En vivo) para ponerla **a pantalla completa**, sin depender del tamaño de la fuente de animaciones.

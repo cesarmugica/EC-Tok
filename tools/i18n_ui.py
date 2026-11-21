@@ -296,7 +296,7 @@ T = {
 'tamaño': ('size', 'tamanho'),
 '💜 EC-Tok es gratis y siempre lo será. 💜': ('💜 EC-Tok is free and always will be. 💜', '💜 O EC-Tok é grátis e sempre será. 💜'),
 'Sigue al Staff EC-Tok en TikTok:': ('Follow the EC-Tok Staff on TikTok:', 'Siga o Staff EC-Tok no TikTok:'),
-'Invítanos un café (PayPal):': ('Buy us a coffee (PayPal):', 'Pague-nos um café (PayPal):'),
+'¿Te ha servido EC-Tok? Invítanos un café (PayPal):': ('Has EC-Tok helped you? Buy us a coffee (PayPal):', 'O EC-Tok te ajudou? Pague-nos um café (PayPal):'),
 '📥 Banco completo de personajes y efectos (se descarga una sola vez).': ('📥 Full library of characters and effects (downloaded only once).', '📥 Banco completo de personagens e efeitos (baixado uma só vez).'),
 '📥 Descargar banco completo': ('📥 Download full library', '📥 Baixar banco completo'),
 '📥 Actualizar banco completo': ('📥 Update full library', '📥 Atualizar banco completo'),
