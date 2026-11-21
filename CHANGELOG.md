@@ -1,5 +1,8 @@
 # Cambios de EC-Tok
 
+## 2.7.1
+- 🧪 Entorno de prueba: arriba vienen las **instrucciones** (agregar antes en LIVE Studio / OBS las fuentes que quieras probar; no es obligatorio agregarlas todas, pero sí recomendable) y la **lista de direcciones** de las fuentes con su botón 📋 Copiar.
+
 ## 2.7.0 — 🧪 Entorno de prueba
 - Nueva pestaña **🧪 Entorno de prueba** para simular un live lleno sin estar en vivo:
   - ❤️ {500} likes de un solo usuario cada {30} s (te dice cada cuánto saldría tu animación «cada N likes»)
