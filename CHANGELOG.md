@@ -1,6 +1,6 @@
 # Cambios de EC-Tok
 
-## 2.10.0 — 🔈 Audio de EC-Tok
+## 3.0.0 — 🔈 Audio de EC-Tok
 - En **⚙ Ajustes › 🔈 Audio de EC-Tok** eliges la **salida** por donde suena EC-Tok: sonidos de las reglas, 🎛 consola de sonidos y 🗣 la voz que lee el chat. Sin tocar la configuración de sonido de Windows.
 - La voz, con una salida elegida, se genera en tu PC con las voces de Windows para poder sacarla por esa salida. Si algo falla, sigue con la voz de siempre por la salida predeterminada y te avisa.
 - **Sonido de las 🌟 animaciones especiales**: por la fuente de LIVE Studio (como antes) o **por EC-Tok**, por la salida elegida. Ideal si tienes apagado el monitoreo de LIVE Studio y escuchas todo desde tu consola.
