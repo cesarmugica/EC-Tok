@@ -1,5 +1,10 @@
 # Cambios de EC-Tok
 
+## 2.5.2 — Teclas rápidas a prueba de errores
+- En la lista de teclas ves **quién usa cada una**: «Ctrl+Alt+1 · ya la usa: ¡Gracias!».
+- Si eliges una tecla que ya tiene otro botón (Personalizado, Acceso rápido o Especial), EC-Tok **pregunta** si se la pasas a este; el otro se queda sin tecla, pero no se borra. Antes se la quitaba sin avisar.
+- En 🌟 Animaciones especiales, si una tecla no se puede usar (la tiene otro programa o tu teclado escribe un carácter con ella), el aviso sale **debajo de esa misma animación**, con la tecla marcada en naranja.
+
 ## 2.5.1
 - 🌟 Animaciones especiales más ordenadas: cada una va en **dos renglones** (arriba: miniatura, animación, ⓘ, tamaño, sonido y volumen; abajo: **Acceso rápido**, **Duración**, ▶ y 🗑) y con una **línea divisoria** entre una y otra. Todo queda alineado.
 

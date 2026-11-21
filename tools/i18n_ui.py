@@ -418,4 +418,7 @@ T = {
 'Esa animación especial no tiene archivo.': ('That special animation has no file.', 'Essa animação especial não tem arquivo.'),
 'Acceso rápido:': ('Shortcut:', 'Atalho:'),
 'Duración:': ('Duration:', 'Duração:'),
+'ya la usa: {0}': ('used by: {0}', 'já usada por: {0}'),
+'Ctrl+Alt+{0} ya la usa «{1}». ¿Pasársela a este botón?\n\n«{1}» se queda sin tecla (le puedes poner otra cuando quieras). El botón y su animación NO se borran.': ('Ctrl+Alt+{0} is already used by “{1}”. Give it to this button?\n\n“{1}” will be left without a key (you can give it another one anytime). The button and its animation are NOT deleted.', 'Ctrl+Alt+{0} já é usada por «{1}». Passar para este botão?\n\n«{1}» fica sem tecla (você pode dar outra quando quiser). O botão e sua animação NÃO são apagados.'),
+'Sí, pasársela': ('Yes, give it', 'Sim, passar'),
 }
