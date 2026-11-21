@@ -394,7 +394,7 @@ T = {
 '📂 Subir mi animación…': ('📂 Upload my animation…', '📂 Enviar minha animação…'),
 '➕ Usar una que ya tengo': ('➕ Use one I already have', '➕ Usar uma que já tenho'),
 'Al subirla le pones el nombre con que quieres verla en la lista; se agrega aquí con su tecla Ctrl+Alt+… para lanzarla en vivo. Pasa el mouse por la ⓘ para ver qué archivo es y dónde está.': ('When you upload it you give it the name you want to see in the list; it is added here with its Ctrl+Alt+… key to launch it live. Hover over the ⓘ to see which file it is and where it is.', 'Ao enviar, você dá o nome com que quer vê-la na lista; ela é adicionada aqui com sua tecla Ctrl+Alt+… para lançá-la ao vivo. Passe o mouse no ⓘ para ver qual arquivo é e onde está.'),
-'«Dura» en 0 = hasta que termine el video (las imágenes duran 8 s). En 🔊 puedes dejar el sonido del video, quitárselo o ponerle uno del banco de sonidos en su lugar. Para que se oiga en LIVE Studio, deja prendido «Activar sonido» en la fuente de especiales.': ('“Lasts” at 0 = until the video ends (images last 8 s). In 🔊 you can keep the video’s sound, mute it, or use one from the sound library instead. To hear it in LIVE Studio, keep “Enable audio” on in the specials source.', '«Dura» em 0 = até o vídeo terminar (imagens duram 8 s). Em 🔊 você pode manter o som do vídeo, tirá-lo ou colocar um da biblioteca de sons no lugar. Para ouvir no LIVE Studio, deixe «Ativar áudio» ligado na fonte de especiais.'),
+'«Duración» en 0 = hasta que termine el video (las imágenes duran 8 s). En 🔊 puedes dejar el sonido del video, quitárselo o ponerle uno del banco de sonidos en su lugar. Para que se oiga en LIVE Studio, deja prendido «Activar sonido» en la fuente de especiales.': ('“Duration” at 0 = until the video ends (images last 8 s). In 🔊 you can keep the video’s sound, mute it, or use one from the sound library instead. To hear it in LIVE Studio, keep “Enable audio” on in the specials source.', '«Duração» em 0 = até o vídeo terminar (imagens duram 8 s). Em 🔊 você pode manter o som do vídeo, tirá-lo ou colocar um da biblioteca de sons no lugar. Para ouvir no LIVE Studio, deixe «Ativar áudio» ligado na fonte de especiais.'),
 'Archivo: {0}': ('File: {0}', 'Arquivo: {0}'),
 'Nombre: {0}': ('Name: {0}', 'Nome: {0}'),
 'Video original: {0}': ('Original video: {0}', 'Vídeo original: {0}'),
@@ -416,4 +416,6 @@ T = {
 'Agregar': ('Add', 'Adicionar'),
 'Solo puedes ponerle nombre a tus animaciones.': ('You can only name your own animations.', 'Você só pode dar nome às suas animações.'),
 'Esa animación especial no tiene archivo.': ('That special animation has no file.', 'Essa animação especial não tem arquivo.'),
+'Acceso rápido:': ('Shortcut:', 'Atalho:'),
+'Duración:': ('Duration:', 'Duração:'),
 }

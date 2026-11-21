@@ -1,5 +1,8 @@
 # Cambios de EC-Tok
 
+## 2.5.1
+- 🌟 Animaciones especiales más ordenadas: cada una va en **dos renglones** (arriba: miniatura, animación, ⓘ, tamaño, sonido y volumen; abajo: **Acceso rápido**, **Duración**, ▶ y 🗑) y con una **línea divisoria** entre una y otra. Todo queda alineado.
+
 ## 2.5.0 — 🌟 Animaciones especiales, más fáciles
 - **📂 Subir mi animación…** ahora está arriba de la lista (sirve para agregar cualquier animación, no solo la de un renglón). Eliges el archivo, **le pones el nombre** con que quieres verla y se agrega sola a la lista, al botón de 🔴 En vivo y con su **tecla Ctrl+Alt+…**.
 - En la lista se ve el **nombre que tú le pusiste**, no el nombre del archivo. ✎ para cambiarlo cuando quieras (el archivo no cambia).
