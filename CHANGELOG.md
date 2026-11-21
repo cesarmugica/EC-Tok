@@ -1,5 +1,10 @@
 # Cambios de EC-Tok
 
+## 2.6.1 — 🎛 Consola recomendada 6×6
+- La consola viene con **36 sonidos recomendados (6×6)** en vez de todo el banco: 2 renglones de festejo, 1 de risas, 2 de efectos y 1 de voces. Si en la 2.6.0 te llegaron los 63 y no los tocaste, se cambian solos a los 36.
+- La ventana de la consola abre del tamaño justo para el 6×6; si agregas más sonidos (🎛 en el banco), **crece** para que se vean todos.
+- «🎧 Poner los recomendados (6×6)» vuelve a poner los que falten.
+
 ## 2.6.0 — 🎛 Consola de sonidos lista para usar
 - La **consola de sonidos ya viene llena** con los 63 sonidos del banco (festejo, risas, efectos y voces, cada grupo con su color). Solo quitas los que no quieras.
 - 🗑 en la consola **solo los quita de la consola**: el sonido no se borra, sigue en el banco. «🎧 Poner todos los del banco» vuelve a poner los que falten (sin repetir ni quitar los tuyos).

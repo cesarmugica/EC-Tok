@@ -28,7 +28,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, unquote, urlsplit
 
-APP_VERSION = "2.6.0"
+APP_VERSION = "2.6.1"
 
 try:  # lo genera windows/build.ps1
     from ectok_build import BUILD_DATE  # type: ignore[import-not-found]
@@ -118,6 +118,7 @@ DEFAULT_CONFIG: dict = {
     "console": {"sounds": [], "ontop": True},
     "keys_for_all": False,
     "console_seeded": False,
+    "console_6x6": False,
     "style": {"color": "#FE2C55", "accent": "#25F4EE", "font_size": 34, "animation": "pop", "position": "top"},
     "sounds": [],  # [{id, on, trigger: any_gift|gift|min_diamonds|follow|share|likes, gift, min_diamonds, every, file, name, volume}]
     "sound_overlap": False,
@@ -290,12 +291,33 @@ def load_config() -> dict:
 
 
 def _seed_console(cfg: dict, saved: dict) -> None:
-    """2.6.0: la consola de sonidos viene con los sonidos del banco (una sola vez; si luego los quitas, no regresan solos)."""
+    """2.6.0: la consola de sonidos viene con los 36 recomendados (6×6) del banco (una sola vez; si luego los quitas, no regresan solos)."""
     if saved.get("console_seeded"):
+        # 2.6.1: quien recibió en 2.6.0 los 63 sonidos y no los tocó, pasa a los 36 recomendados (6×6)
+        if not saved.get("console_6x6"):
+            cfg["console_6x6"] = True
+            bank: list = []
+            with contextlib.suppress(OSError, ValueError):
+                bank = json.loads((SOUND_BANK / "sonidos.json").read_text(encoding="utf-8"))
+            files = [x.get("file") for x in cfg["console"]["sounds"]]
+            if bank and len(files) == len(bank) and set(files) == {b["file"] for b in bank}:
+                cfg["console"]["sounds"] = bank_console_items(cfg.get("language", "es"))
         return
+    cfg["console_6x6"] = True
     cfg["console_seeded"] = True
     if not cfg["console"]["sounds"]:
         cfg["console"]["sounds"] = bank_console_items(cfg.get("language", "es"))
+
+
+# La consola recomendada: 6×6 = 36 sonidos del banco, por renglones (festejo, risas, efectos, voces).
+CONSOLE_RECOMMENDED = [
+    "aplausos.mp3", "ovacion.mp3", "redoble-platillo.mp3", "corneta.mp3", "ta-da.mp3", "fanfarria-orquesta.mp3",
+    "victoria-piano.mp3", "guitarra-rockera.mp3", "fanfarria-8bit.mp3", "fuegos-artificiales.mp3", "cañon-confeti.mp3", "jingle-alegre.mp3",
+    "risa-mujer.mp3", "risa-hombre.mp3", "risa-malvada.mp3", "eructo.mp3", "boing.mp3", "triste-trombon.mp3",
+    "subir-nivel.mp3", "power-up.mp3", "monedas.mp3", "magia.mp3", "campanitas.mp3", "ding.mp3",
+    "subida.mp3", "whoosh.mp3", "silbato.mp3", "tambor-militar.mp3", "platillo.mp3", "laser.mp3",
+    "voz-congratulations.mp3", "voz-you-win.mp3", "voz-winner.mp3", "voz-level-up.mp3", "voz-fight.mp3", "voz-game-over.mp3",
+]
 
 
 def bank_console_items(lang: str, skip: set | None = None) -> list[dict]:
@@ -304,7 +326,8 @@ def bank_console_items(lang: str, skip: set | None = None) -> list[dict]:
     bank: list = []
     with contextlib.suppress(OSError, ValueError):  # (se usa al cargar la configuración, antes de sound_bank())
         bank = json.loads((SOUND_BANK / "sonidos.json").read_text(encoding="utf-8"))
-    bank = sorted(bank, key=lambda b: order.get(b.get("cat"), 9))
+    by_file = {b["file"]: b for b in bank}
+    bank = [by_file[f] for f in CONSOLE_RECOMMENDED if f in by_file]
     items = []
     for b in bank:
         if skip and b["file"] in skip:
@@ -1828,7 +1851,7 @@ class Handler(BaseHTTPRequestHandler):
             save_config(CONFIG)
             self.send_json({"ok": True, "my_sounds": my_sounds(), "config": CONFIG})
         elif path == "/api/console/bank":
-            # Volver a poner en la consola los sonidos del banco que falten (no duplica ni quita los tuyos).
+            # Volver a poner los 36 recomendados (6×6) que falten (no duplica ni quita los tuyos).
             with CONFIG_LOCK:
                 c = CONFIG["console"]["sounds"]
                 c += bank_console_items(CONFIG.get("language", "es"), {x.get("file") for x in c})
@@ -1898,7 +1921,7 @@ class Handler(BaseHTTPRequestHandler):
             bank_remove()
             self.send_json({"ok": True, "bank": bank_status(), "animations": list_animations()})
         elif path == "/api/console/open":
-            open_app_window(f"http://127.0.0.1:{self.port}/consola", "440,640")
+            open_app_window(f"http://127.0.0.1:{self.port}/consola", "760,600")
             self.send_json({"ok": True})
         elif path == "/api/console/ontop":
             on = bool(data.get("on"))
