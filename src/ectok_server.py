@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import argparse
 import contextlib
+import copy
 import ipaddress
 import json
 import mimetypes
@@ -28,7 +29,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, unquote, urlsplit
 
-APP_VERSION = "2.6.3"
+APP_VERSION = "2.7.0"
 
 try:  # lo genera windows/build.ps1
     from ectok_build import BUILD_DATE  # type: ignore[import-not-found]
@@ -1208,6 +1209,128 @@ def live_emit(event: dict) -> None:
 LIVE = Live(emit=live_emit, log=log)
 import ectok_live  # noqa: E402
 
+
+# ---------------------------------------------------------------------------
+# 🧪 Entorno de prueba: simular un live lleno (likes, follows, regalos…) para ver cómo se porta todo
+# ---------------------------------------------------------------------------
+SIM_KINDS = ("like", "follow", "share", "comment", "gift")
+SIM_LIKER = {"id": "sim_likes", "name": "Fan de prueba", "avatar": ""}
+
+
+class Simulator:
+    """Manda eventos de prueba en su propio hilo, cada N segundos, por el mismo camino que los del live real
+    (reglas, alertas, sonidos, metas y top). Al terminar puede dejar los números del live como estaban."""
+
+    def __init__(self) -> None:
+        self.lock = threading.Lock()
+        self.running = False
+        self.items: list[dict] = []
+        self.until = 0.0
+        self.started = 0.0
+        self.sent: dict[str, int] = {}
+        self.snapshot: dict | None = None
+        self.gen = 0
+
+    @staticmethod
+    def clean(raw) -> list[dict]:
+        items = []
+        for x in (raw or [])[:20]:
+            if not isinstance(x, dict) or x.get("kind") not in SIM_KINDS:
+                continue
+            items.append({"kind": x["kind"], "count": int(_num(x.get("count"), 1, 1, 5000)),
+                          "every": float(_num(x.get("every"), 10, 0.5, 3600)), "gift": _text(x.get("gift"), "", 60).strip(),
+                          "min": int(_num(x.get("min"), 0, 0, 1_000_000))})
+        return items
+
+    def _snap(self) -> dict:
+        st = LIVE.stats
+        with st.lock:
+            return copy.deepcopy({k: getattr(st, k) for k in ("started", "likes", "diamonds", "follows", "shares", "gifts",
+                                                               "comments", "donors", "likers", "gift_names")})
+
+    def start(self, items: list[dict], minutes: float) -> None:
+        with self.lock:
+            if not self.running:
+                self.snapshot = self._snap()  # cómo estaban los números antes de la prueba
+            self.gen += 1
+            self.items, self.running = items, True
+            self.started = time.time()
+            self.until = self.started + minutes * 60
+            self.sent = {}
+            gen = self.gen
+        threading.Thread(target=self._run, args=(gen,), daemon=True).start()
+        log(f"Entorno de prueba: simulación por {minutes:g} min ({len(items)} tipos de evento)")
+
+    def stop(self, restore: bool, finish: bool = True) -> None:
+        """finish=False: solo parar (se guarda la foto de los números para preguntar después si se regresan)."""
+        with self.lock:
+            self.running = False
+            self.gen += 1
+            if not finish:
+                return
+            snap, self.snapshot = self.snapshot, None
+        if restore and snap:
+            st = LIVE.stats
+            with st.lock:
+                for k, v in snap.items():
+                    setattr(st, k, v)
+            USER_LIKE_MARKS.clear()
+            LIKE_MARKS.clear()
+            ALERT_LIKE_MARK["value"] = None
+            BUS.emit(new_event("stats_reset"))  # los overlays de metas y top vuelven a leer los números
+
+    def public(self) -> dict:
+        with self.lock:
+            return {"running": self.running, "left": max(0, round(self.until - time.time())) if self.running else 0,
+                    "sent": dict(self.sent), "changed": self.snapshot is not None}
+
+    def _event(self, item: dict) -> list[dict]:
+        kind, n = item["kind"], item["count"]
+        if kind == "like":  # de un solo usuario: así también cuentan las reglas «cada N likes de una persona»
+            return [new_event("like", user=dict(SIM_LIKER), count=n, total_likes=0, test=True, sim=True)]
+        out = []
+        for _ in range(min(n, 200)):
+            if kind == "gift":
+                ev = test_event("gift", item["gift"])
+                gift = ev["gift"]
+                if item["gift"] and gift["name"].lower() != item["gift"].lower():  # un regalo que no está en la lista de prueba
+                    gift.update(name=item["gift"], diamonds=max(1, item["min"]), count=1)
+                elif not item["gift"] and item["min"]:  # «un regalo de N 💎 o más»
+                    known = sorted((g for g in ectok_live.TEST_GIFTS if g[1] >= item["min"]), key=lambda g: g[1])
+                    name, each = known[0] if known else (f"Regalo {item['min']} 💎", item["min"])
+                    gift.update(name=name, diamonds=each, count=1)
+                gift["total"] = gift["diamonds"] * gift["count"]
+            else:
+                ev = test_event(kind)
+            ev["sim"] = True
+            out.append(ev)
+        return out
+
+    def _run(self, gen: int) -> None:
+        due = [time.time() + 0.3 + i * 0.15 for i in range(len(self.items))]
+        while True:
+            with self.lock:
+                if gen != self.gen or not self.running:
+                    return
+                if time.time() >= self.until:
+                    self.running = False
+                    log("Entorno de prueba: terminó el tiempo de la simulación")
+                    BUS.emit(new_event("sim", running=False))
+                    return
+                items = list(self.items)
+            now = time.time()
+            for i, item in enumerate(items):
+                if now >= due[i]:
+                    due[i] = now + item["every"]
+                    for ev in self._event(item):
+                        LIVE.push(ev)
+                    with self.lock:
+                        self.sent[item["kind"]] = self.sent.get(item["kind"], 0) + item["count"]
+            time.sleep(0.1)
+
+
+SIM = Simulator()
+
 ectok_live.LANG["value"] = CONFIG["language"]
 
 
@@ -1821,6 +1944,18 @@ class Handler(BaseHTTPRequestHandler):
             event = test_event(str(data.get("type") or "gift"), str(data.get("gift") or ""))
             LIVE.push(event)
             self.send_json({"ok": True, "event": event})
+        elif path == "/api/sim/start":
+            items = Simulator.clean(data.get("items"))
+            if not items:
+                self.send_json({"ok": False, "error": "Prende al menos una simulación."}, 400)
+                return
+            SIM.start(items, 5)  # se detiene sola a los 5 minutos, por si se te olvida
+            self.send_json({"ok": True, "sim": SIM.public()})
+        elif path == "/api/sim/stop":
+            SIM.stop(bool(data.get("restore")), data.get("finish") is not False)
+            self.send_json({"ok": True, "sim": SIM.public(), "live": LIVE.public(CONFIG["top"]["count"])})
+        elif path == "/api/sim/status":
+            self.send_json({"ok": True, "sim": SIM.public(), "live_state": LIVE.state})
         elif path == "/api/reset-stats":
             LIVE.stats.reset()
             BUS.emit(new_event("stats_reset"))

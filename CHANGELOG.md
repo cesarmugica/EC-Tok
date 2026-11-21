@@ -1,5 +1,16 @@
 # Cambios de EC-Tok
 
+## 2.7.0 — 🧪 Entorno de prueba
+- Nueva pestaña **🧪 Entorno de prueba** para simular un live lleno sin estar en vivo:
+  - ❤️ {500} likes de un solo usuario cada {30} s (te dice cada cuánto saldría tu animación «cada N likes»)
+  - 💖 {4} nuevos seguidores cada {2} s
+  - 🎁 {1} regalo cada {20} s, eligiendo de **los regalos que ya configuraste** («Heart Me», «Regalo de 100 💎 o más»…) o de los comunes; «➕ Otro regalo» para probar varios
+  - 📣 compartidos y 💬 comentarios
+- Los eventos pasan por tu misma configuración (alertas, animaciones, sonidos, voz, metas y top) y salen en LIVE Studio / OBS.
+- **▶ Probar ahora** / **⏹ Detener**. Puedes irte a otra pestaña o a LIVE Studio: arriba se ve «🧪 Prueba en curso» con su ⏹. **Se detiene sola a los 5 minutos.**
+- Al detenerla pregunta si regresas los números del live (likes, diamantes, top…) a como estaban antes de la prueba.
+- Si estás conectado a tu live, avisa antes de empezar que lo simulado sí saldría en tu transmisión.
+
 ## 2.6.3
 - Arreglado de raíz: «📌 Mantener encima» de la 🎛 consola no funcionaba en Windows de 64 bits (la orden a Windows iba mal armada), por eso se iba para atrás al darle clic a LIVE Studio.
 - La consola **abre del tamaño justo del 6×6** (Edge recordaba el último tamaño y la abría más grande). Si agregas más sonidos, crece; si tú la acomodas, se respeta mientras esté abierta.
