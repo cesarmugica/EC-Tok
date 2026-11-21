@@ -498,11 +498,34 @@
     $('#actions').hidden = !which.includes('actions');
     drawGoals(); drawTop(); drawActions();
   }
+  // UNA sola conexión de eventos para todas las fuentes de EC-Tok abiertas en el mismo programa (LIVE Studio/OBS),
+  // con un «trabajador compartido» (overlay-worker.js). El navegador solo abre 6 conexiones a la vez con la misma
+  // dirección: con 6 o más fuentes, cada una con su conexión abierta, ya no quedaba lugar para bajar los videos y
+  // los personajes dejaban de salir. Si el navegador no tiene trabajadores compartidos, cada fuente se conecta sola.
+  function handle(ev) { if (ev.type === '_open') { load().catch(() => {}); return; } onEvent(ev); }
+  function ownStream() {
+    const es = new EventSource('/api/stream?who=overlay');
+    es.onmessage = m => { try { handle(JSON.parse(m.data)); } catch (_) {} };
+    es.onopen = () => handle({type: '_open'});
+  }
   load().then(() => {
-    // la fuente propia de «Ya regresamos» se anuncia (overlay-brb); las vistas previas de EC-Tok no cuentan
-    const es = new EventSource('/api/stream?who=' + (which.includes('brb') && !isPreviewFrame ? 'overlay-brb' : 'overlay'));
-    es.onmessage = m => { try { onEvent(JSON.parse(m.data)); } catch (_) {} };
-    es.onopen = () => load().catch(() => {});
+    let shared = false;
+    if (typeof SharedWorker === 'function') {
+      try {
+        const w = new SharedWorker('/overlay-worker.js?v=' + encodeURIComponent(OV_VERSION || ''), {name: 'ectok-eventos'});
+        w.port.onmessage = m => { try { handle(JSON.parse(m.data)); } catch (_) {} };
+        w.port.start();
+        addEventListener('pagehide', () => { try { w.port.postMessage('bye'); } catch (_) {} });
+        w.onerror = () => { if (!shared) return; shared = false; ownStream(); };  // si el trabajador falla, conectarse sola
+        shared = true;
+      } catch (_) { shared = false; }
+    }
+    if (!shared) ownStream();
+    // la fuente propia de «Ya regresamos» avisa que está abierta (las vistas previas de EC-Tok no cuentan)
+    if (which.includes('brb') && !isPreviewFrame) {
+      const here = () => fetch('/api/overlay?here=brb').catch(() => {});
+      here(); setInterval(here, 4000);
+    }
   }).catch(() => setTimeout(() => location.reload(), 3000));
 </script>
 </body>

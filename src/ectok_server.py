@@ -29,7 +29,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, unquote, urlsplit
 
-APP_VERSION = "2.7.6"
+APP_VERSION = "2.7.7"
 
 try:  # lo genera windows/build.ps1
     from ectok_build import BUILD_DATE  # type: ignore[import-not-found]
@@ -43,7 +43,7 @@ LOCAL_HOSTS = {"127.0.0.1", "localhost", "[::1]", "::1"}
 # Nombres con dominio que apuntan a esta misma PC, para programas que no aceptan
 # «localhost» ni «127.0.0.1» (TikTok LIVE Studio). Solo sirven los overlays.
 OVERLAY_HOSTS = {"ectok.localhost", "localtest.me", "ectok.localtest.me", "127.0.0.1.nip.io"}
-OVERLAY_PATHS = ("/overlay", "/overlay.html", "/api/overlay", "/api/stream")
+OVERLAY_PATHS = ("/overlay", "/overlay.html", "/overlay-worker.js", "/api/overlay", "/api/stream")
 OVERLAY_PREFIXES = ("/img/", "/anim/", "/sound/", "/metas/", "/mis-metas/")
 IS_WINDOWS = os.name == "nt"
 
@@ -932,9 +932,31 @@ def special_event(sp: dict, preview: bool = False) -> dict:
                      mute=sound == "none", sound=sound if sound not in ("", "none") else "")
 
 
+BRB_SEEN = {"t": 0.0}  # última vez que la fuente propia de «Ya regresamos» avisó que está abierta
+
+
+def brb_own() -> bool:
+    return BUS.count("overlay-brb") > 0 or time.time() - BRB_SEEN["t"] < 12
+
+
 def brb_payload() -> dict:
     # own: hay una fuente ☕ «Ya regresamos» abierta en LIVE Studio/OBS; entonces ya no sale en la de animaciones
-    return {**CONFIG["anims"]["brb"], **BRB, "own": BUS.count("overlay-brb") > 0}
+    return {**CONFIG["anims"]["brb"], **BRB, "own": brb_own()}
+
+
+def _brb_watch() -> None:
+    """Si la fuente de «Ya regresamos» aparece o desaparece, avisar a los overlays (para que no salga doble ni se pierda)."""
+    last = None
+    while True:
+        time.sleep(2)
+        now = brb_own()
+        if now != last:
+            if last is not None:
+                BUS.emit(new_event("brb", brb=brb_payload()))
+            last = now
+
+
+threading.Thread(target=_brb_watch, daemon=True).start()
 
 
 def set_brb(on: bool) -> None:
@@ -1776,6 +1798,8 @@ class Handler(BaseHTTPRequestHandler):
             self.send_file(WEB_ROOT / "index.html", html.encode("utf-8"))
         elif path in ("/overlay", "/overlay.html"):
             self.send_file(WEB_ROOT / "overlay.html")
+        elif path == "/overlay-worker.js":
+            self._send_bytes(WEB_ROOT / "overlay-worker.js", "text/javascript; charset=utf-8")
         elif path in ("/consola", "/consola.html"):
             html = (WEB_ROOT / "consola.html").read_text(encoding="utf-8").replace('<html lang="es">', f'<html lang="{CONFIG["language"]}">', 1)
             self.send_file(WEB_ROOT / "consola.html", html.encode("utf-8"))
@@ -1812,6 +1836,10 @@ class Handler(BaseHTTPRequestHandler):
                             "live": LIVE.public(CONFIG["top"]["count"]), "port": self.port,
                             "recent": list(LIVE.recent)[-60:]})
         elif path == "/api/overlay":
+            if query.get("here") == ["brb"]:  # la fuente propia de «Ya regresamos» avisa que está abierta
+                BRB_SEEN["t"] = time.time()
+                self.send_json({"ok": True})
+                return
             self.send_json(overlay_payload())
         elif path == "/api/state":
             LAST_PING = time.time()
