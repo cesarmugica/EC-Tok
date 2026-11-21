@@ -28,7 +28,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, unquote, urlsplit
 
-APP_VERSION = "2.5.2"
+APP_VERSION = "2.5.3"
 
 try:  # lo genera windows/build.ps1
     from ectok_build import BUILD_DATE  # type: ignore[import-not-found]
@@ -116,6 +116,7 @@ DEFAULT_CONFIG: dict = {
     },
     # Consola de sonidos para tocar a mano durante el live (ventana flotante)
     "console": {"sounds": [], "ontop": True},
+    "keys_for_all": False,
     "style": {"color": "#FE2C55", "accent": "#25F4EE", "font_size": 34, "animation": "pop", "position": "top"},
     "sounds": [],  # [{id, on, trigger: any_gift|gift|min_diamonds|follow|share|likes, gift, min_diamonds, every, file, name, volume}]
     "sound_overlap": False,
@@ -174,7 +175,7 @@ DEFAULT_CONFIG: dict = {
         ],
         "quick_seconds": 4,
         "quick_size": 70,
-        "brb": {"file": "cafe-ya-regreso.webp", "text": "Ya regresamos", "sub": "No te vayas 💖", "dim": True},
+        "brb": {"id": "brb", "file": "cafe-ya-regreso.webp", "text": "Ya regresamos", "sub": "No te vayas 💖", "dim": True, "key": ""},
         # Animaciones especiales: las del streamer (intro de batalla, etc.); solo se muestran cuando él las lanza.
         "special": [],
     },
@@ -211,7 +212,7 @@ def _scene_files() -> set:
 def assign_keys(a: dict) -> None:
     """Cada botón con una tecla distinta (Ctrl+Alt+tecla); los que no tienen, la siguiente libre."""
     used: set = set()
-    items = [*a.get("custom", []), *a.get("quick", []), *a.get("special", [])]
+    items = [*a.get("custom", []), *a.get("quick", []), *a.get("special", []), *([a["brb"]] if isinstance(a.get("brb"), dict) else [])]
     for item in items:
         key = item.get("key") or ""
         if key not in HOTKEY_KEYS or key in used:
@@ -278,8 +279,23 @@ def load_config() -> dict:
                     rule["name"] = rule.get("id") in ("heartme", "follow", "big", "chest", "sub")
             if "custom" not in (saved.get("anims") or {}):
                 _split_quick(cfg, saved)
+            _keys_for_all(cfg, saved)
             return cfg
-    return _merge(DEFAULT_CONFIG, {})
+    cfg = _merge(DEFAULT_CONFIG, {})
+    _keys_for_all(cfg, {})
+    return cfg
+
+
+def _keys_for_all(cfg: dict, saved: dict) -> None:
+    """2.5.3: las animaciones especiales y «Ya regresamos» también traen tecla Ctrl+Alt (la siguiente libre), una sola vez."""
+    if saved.get("keys_for_all"):
+        return
+    cfg["keys_for_all"] = True
+    a = cfg["anims"]
+    for item in [*a.get("special", []), a["brb"]]:
+        if not item.get("key"):
+            item["_auto"] = True
+    assign_keys(a)
 
 
 def save_config(config: dict) -> None:
@@ -493,7 +509,6 @@ def clean_config(data: dict) -> dict:
                              "key": _text(q.get("key"), "", 4), "sound": Path(_text(q.get("sound"), "", 120)).name,
                              "_auto": "key" not in q}  # las de antes (sin tecla) toman la siguiente libre
                             for q in anims["special"][:SPECIAL_MAX] if isinstance(q, dict)]
-        assign_keys(a)
         brb = anims.get("brb")
         if isinstance(brb, dict):
             a["brb"]["file"] = Path(str(brb.get("file") or a["brb"]["file"])).name
@@ -501,6 +516,11 @@ def clean_config(data: dict) -> dict:
             a["brb"]["sub"] = _text(brb.get("sub"), a["brb"]["sub"], 80)
             if isinstance(brb.get("dim"), bool):
                 a["brb"]["dim"] = brb["dim"]
+            a["brb"]["id"] = "brb"
+            a["brb"]["key"] = _text(brb.get("key"), "", 4)
+            if "key" not in brb:  # 2.5.3: «Ya regresamos» también trae su tecla; la siguiente libre
+                a["brb"]["_auto"] = True
+        assign_keys(a)
     top = data.get("top")
     if isinstance(top, dict):
         cfg["top"]["count"] = int(_num(top.get("count"), cfg["top"]["count"], 1, 10))
@@ -536,6 +556,20 @@ def clean_config(data: dict) -> dict:
 # ---------------------------------------------------------------------------
 # Eventos en vivo para la ventana y los overlays (Server-Sent Events)
 # ---------------------------------------------------------------------------
+def _peer_closed(sock) -> bool:
+    """¿La otra punta cerró la conexión? (sin esperar a que falle un envío)."""
+    import select
+
+    with contextlib.suppress(OSError, ValueError):
+        ready, _w, _x = select.select([sock], [], [], 0)
+        if ready:
+            import socket
+
+            return sock.recv(1, socket.MSG_PEEK) == b""
+        return False
+    return True
+
+
 class Bus:
     def __init__(self) -> None:
         self.lock = threading.Lock()
@@ -837,9 +871,22 @@ def special_event(sp: dict, preview: bool = False) -> dict:
                      mute=sound == "none", sound=sound if sound not in ("", "none") else "")
 
 
+def brb_payload() -> dict:
+    # own: hay una fuente ☕ «Ya regresamos» abierta en LIVE Studio/OBS; entonces ya no sale en la de animaciones
+    return {**CONFIG["anims"]["brb"], **BRB, "own": BUS.count("overlay-brb") > 0}
+
+
+def set_brb(on: bool) -> None:
+    BRB["on"] = bool(on)
+    BUS.emit(new_event("brb", brb=brb_payload()))
+
+
 def fire_button(kind: str, item_id: str, preview: bool = False) -> str:
     """Lanzar un botón de acceso rápido (clic o Ctrl+Alt+tecla). Regresa el error, o "" si salió."""
     a = CONFIG["anims"]
+    if kind == "brb":  # la tecla de «Ya regresamos» lo pone y lo quita
+        set_brb(not BRB["on"])
+        return ""
     item = next((q for q in a.get(kind, []) if q.get("id") == item_id), None) if kind in ("custom", "quick", "special") else None
     if not item:
         return "No encontré ese botón."
@@ -920,8 +967,8 @@ class Hotkeys:
         self.problems = {}
         a = CONFIG["anims"]
         hid = 1
-        for kind in ("custom", "quick", "special"):
-            for item in a.get(kind, []):
+        for kind in ("custom", "quick", "special", "brb"):
+            for item in ([a["brb"]] if kind == "brb" else a.get(kind, [])):
                 key = item.get("key") or ""
                 if key not in HOTKEY_KEYS:
                     continue
@@ -1112,7 +1159,7 @@ def overlay_actions() -> dict:
 def overlay_payload() -> dict:
     """Lo que necesitan los overlays: estilos, alertas, metas y el estado del live."""
     return {"style": CONFIG["style"], "alerts": CONFIG["alerts"], "goals": CONFIG["goals"], "top": CONFIG["top"], "likers": CONFIG["likers"],
-            "actions": overlay_actions(), "stats": LIVE.stats.public(CONFIG["top"]["count"]), "brb": {**CONFIG["anims"]["brb"], **BRB},
+            "actions": overlay_actions(), "stats": LIVE.stats.public(CONFIG["top"]["count"]), "brb": brb_payload(),
             "lang": CONFIG["language"], "version": APP_VERSION}
 
 
@@ -1581,6 +1628,8 @@ class Handler(BaseHTTPRequestHandler):
         """Eventos en tiempo real (la conexión se queda abierta)."""
         global LAST_PING
         sid, q = BUS.subscribe(who)
+        if who == "overlay-brb":
+            BUS.emit(new_event("brb", brb=brb_payload()))
         try:
             self.send_response(200)
             self.send_header("Content-Type", "text/event-stream; charset=utf-8")
@@ -1591,19 +1640,29 @@ class Handler(BaseHTTPRequestHandler):
             # La versión que está corriendo: si la ventana o un overlay traen otra (se actualizó EC-Tok), se recargan solos.
             self.wfile.write(f"data: {json.dumps(new_event('hello', version=APP_VERSION))}\n\n".encode("utf-8"))
             self.wfile.flush()
+            # La fuente de «Ya regresamos» se revisa seguido: si la quitan de LIVE Studio, que vuelva a salir en la
+            # de animaciones en segundos (no hasta que falle un envío).
+            watch = who == "overlay-brb"
+            last_write = time.time()
             while True:
                 try:
-                    event = q.get(timeout=15)
+                    event = q.get(timeout=3 if watch else 15)
                     payload = json.dumps(event, ensure_ascii=False)
                     self.wfile.write(f"data: {payload}\n\n".encode("utf-8"))
                 except queue.Empty:
+                    if watch and _peer_closed(self.connection):
+                        break
+                    if watch and time.time() - last_write < 15:
+                        continue
                     self.wfile.write(b": sigo aqui\n\n")
                 self.wfile.flush()
-                LAST_PING = time.time()
+                last_write = LAST_PING = time.time()
         except (ConnectionError, OSError):
             pass
         finally:
             BUS.unsubscribe(sid)
+            if who == "overlay-brb":
+                BUS.emit(new_event("brb", brb=brb_payload()))
 
     def _send_bytes(self, target: Path, ctype: str) -> None:
         size = target.stat().st_size
@@ -1714,8 +1773,7 @@ class Handler(BaseHTTPRequestHandler):
         elif path == "/api/hotkeys":
             self.send_json({"ok": True, **HOTKEYS.status()})
         elif path == "/api/brb":
-            BRB["on"] = bool(data.get("on"))
-            BUS.emit(new_event("brb", brb={**CONFIG["anims"]["brb"], **BRB}))
+            set_brb(bool(data.get("on")))
             self.send_json({"ok": True, "brb": BRB})
         elif path == "/api/anims/open":
             open_in_explorer(ANIM_USER)

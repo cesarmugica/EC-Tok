@@ -187,8 +187,9 @@ T = {
   "Batalhas e multiplicadores x2/x3 quase não são documentados pelo TikTok: o EC-Tok tenta reconhecê-los sozinho. Se não aparecerem na sua live, use os botões de acesso rápido (e envie seu registro para ajustá-los)."),
 "Para lanzar una animación cuando tú quieras (también con las teclas 1 a 9 en la pestaña 🔴 En vivo).":
  ("To launch an animation whenever you want (also with keys 1 to 9 in the 🔴 LIVE tab).", "Para lançar uma animação quando você quiser (também com as teclas 1 a 9 na aba 🔴 Ao vivo)."),
-"Para cuando te paras un momento: se queda en pantalla (con la animación que elijas) hasta que lo quitas.":
- ("For when you step away for a moment: it stays on screen (with the animation you choose) until you remove it.", "Para quando você sai um pouco: fica na tela (com a animação que você escolher) até você tirar."),
+"Para cuando te paras un momento: se queda en pantalla (con la animación que elijas) hasta que lo quitas. Con su tecla Ctrl+Alt+… lo pones y lo quitas sin salir de LIVE Studio.":
+    ("For when you step away for a moment: it stays on screen (with the animation you choose) until you remove it. With its Ctrl+Alt+… key you turn it on and off without leaving LIVE Studio.",
+     "Para quando você sai por um momento: fica na tela (com a animação que você escolher) até você tirar. Com a tecla Ctrl+Alt+… você liga e desliga sem sair do LIVE Studio."),
 "Cada regla dice qué sonido toca y cuándo. Si un regalo cumple varias, suena la más específica: el regalo exacto, luego «regalo de N 💎 o más» (la más alta que cumpla) y al final «cualquier regalo».":
  ("Each rule says which sound plays and when. If a gift matches several, the most specific plays: the exact gift, then “gift of N 💎 or more” (the highest one it meets) and finally “any gift”.",
   "Cada regra diz qual som toca e quando. Se um presente cumpre várias, toca a mais específica: o presente exato, depois «presente de N 💎 ou mais» (a mais alta que cumprir) e por último «qualquer presente»."),
@@ -421,4 +422,7 @@ T = {
 'ya la usa: {0}': ('used by: {0}', 'já usada por: {0}'),
 'Ctrl+Alt+{0} ya la usa «{1}». ¿Pasársela a este botón?\n\n«{1}» se queda sin tecla (le puedes poner otra cuando quieras). El botón y su animación NO se borran.': ('Ctrl+Alt+{0} is already used by “{1}”. Give it to this button?\n\n“{1}” will be left without a key (you can give it another one anytime). The button and its animation are NOT deleted.', 'Ctrl+Alt+{0} já é usada por «{1}». Passar para este botão?\n\n«{1}» fica sem tecla (você pode dar outra quando quiser). O botão e sua animação NÃO são apagados.'),
 'Sí, pasársela': ('Yes, give it', 'Sim, passar'),
+'Tiene <b>su propia fuente</b>: agrega en LIVE Studio u OBS la dirección <b>☕ Ya regresamos</b> (pestaña 🔴 En vivo) <b>a pantalla completa</b> y encima de las demás. Si no la agregas, sale en la fuente de animaciones, como antes.': ('It has <b>its own source</b>: add the <b>☕ Be right back</b> address (🔴 Live tab) in LIVE Studio or OBS, <b>full screen</b> and on top of the others. If you don’t add it, it shows in the animations source, as before.', 'Tem <b>sua própria fonte</b>: adicione no LIVE Studio ou OBS o endereço <b>☕ Já voltamos</b> (aba 🔴 Ao vivo) <b>em tela cheia</b> e acima das outras. Se não adicionar, aparece na fonte de animações, como antes.'),
+'Ya regresamos': ('Be right back', 'Já voltamos'),
+'☕ Ya regresamos': ('☕ Be right back', '☕ Já voltamos'),
 }

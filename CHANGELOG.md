@@ -1,5 +1,10 @@
 # Cambios de EC-Tok
 
+## 2.5.3 — ☕ «Ya regresamos» con tecla y fuente propia
+- **Tecla Ctrl+Alt+…** para «Ya regresamos»: la misma tecla lo pone y lo quita, aunque estés en LIVE Studio. Al actualizar toma sola la siguiente tecla libre (y las animaciones especiales que no tenían, también). El botón dice cuál es.
+- **Su propia fuente** ☕ Ya regresamos (pestaña 🔴 En vivo) para ponerla **a pantalla completa**, sin depender del tamaño de la fuente de animaciones.
+- Si no agregas esa fuente, sigue saliendo en la de animaciones como antes, para que no se te pierda. Cuando la agregas, ya solo sale en la suya; si la quitas, regresa a la de animaciones en unos segundos.
+
 ## 2.5.2 — Teclas rápidas a prueba de errores
 - En la lista de teclas ves **quién usa cada una**: «Ctrl+Alt+1 · ya la usa: ¡Gracias!».
 - Si eliges una tecla que ya tiene otro botón (Personalizado, Acceso rápido o Especial), EC-Tok **pregunta** si se la pasas a este; el otro se queda sin tecla, pero no se borra. Antes se la quitaba sin avisar.

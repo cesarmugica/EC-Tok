@@ -153,6 +153,7 @@
 <script>
   const params = new URLSearchParams(location.search);
   const which = (params.get('w') || 'alerts').split(',');
+  const isPreviewFrame = params.has('preview');
   let OV_VERSION = '';
   const $ = s => document.querySelector(s);
   const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[c]));
@@ -387,9 +388,12 @@
       vidEl.addEventListener('error', () => { clearTimeout(safety); finish(); });
     } else setTimeout(finish, a.seconds * 1000);
   }
+  // «Ya regresamos» sale en su propia fuente (w=brb, a pantalla completa). Si esa fuente no está abierta en
+  // LIVE Studio/OBS, sale en la de animaciones como antes, para que a nadie se le pierda al actualizar.
+  const brbHere = b => which.includes('brb') || (which.includes('anim') && !(b && b.own && !isPreviewFrame));
   function showBrb(b) {
     const box = $('#brb');
-    if (!b || !b.on) { box.hidden = true; box.className = ''; box.innerHTML = ''; return; }
+    if (!b || !b.on || !brbHere(b)) { box.hidden = true; box.className = ''; box.innerHTML = ''; return; }
     const src = '/anim/' + encodeURIComponent(b.file);
     const pic = b.file.toLowerCase().endsWith('.webm') ? `<video class="pic" src="${src}" autoplay muted loop playsinline></video>` : `<img class="pic" src="${src}" alt="">`;
     box.className = b.dim ? 'dim' : '';
@@ -435,9 +439,9 @@
     if (ev.type === 'special') { if (which.includes('special')) showSpecial(ev); return; }
     if (ev.type === 'special_stop') { if (which.includes('special')) stopSpecial(); return; }
     if (ev.type === 'anim') { if (which.includes('anim')) playAnim(ev); return; }
-    if (ev.type === 'brb') { if (which.includes('anim')) showBrb(ev.brb); return; }
+    if (ev.type === 'brb') { showBrb(ev.brb); return; }
     if (ev.stats) stats = ev.stats;
-    if (ev.type === 'config') { cfg = ev.overlay; stats = ev.overlay.stats; applyStyle(); drawActions(); if (which.includes('anim')) showBrb(cfg.brb); }
+    if (ev.type === 'config') { cfg = ev.overlay; stats = ev.overlay.stats; applyStyle(); drawActions(); showBrb(cfg.brb); }
     if (ev.type === 'stats_reset') { load(); return; }
     if (which.includes('alerts')) {
       const conf = wantAlert(ev); if (conf) { queue.push({ev, conf}); next(); }
@@ -453,13 +457,14 @@
     OV_VERSION = data.version || OV_VERSION;
     cfg = data; stats = data.stats; LOC = {en: 'en-US', pt: 'pt-BR'}[data.lang] || 'es-MX'; likeMark = Math.floor(stats.likes / (cfg.alerts.like.every || 1)) * (cfg.alerts.like.every || 1);
     applyStyle();
-    if (which.includes('anim')) showBrb(data.brb);
+    showBrb(data.brb);
     $('#goal').hidden = !which.includes('goal'); $('#top').hidden = !which.includes('top'); $('#likers').hidden = !which.includes('likes'); $('#alerts').hidden = !which.includes('alerts');
     $('#actions').hidden = !which.includes('actions');
     drawGoals(); drawTop(); drawActions();
   }
   load().then(() => {
-    const es = new EventSource('/api/stream?who=overlay');
+    // la fuente propia de «Ya regresamos» se anuncia (overlay-brb); las vistas previas de EC-Tok no cuentan
+    const es = new EventSource('/api/stream?who=' + (which.includes('brb') && !isPreviewFrame ? 'overlay-brb' : 'overlay'));
     es.onmessage = m => { try { onEvent(JSON.parse(m.data)); } catch (_) {} };
     es.onopen = () => load().catch(() => {});
   }).catch(() => setTimeout(() => location.reload(), 3000));
