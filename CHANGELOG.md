@@ -1,5 +1,8 @@
 # Cambios de EC-Tok
 
+## 2.7.4
+- 🧪 Entorno de prueba: ⏹ Detener ahora pregunta con tres botones claros: **Detener y SÍ borrar las estadísticas de la prueba** · **Detener y NO borrar las estadísticas de la prueba** · **Cancelar, seguir con la prueba**. Si la prueba se detiene sola (5 min), pregunta solo si borras las estadísticas.
+
 ## 2.7.3
 - Arreglado: en 🧪 Entorno de prueba, al darle ⏹ Detener seguían saliendo alertas, animaciones, sonidos y voz que se habían quedado en fila. Ahora Detener **corta todo al instante**: lo que se está viendo y lo que esperaba turno (solo lo de la prueba; lo de un live real no se toca).
 
