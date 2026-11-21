@@ -264,6 +264,12 @@
   }
 
   // ---------- animaciones (una a la vez, en fila) ----------
+  // Soltar los videos al quitarlos: si no, el navegador de LIVE Studio los guarda abiertos y, tras muchas animaciones
+  // (un live lleno o el 🧪 Entorno de prueba), se queda sin «reproductores» y los personajes ya no se ven (solo el texto).
+  function freeMedia(root) {
+    const list = root.tagName === 'VIDEO' ? [root] : [...root.querySelectorAll('video')];
+    for (const v of list) { try { v.pause(); v.removeAttribute('src'); v.load(); } catch (_) {} }
+  }
   const animQueue = [];
   let animShowing = false;
   function playAnim(a) { if (animQueue.length < 30) animQueue.push(a); nextAnim(); }
@@ -294,6 +300,10 @@
         Object.assign(vid, {src, muted: true, loop: true, autoplay: true, playsInline: true});
         vid.onerror = () => finish && finish();
         body.appendChild(vid);
+        // El letrero no sale solo: la escena se muestra cuando el personaje ya se está viendo (si no carga, se salta).
+        el.style.visibility = 'hidden';
+        vid.addEventListener('playing', () => { el.style.visibility = ''; }, {once: true});
+        setTimeout(() => { if (el.style.visibility === 'hidden' && finish) finish(); }, 6000);
       } else if (sc.sprite) {
         // Personaje animado cuadro por cuadro: una tira de cuadros que vamos cambiando aquí, para que el letrero lo siga.
         el.classList.add('sprite');
@@ -301,6 +311,12 @@
         frames.style.backgroundImage = `url("/anim/${encodeURIComponent(sc.sprite.file)}")`;
         frames.style.backgroundSize = `${sc.sprite.n * 100}% 100%`;
         body.appendChild(frames);
+        el.style.visibility = 'hidden';  // igual: esperar a que cargue la tira de cuadros del personaje
+        const pre = new Image();
+        pre.onload = () => { el.style.visibility = ''; };
+        pre.onerror = () => finish && finish();
+        pre.src = `/anim/${encodeURIComponent(sc.sprite.file)}`;
+        setTimeout(() => { if (el.style.visibility === 'hidden' && finish) finish(); }, 6000);
       } else { media.className = 'char'; body.appendChild(media); }
       for (const part of sc.parts || []) {
         const p = document.createElement('img'); p.className = 'part ' + (part.anim || ''); p.src = '/anim/' + encodeURIComponent(part.file);
@@ -366,7 +382,7 @@
     const outClass = a.scene ? 'sc out' : el === media ? 'a center out' : 'w out';
     let done = false;
     animNow = {sim: !!a.sim, finish: () => finish()};
-    const finish = () => { if (done) return; done = true; el.className = outClass; setTimeout(() => { el.remove(); animShowing = false; nextAnim(); }, a.scene ? 520 : 400); };
+    const finish = () => { if (done) return; done = true; el.className = outClass; setTimeout(() => { freeMedia(el); el.remove(); animShowing = false; nextAnim(); }, a.scene ? 520 : 400); };
     if (!videoScene) media.onerror = finish;
     $('#anim').appendChild(el);
     // Los videos se ven completos al menos una vez (una explosión no se corta a la mitad);
@@ -411,7 +427,7 @@
   function stopSpecial() {
     clearTimeout(spTimer);
     if (spAudio) { const au = spAudio; spAudio = null; au.pause(); au.src = ''; }
-    for (const el of $('#special').children) { el.classList.add('out'); if (el.pause) setTimeout(() => el.pause(), 400); setTimeout(() => el.remove(), 450); }
+    for (const el of $('#special').children) { el.classList.add('out'); setTimeout(() => { freeMedia(el); el.remove(); }, 450); }
   }
   function showSpecial(sp) {
     stopSpecial();

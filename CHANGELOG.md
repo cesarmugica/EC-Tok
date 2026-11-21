@@ -1,5 +1,8 @@
 # Cambios de EC-Tok
 
+## 2.7.5
+- Arreglado: tras muchas animaciones seguidas (un live lleno o el 🧪 Entorno de prueba), en LIVE Studio los personajes dejaban de verse y solo salía el texto del letrero. Ahora cada video se suelta al terminar, y la escena solo aparece cuando el personaje ya cargó (si no carga, se salta en vez de mostrar el texto solo).
+
 ## 2.7.4
 - 🧪 Entorno de prueba: ⏹ Detener ahora pregunta con tres botones claros: **Detener y SÍ borrar las estadísticas de la prueba** · **Detener y NO borrar las estadísticas de la prueba** · **Cancelar, seguir con la prueba**. Si la prueba se detiene sola (5 min), pregunta solo si borras las estadísticas.
 
