@@ -1,5 +1,8 @@
 # Cambios de EC-Tok
 
+## 2.9.5
+- Para revisión: la primera vez que te conectes a un live, EC-Tok guarda en su carpeta todo lo que TikTok manda del catálogo de regalos (regalos_tiktok_completo.json) y un ejemplo de un regalo recibido (regalo_evento_ejemplo.json). No cambia nada de lo que ves.
+
 ## 2.9.4
 - 🎯 Metas de acción: el texto de cada meta puede ir en **hasta 4 renglones** (Enter para cambiar de renglón). En lista y en cuadrícula se ve con sus renglones; en cuadrícula, si una línea es muy larga, se acomoda sola en dos en vez de cortarse con «…».
 

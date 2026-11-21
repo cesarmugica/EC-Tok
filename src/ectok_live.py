@@ -210,6 +210,8 @@ class Live:
         self.client = None
         self.recent: deque[dict] = deque(maxlen=200)
         self.on_gifts: Callable[[list[dict]], None] | None = None  # recibe el catálogo de regalos (nombre, monedas, imagen)
+        self.on_gifts_raw: Callable[[object], None] | None = None  # recibe la respuesta completa (para revisarla)
+        self.on_gift_event_raw: Callable[[object], None] | None = None
         self.lock = threading.Lock()
 
     # ---------- estado ----------
@@ -329,6 +331,9 @@ class Live:
                 return  # todavía va la racha: avisar solo al terminar
             count = int(_get(event, "repeat_count", default=1) or 1)
             each = int(_get(gift, "diamond_count", "info.diamond_count", default=0) or 0)
+            if self.on_gift_event_raw:  # un ejemplo completo de cómo llega un regalo (para revisión)
+                with contextlib.suppress(Exception):
+                    self.on_gift_event_raw(event)
             info = gift_info(gift)
             if info and info["image"] and self.on_gifts:  # cada regalo que llega también enseña su imagen oficial
                 with contextlib.suppress(Exception):
@@ -376,6 +381,9 @@ class Live:
                 result = fn()
                 if asyncio.iscoroutine(result):
                     result = await result
+                if self.on_gifts_raw:
+                    with contextlib.suppress(Exception):
+                        self.on_gifts_raw(result)
                 gifts = find_gifts(result)
                 if gifts:
                     self.on_gifts(gifts)
