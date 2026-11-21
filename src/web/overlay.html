@@ -115,12 +115,15 @@
   .topbox h1 { margin: 0 0 8px; font-size: calc(var(--fs) * .66); color: var(--c2); }
   .topbox ol { list-style: none; margin: 0; padding: 0; display: grid; gap: calc(var(--fs) * .32); }
   .topbox ol li:nth-child(-n+3) { padding-top: calc(var(--fs) * .3); }
-  .topbox li { display: grid; grid-template-columns: 1.6em calc(var(--fs) * 1.1) 1fr auto; gap: 10px; align-items: center;
+  .topbox li { display: grid; grid-template-columns: 1.6em calc(var(--fs) * 1.1) minmax(0, 1fr); gap: 10px; align-items: center;
     font-size: calc(var(--fs) * .56); font-weight: 700; }
   .topbox li .n { color: var(--c1); text-align: center; }
   .topbox li img, .topbox li .av { width: calc(var(--fs) * 1.1); height: calc(var(--fs) * 1.1); border-radius: 50%; object-fit: cover;
     background: rgba(255,255,255,.15); display: grid; place-items: center; font-size: .8em; }
-  .topbox li .nm { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 12em; margin-right: .6em; }
+  /* nombre arriba y la cantidad abajo (no al lado): así el cuadro es angosto y nada se sale de la fuente */
+  .topbox li .who { display: flex; flex-direction: column; min-width: 0; line-height: 1.15; margin-left: .3em; }
+  .topbox li .nm { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 12em; }
+  .topbox li .amt { font-size: .82em; color: var(--c2); white-space: nowrap; }
   .topbox li .pic { position: relative; width: calc(var(--fs) * 1.1); height: calc(var(--fs) * 1.1); }
   .topbox li .pic svg { position: absolute; filter: drop-shadow(0 1px 2px rgba(0,0,0,.7)); }
   .topbox li .pic .crown { width: 80%; left: 10%; top: -48%; }
@@ -247,7 +250,7 @@
     const medal = ([c, d], n) => `<svg class="medal" viewBox="0 0 32 40"><path d="M8 0h7l3 14H11zM17 0h7l-3 14h-7z" fill="#E53950"/><circle cx="16" cy="25" r="13" fill="${c}" stroke="${d}" stroke-width="3"/><text x="16" y="30.5" text-anchor="middle" font-size="15" font-weight="800" fill="${d}" font-family="sans-serif">${n}</text></svg>`;
     const board = (box, title, list, unit, value, empty, badge) => {
       box.innerHTML = `<div class="topbox"><h1 class="shadow">${title}</h1>${list.length ? `<ol>${list.map((d, i) =>
-        `<li class="shadow"><span class="n">${i + 1}</span><span class="pic">${d.avatar ? `<img src="${esc(d.avatar)}" alt="" referrerpolicy="no-referrer">` : '<span class="av">👤</span>'}${i < 3 ? badge(METAL[i], i + 1) : ''}</span><span class="nm">${esc(d.name)}</span><span>${unit} ${value(d).toLocaleString(LOC)}</span></li>`).join('')}</ol>` : `<div class="empty shadow">${empty[cfg.lang] || empty.es}</div>`}</div>`;
+        `<li class="shadow"><span class="n">${i + 1}</span><span class="pic">${d.avatar ? `<img src="${esc(d.avatar)}" alt="" referrerpolicy="no-referrer">` : '<span class="av">👤</span>'}${i < 3 ? badge(METAL[i], i + 1) : ''}</span><span class="who"><span class="nm">${esc(d.name)}</span><span class="amt">${unit} ${value(d).toLocaleString(LOC)}</span></span></li>`).join('')}</ol>` : `<div class="empty shadow">${empty[cfg.lang] || empty.es}</div>`}</div>`;
       box.querySelectorAll('.pic img').forEach(img => { img.onerror = () => { const av = document.createElement('span'); av.className = 'av'; av.textContent = '👤'; img.replaceWith(av); }; });
     };
     if (which.includes('top')) board($('#top'), '🏆 ' + esc(cfg.top.title), stats.top.slice(0, cfg.top.count), '💎', d => d.diamonds, EMPTY_TOP, crown);

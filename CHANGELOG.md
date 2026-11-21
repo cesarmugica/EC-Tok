@@ -1,5 +1,8 @@
 # Cambios de EC-Tok
 
+## 2.8.0
+- 🏆 Top donadores y ❤️ Top likes: la cantidad (💎 o ❤️) va **debajo del nombre**, no al lado. El cuadro queda angosto y ya no se sale de la fuente aunque los números sean grandes (2,000 likes, 10,000 💎…).
+
 ## 2.7.9
 - 🎯 Meta: la barra tiene un largo razonable en vez de estirarse a todo lo ancho de la fuente (igual que los tops). Si la fuente es más angosta, se ajusta; el número (❤️ 1,500 / 10,000) nunca se parte en dos renglones y, si no cabe todo, se acorta el título con «…».
 
