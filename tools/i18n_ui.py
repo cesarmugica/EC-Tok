@@ -480,4 +480,8 @@ T = {
 'Separación': ('Spacing', 'Espaçamento'),
 'Fondo': ('Background', 'Fundo'),
 'transparente': ('transparent', 'transparente'),
+'Lista': ('List', 'Lista'),
+'Estilo': ('Style', 'Estilo'),
+'Imagen, texto a la derecha': ('Image, text on the right', 'Imagem, texto à direita'),
+'Imagen, texto abajo': ('Image, text below', 'Imagem, texto abaixo'),
 }

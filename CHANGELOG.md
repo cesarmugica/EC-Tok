@@ -1,5 +1,9 @@
 # Cambios de EC-Tok
 
+## 2.9.3
+- 🎯 Metas de acción: **Diseño** ahora es **Lista** o **Cuadrícula**. En Lista aparece **Estilo** («Imagen, texto a la derecha» o «Imagen, texto abajo»); en Cuadrícula, las **Columnas**.
+- **Separación** va del 1 (mínima, sin pegarse) al 5 (más separadas, sin que quepa otra meta en medio).
+
 ## 2.9.2
 - 🎯 Metas de acción: **Separación** (de pegaditas a muy separadas) y **Fondo** (de totalmente transparente a oscuro sólido) para la lista y la cuadrícula.
 
