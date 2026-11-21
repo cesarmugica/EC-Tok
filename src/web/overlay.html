@@ -414,12 +414,20 @@
   const brbHere = b => which.includes('brb') || (which.includes('anim') && !(b && b.own && !isPreviewFrame));
   function showBrb(b) {
     const box = $('#brb');
+    freeMedia(box);  // soltar el video anterior antes de cambiarlo (si no, se van acumulando)
     if (!b || !b.on || !brbHere(b)) { box.hidden = true; box.className = ''; box.innerHTML = ''; return; }
-    const src = '/anim/' + encodeURIComponent(b.file);
-    const pic = b.file.toLowerCase().endsWith('.webm') ? `<video class="pic" src="${src}" autoplay muted loop playsinline></video>` : `<img class="pic" src="${src}" alt="">`;
+    const src = '/anim/' + encodeURIComponent(b.file), isVid = /\.(webm|mp4)$/i.test(b.file);
+    const pic = isVid ? `<video class="pic" src="${src}" autoplay muted loop playsinline></video>` : `<img class="pic" src="${src}" alt="">`;
     box.className = b.dim ? 'dim' : '';
     box.innerHTML = `${pic}<h1 class="shadow">${esc(b.text)}</h1>${b.sub ? `<p class="shadow">${esc(b.sub)}</p>` : ''}`;
     box.hidden = false;
+    const v = box.querySelector('video');
+    if (v) {  // si el video no arranca (navegador saturado o tardó en cargar), reintentar un par de veces
+      let tries = 0;
+      const retry = () => { if (!v.isConnected || !v.paused || tries++ >= 3) return; v.load(); v.play().catch(() => {}); setTimeout(retry, 3000); };
+      v.addEventListener('error', () => setTimeout(retry, 1000));
+      setTimeout(retry, 3000);
+    }
   }
 
   // ---------- animaciones especiales: salen encima de todo, con su sonido, hasta que terminan ----------

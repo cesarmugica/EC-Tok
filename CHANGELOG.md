@@ -1,5 +1,8 @@
 # Cambios de EC-Tok
 
+## 2.7.6
+- ☕ «Ya regresamos»: suelta el video anterior cada vez que se pone o se quita (antes se iban acumulando), reintenta solo si el video no arranca, y ahora también acepta animaciones .mp4 (antes solo .webm).
+
 ## 2.7.5
 - Arreglado: tras muchas animaciones seguidas (un live lleno o el 🧪 Entorno de prueba), en LIVE Studio los personajes dejaban de verse y solo salía el texto del letrero. Ahora cada video se suelta al terminar, y la escena solo aparece cuando el personaje ya cargó (si no carga, se salta en vez de mostrar el texto solo).
 
