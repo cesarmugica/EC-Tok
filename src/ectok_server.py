@@ -29,7 +29,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, unquote, urlsplit
 
-APP_VERSION = "2.9.1"
+APP_VERSION = "2.9.2"
 
 try:  # lo genera windows/build.ps1
     from ectok_build import BUILD_DATE  # type: ignore[import-not-found]
@@ -131,7 +131,7 @@ DEFAULT_CONFIG: dict = {
     "top": {"count": 5, "title": "Top donadores"},
     "likers": {"count": 5, "title": "Top likes"},
     # Metas de acción: lista fija (hasta 10) de imagen + texto, ej. «🌌 Baile con canto»
-    "actions": {"title": "", "layout": "side", "cols": 4, "size": 100, "circle": False, "items": [],
+    "actions": {"title": "", "layout": "side", "cols": 4, "gap": 2, "bg": 0, "size": 100, "circle": False, "items": [],
                 # colores: vacío = el de siempre (título en el color de acento, texto blanco con sombra)
                 "title_color": "", "title_outline": "", "text_color": "", "text_outline": ""},
     "likes_rule_added": True,
@@ -597,6 +597,9 @@ def clean_config(data: dict) -> dict:
         if actions.get("layout") in ("side", "stack", "grid"):  # grid: cuadrícula de N columnas (recomendado hasta 6×6)
             a["layout"] = actions["layout"]
         a["cols"] = int(_num(actions.get("cols"), a.get("cols", 4), 1, 8))
+        gap = actions.get("gap", a.get("gap", 2))  # separación entre metas: 1 (mínima, sin pegarse) a 5 (bien separadas)
+        a["gap"] = int(_num(gap, 2, 1, 5)) if isinstance(gap, (int, float)) and 1 <= gap <= 5 else 2
+        a["bg"] = int(_num(actions.get("bg"), a.get("bg", 0), 0, 100))       # fondo oscuro: 0 = transparente, 100 = sólido
         a["size"] = int(_num(actions.get("size"), a["size"], 40, 250))
         if isinstance(actions.get("circle"), bool):
             a["circle"] = actions["circle"]

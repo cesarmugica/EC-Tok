@@ -348,7 +348,7 @@ T = {
 '⚙ Para todos los botones de acceso rápido': ('⚙ For all quick buttons', '⚙ Para todos os botões de acesso rápido'),
 'Los personajes y efectos en video siempre se ven completos al menos una vez; si pones más segundos, se repiten hasta cumplir el tiempo. Los personalizados sin personaje usan este tiempo para la alerta.': ('Video characters and effects always play fully at least once; if you set more seconds, they repeat until the time is up. Custom buttons without a character use this time for the alert.', 'Personagens e efeitos em vídeo sempre aparecem completos pelo menos uma vez; se você puser mais segundos, eles se repetem até completar o tempo. Os personalizados sem personagem usam este tempo para o alerta.'),
 '🎯 Metas de acción': ('🎯 Action goals', '🎯 Metas de ação'),
-'Una lista fija (hasta 10) de lo que haces cuando te mandan algo: una imagen y su texto (ej. «Baile con canto» o «Como huevo crudo»). No se mueve ni cuenta nada: se queda en pantalla.': ('A fixed list (up to 10) of what you do when someone sends you something: an image and its text (e.g. “Dance and sing” or “I eat a raw egg”). It doesn\'t move or count anything: it stays on screen.', 'Uma lista fixa (até 10) do que você faz quando te mandam algo: uma imagem e seu texto (ex. «Dança com canto» ou «Como ovo cru»). Não se mexe nem conta nada: fica na tela.'),
+'Una lista fija (hasta 10, o hasta 48 en cuadrícula) de lo que haces cuando te mandan algo: una imagen y su texto (ej. «Baile con canto» o «Como huevo crudo»). No se mueve ni cuenta nada: se queda en pantalla.': ('A fixed list (up to 10, or up to 48 in a grid) of what you do when someone sends you something: an image and its text (e.g. “Dance and sing” or “I eat a raw egg”). It doesn\'t move or count anything: it stays on screen.', 'Uma lista fixa (até 10, ou até 48 em grade) do que você faz quando te mandam algo: uma imagem e seu texto (ex. «Dança com canto» ou «Como ovo cru»). Não se mexe nem conta nada: fica na tela.'),
 'Ponla en tu live con la dirección «🎯 Metas de acción» (pestaña 🔴 En vivo).': ('Add it to your LIVE with the “🎯 Action goals” address (🔴 Live tab).', 'Coloque na sua live com o endereço «🎯 Metas de ação» (aba 🔴 Ao vivo).'),
 'Título (opcional)': ('Title (optional)', 'Título (opcional)'),
 'Ej. Retos del live': ('E.g. LIVE challenges', 'Ex. Desafios da live'),
@@ -477,4 +477,7 @@ T = {
 'Recomendado: hasta 6×6': ('Recommended: up to 6×6', 'Recomendado: até 6×6'),
 '{0} de {1}': ('{0} of {1}', '{0} de {1}'),
 'En lista caben hasta 10 metas y tienes {0}.\n\nSe quedan solo las primeras 10; las demás se quitan de la lista (sus imágenes NO se borran).': ('A list fits up to 10 goals and you have {0}.\n\nOnly the first 10 stay; the rest are removed from the list (their images are NOT deleted).', 'Em lista cabem até 10 metas e você tem {0}.\n\nSó as 10 primeiras ficam; as outras saem da lista (as imagens NÃO são apagadas).'),
+'Separación': ('Spacing', 'Espaçamento'),
+'Fondo': ('Background', 'Fundo'),
+'transparente': ('transparent', 'transparente'),
 }

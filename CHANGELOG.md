@@ -1,5 +1,8 @@
 # Cambios de EC-Tok
 
+## 2.9.2
+- 🎯 Metas de acción: **Separación** (de pegaditas a muy separadas) y **Fondo** (de totalmente transparente a oscuro sólido) para la lista y la cuadrícula.
+
 ## 2.9.1 — 🎯 Metas de acción en cuadrícula
 - Nuevo diseño **Cuadrícula**: los regalos en N columnas (de 1 a 8), con la imagen arriba y su etiqueta abajo. Recomendado: hasta 6×6.
 - En cuadrícula caben hasta 48 metas (en lista siguen siendo 10). Si pasas de cuadrícula a lista con más de 10, te avisa antes y solo se quitan de la lista (las imágenes no se borran).

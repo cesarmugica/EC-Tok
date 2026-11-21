@@ -131,19 +131,19 @@
   .topbox .empty { opacity: .6; font-size: calc(var(--fs) * .5); }
 
   /* ---------- metas de acción (lista fija: imagen + texto) ---------- */
-  #actions { margin: 12px; display: inline-flex; flex-direction: column; gap: calc(var(--au) * .18); --au: calc(var(--fs) * var(--asz, 1)); }
+  #actions { margin: 12px; display: inline-flex; flex-direction: column; gap: calc(var(--au) * .18 * var(--agap, 1)); --au: calc(var(--fs) * var(--asz, 1)); }
   #actions h1 { margin: 0 0 calc(var(--au) * .1); font-size: calc(var(--au) * .62); color: var(--c2); }
   #actions .side { display: flex; align-items: center; gap: calc(var(--au) * .22); padding: calc(var(--au) * .1) calc(var(--au) * .42) calc(var(--au) * .1) calc(var(--au) * .1);
     border-radius: 999px; background: rgba(15,15,22,.55); border: 1px solid rgba(255,255,255,.14); width: fit-content; max-width: 92vw; }
   #actions .side img, #actions .side .ph { width: calc(var(--au) * 1.25); height: calc(var(--au) * 1.25); object-fit: contain; flex: none; filter: drop-shadow(0 2px 3px rgba(0,0,0,.5)); }
   #actions .side .tx { font-size: calc(var(--au) * .58); font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  #actions.stack { gap: calc(var(--au) * .12); align-items: center; }
+  #actions.stack { gap: calc(var(--au) * .12 * var(--agap, 1)); align-items: center; }
   #actions .st { display: flex; flex-direction: column; align-items: center; }
   #actions .st img, #actions .st .ph { width: calc(var(--au) * 2.3); height: calc(var(--au) * 2.3); object-fit: contain; filter: drop-shadow(0 3px 5px rgba(0,0,0,.55)); }
   #actions .st .tx { margin-top: calc(var(--au) * -.28); padding: calc(var(--au) * .05) calc(var(--au) * .38); border-radius: 999px; background: rgba(20,20,20,.82);
     border: calc(var(--au) * .07) solid #E9B949; font-size: calc(var(--au) * .5); font-weight: 800; white-space: nowrap; max-width: 60vw; overflow: hidden; text-overflow: ellipsis; position: relative; }
   /* cuadrícula: N columnas de regalos, imagen arriba y su etiqueta abajo (recomendado hasta 6×6) */
-  #actions.grid .gr { display: grid; grid-template-columns: repeat(var(--cols, 4), auto); gap: calc(var(--au) * .18) calc(var(--au) * .22); justify-content: center; }
+  #actions.grid .gr { display: grid; grid-template-columns: repeat(var(--cols, 4), auto); gap: calc(var(--au) * .18 * var(--agap, 1)) calc(var(--au) * .22 * var(--agap, 1)); justify-content: center; }
   #actions.grid .st img, #actions.grid .st .ph { width: calc(var(--au) * 1.7); height: calc(var(--au) * 1.7); }
   #actions.grid .st .tx { font-size: calc(var(--au) * .36); max-width: calc(var(--au) * 3.4); margin-top: calc(var(--au) * -.2); }
   #actions.grid .st .ph { font-size: calc(var(--au) * 1.1); }
@@ -268,6 +268,9 @@
     const a = cfg.actions || {items: []}, box = $('#actions'), grid = a.layout === 'grid', stack = a.layout === 'stack' || grid;
     box.className = (grid ? 'stack grid' : stack ? 'stack' : '') + (a.circle ? ' circle' : '');
     box.style.setProperty('--cols', Math.max(1, Math.min(8, a.cols || 4)));
+    box.style.setProperty('--agap', [0.6, 1, 1.5, 2, 2.6][Math.max(1, Math.min(5, a.gap || 2)) - 1]);  // separación 1 a 5 (nunca pegadas, nunca cabe otra entre ellas)
+    const bg = Math.max(0, Math.min(100, a.bg || 0)) / 100;  // fondo: de transparente a oscuro sólido
+    box.style.background = bg ? `rgba(12,12,18,${bg})` : ''; box.style.padding = bg ? 'calc(var(--au) * .35) calc(var(--au) * .45)' : ''; box.style.borderRadius = bg ? 'calc(var(--au) * .35)' : '';
     // colores elegidos: letra y orilla (la orilla se hace con sombras alrededor, como en los subtítulos)
     const ring = c => { const o = []; for (let g = 0; g < 360; g += 30) o.push(`${(Math.cos(g * Math.PI / 180) * 0.06).toFixed(3)}em ${(Math.sin(g * Math.PI / 180) * 0.06).toFixed(3)}em 0 ${c}`); return o.join(',') + ',0 .1em .25em rgba(0,0,0,.5)'; };
     const paint = (color, outline) => (color ? `color:${color};` : '') + (outline ? `text-shadow:${ring(outline)};` : ''); box.style.setProperty('--asz', (a.size || 100) / 100);
