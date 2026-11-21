@@ -1,5 +1,8 @@
 # Cambios de EC-Tok
 
+## 2.7.9
+- 🎯 Meta: la barra tiene un largo razonable en vez de estirarse a todo lo ancho de la fuente (igual que los tops). Si la fuente es más angosta, se ajusta; el número (❤️ 1,500 / 10,000) nunca se parte en dos renglones y, si no cabe todo, se acorta el título con «…».
+
 ## 2.7.8
 - 🏆 Top donadores y ❤️ Top likes: el cuadro ya no se estira a todo lo ancho; abraza su contenido y la cantidad (💎 / ❤️) queda junto al nombre. Antes, si recortabas la fuente en LIVE Studio, la cantidad quedaba fuera y solo se veía 1, 2, 3…
 
