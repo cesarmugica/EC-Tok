@@ -29,7 +29,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, unquote, urlsplit
 
-APP_VERSION = "2.9.3"
+APP_VERSION = "2.9.4"
 
 try:  # lo genera windows/build.ps1
     from ectok_build import BUILD_DATE  # type: ignore[import-not-found]
@@ -613,7 +613,9 @@ def clean_config(data: dict) -> dict:
                 if isinstance(item, dict):
                     image = str(item.get("image") or "")
                     items.append({"id": re.sub(r"[^\w-]", "", str(item.get("id") or uuid.uuid4().hex[:8]))[:12] or uuid.uuid4().hex[:8],
-                                  "image": image if action_image_path(image) or gift_image_ok(image) else "", "text": _text(item.get("text"), "", 60)})
+                                  "image": image if action_image_path(image) or gift_image_ok(image) else "",
+                                  # hasta 4 renglones (Enter para cambiar de renglón)
+                                  "text": "\n".join(_text(item.get("text"), "", 160).replace("\r", "").split("\n")[:4])})
             a["items"] = items
     return cfg
 

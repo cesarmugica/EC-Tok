@@ -136,16 +136,16 @@
   #actions .side { display: flex; align-items: center; gap: calc(var(--au) * .22); padding: calc(var(--au) * .1) calc(var(--au) * .42) calc(var(--au) * .1) calc(var(--au) * .1);
     border-radius: 999px; background: rgba(15,15,22,.55); border: 1px solid rgba(255,255,255,.14); width: fit-content; max-width: 92vw; }
   #actions .side img, #actions .side .ph { width: calc(var(--au) * 1.25); height: calc(var(--au) * 1.25); object-fit: contain; flex: none; filter: drop-shadow(0 2px 3px rgba(0,0,0,.5)); }
-  #actions .side .tx { font-size: calc(var(--au) * .58); font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  #actions .side .tx { font-size: calc(var(--au) * .58); font-weight: 800; white-space: pre-line; line-height: 1.15; }
   #actions.stack { gap: calc(var(--au) * .12 * var(--agap, 1)); align-items: center; }
   #actions .st { display: flex; flex-direction: column; align-items: center; }
   #actions .st img, #actions .st .ph { width: calc(var(--au) * 2.3); height: calc(var(--au) * 2.3); object-fit: contain; filter: drop-shadow(0 3px 5px rgba(0,0,0,.55)); }
-  #actions .st .tx { margin-top: calc(var(--au) * -.28); padding: calc(var(--au) * .05) calc(var(--au) * .38); border-radius: 999px; background: rgba(20,20,20,.82);
-    border: calc(var(--au) * .07) solid #E9B949; font-size: calc(var(--au) * .5); font-weight: 800; white-space: nowrap; max-width: 60vw; overflow: hidden; text-overflow: ellipsis; position: relative; }
+  #actions .st .tx { margin-top: calc(var(--au) * -.28); padding: calc(var(--au) * .05) calc(var(--au) * .38); border-radius: calc(var(--au) * .4); background: rgba(20,20,20,.82);
+    border: calc(var(--au) * .07) solid #E9B949; font-size: calc(var(--au) * .5); font-weight: 800; white-space: pre-line; text-align: center; line-height: 1.15; max-width: 60vw; position: relative; }
   /* cuadrícula: N columnas de regalos, imagen arriba y su etiqueta abajo (recomendado hasta 6×6) */
   #actions.grid .gr { display: grid; grid-template-columns: repeat(var(--cols, 4), auto); gap: calc(var(--au) * .18 * var(--agap, 1)) calc(var(--au) * .22 * var(--agap, 1)); justify-content: center; }
   #actions.grid .st img, #actions.grid .st .ph { width: calc(var(--au) * 1.7); height: calc(var(--au) * 1.7); }
-  #actions.grid .st .tx { font-size: calc(var(--au) * .36); max-width: calc(var(--au) * 3.4); margin-top: calc(var(--au) * -.2); }
+  #actions.grid .st .tx { font-size: calc(var(--au) * .36); max-width: calc(var(--au) * 4.2); margin-top: calc(var(--au) * -.2); }
   #actions.grid .st .ph { font-size: calc(var(--au) * 1.1); }
   #actions .ph { display: grid; place-items: center; font-size: calc(var(--au) * .8); }
   #actions .st .ph { font-size: calc(var(--au) * 1.5); } #actions .side .ph { font-size: calc(var(--au) * .95); }

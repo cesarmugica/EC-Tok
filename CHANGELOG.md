@@ -1,5 +1,8 @@
 # Cambios de EC-Tok
 
+## 2.9.4
+- 🎯 Metas de acción: el texto de cada meta puede ir en **hasta 4 renglones** (Enter para cambiar de renglón). En lista y en cuadrícula se ve con sus renglones; en cuadrícula, si una línea es muy larga, se acomoda sola en dos en vez de cortarse con «…».
+
 ## 2.9.3
 - 🎯 Metas de acción: **Diseño** ahora es **Lista** o **Cuadrícula**. En Lista aparece **Estilo** («Imagen, texto a la derecha» o «Imagen, texto abajo»); en Cuadrícula, las **Columnas**.
 - **Separación** va del 1 (mínima, sin pegarse) al 5 (más separadas, sin que quepa otra meta en medio).

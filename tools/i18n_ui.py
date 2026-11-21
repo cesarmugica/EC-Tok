@@ -484,4 +484,5 @@ T = {
 'Estilo': ('Style', 'Estilo'),
 'Imagen, texto a la derecha': ('Image, text on the right', 'Imagem, texto à direita'),
 'Imagen, texto abajo': ('Image, text below', 'Imagem, texto abaixo'),
+'Ej. Baile con canto (Enter = otro renglón, hasta 4)': ('E.g. Dance and sing (Enter = new line, up to 4)', 'Ex. Dança com canto (Enter = outra linha, até 4)'),
 }
