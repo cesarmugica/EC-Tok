@@ -1,5 +1,8 @@
 # Cambios de EC-Tok
 
+## 2.7.8
+- 🏆 Top donadores y ❤️ Top likes: el cuadro ya no se estira a todo lo ancho; abraza su contenido y la cantidad (💎 / ❤️) queda junto al nombre. Antes, si recortabas la fuente en LIVE Studio, la cantidad quedaba fuera y solo se veía 1, 2, 3…
+
 ## 2.7.7 — Arreglo importante: personajes que dejaban de salir
 - Con **6 o más fuentes de EC-Tok** en LIVE Studio u OBS, los personajes, efectos y el changuito de «Ya regresamos» dejaban de salir (solo salían alertas y texto). El navegador de LIVE Studio solo abre 6 conexiones a la vez con la misma dirección y cada fuente tenía la suya abierta todo el tiempo, así que ya no quedaba lugar para bajar los videos.
 - Ahora **todas las fuentes comparten una sola conexión** con EC-Tok, y quedan lugares libres para los videos. No tienes que cambiar nada en LIVE Studio: las fuentes se actualizan solas.

@@ -106,7 +106,9 @@
 
   /* ---------- top donadores ---------- */
   #top, #likers { margin: 12px; }
-  .topbox { padding: 12px 14px; border-radius: 18px; background: rgba(15,15,22,.72); border: 2px solid rgba(255,255,255,.12); }
+  /* el cuadro abraza su contenido (no se estira a todo lo ancho): así la cantidad queda junto al nombre y no se
+     pierde si la fuente se recorta en LIVE Studio */
+  .topbox { width: max-content; min-width: 11em; max-width: 100%; box-sizing: border-box; padding: 12px 14px; border-radius: 18px; background: rgba(15,15,22,.72); border: 2px solid rgba(255,255,255,.12); }
   .topbox h1 { margin: 0 0 8px; font-size: calc(var(--fs) * .66); color: var(--c2); }
   .topbox ol { list-style: none; margin: 0; padding: 0; display: grid; gap: calc(var(--fs) * .32); }
   .topbox ol li:nth-child(-n+3) { padding-top: calc(var(--fs) * .3); }
@@ -115,7 +117,7 @@
   .topbox li .n { color: var(--c1); text-align: center; }
   .topbox li img, .topbox li .av { width: calc(var(--fs) * 1.1); height: calc(var(--fs) * 1.1); border-radius: 50%; object-fit: cover;
     background: rgba(255,255,255,.15); display: grid; place-items: center; font-size: .8em; }
-  .topbox li .nm { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .topbox li .nm { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 12em; margin-right: .6em; }
   .topbox li .pic { position: relative; width: calc(var(--fs) * 1.1); height: calc(var(--fs) * 1.1); }
   .topbox li .pic svg { position: absolute; filter: drop-shadow(0 1px 2px rgba(0,0,0,.7)); }
   .topbox li .pic .crown { width: 80%; left: 10%; top: -48%; }
