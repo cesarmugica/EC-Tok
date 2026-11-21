@@ -80,10 +80,22 @@
   document.addEventListener('keydown', e => { const n = +e.key; if (n >= 1 && n <= 9 && sounds[n - 1]) toggle(sounds[n - 1]); if (e.key === 'Escape') [...playing.keys()].forEach(stop); });
   document.getElementById('stop').addEventListener('click', () => [...playing.keys()].forEach(stop));
   master.addEventListener('input', () => { try { localStorage.setItem('ectok-console-master', master.value); } catch (_) {} playing.forEach((a, id) => { const x = sounds.find(s => s.id === id); if (x) a.volume = Math.min(1, x.volume / 100 * master.value / 100); }); });
-  async function setOntop(on) {
-    ontopSent = on;
-    try { await fetch('/api/console/ontop', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({on})}); } catch (_) {}
+  // refresh: solo volver a ponerla encima (sin guardar). Regresa cuántas ventanas encontró.
+  async function setOntop(on, refresh) {
+    if (!refresh) ontopSent = on;
+    try {
+      const r = await fetch('/api/console/ontop', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({on, refresh: !!refresh})});
+      return (await r.json()).windows || 0;
+    } catch (_) { return 0; }
   }
+  // «Encima» de verdad: al abrir, reintentar hasta que Windows ya tenga la ventana con su título; y cada que le
+  // das clic a otra ventana (LIVE Studio), volver a subirla, por si esa otra también está «siempre encima».
+  async function keepOntop() {
+    for (let i = 0; i < 20 && ontop.checked; i++) { if (await setOntop(true, true)) return; await new Promise(r => setTimeout(r, 500)); }
+  }
+  let blurT = null;
+  window.addEventListener('blur', () => { if (!ontop.checked) return; clearTimeout(blurT); blurT = setTimeout(() => setOntop(true, true), 120); });
+  setInterval(() => { if (ontop.checked) setOntop(true, true); }, 4000);
   ontop.addEventListener('change', () => setOntop(ontop.checked));
 
   async function load(first) {
@@ -95,7 +107,7 @@
       const newSig = JSON.stringify([d.lang, d.console.sounds]);
       LANG = d.lang || 'es';
       if (newSig !== sig) { sig = newSig; sounds = d.console.sounds || []; render(); }
-      if (first) { ontop.checked = !!d.console.ontop; if (ontop.checked) setTimeout(() => setOntop(true), 700); }
+      if (first) { ontop.checked = !!d.console.ontop; if (ontop.checked) keepOntop(); }
     } catch (_) {
       if (!sounds.length) grid.innerHTML = `<div class="empty">${esc(t('EC-Tok está cerrado. Ábrelo para usar la consola.'))}</div>`;
     }

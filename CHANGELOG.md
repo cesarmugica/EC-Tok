@@ -1,5 +1,8 @@
 # Cambios de EC-Tok
 
+## 2.5.5
+- Arreglado: la 🎛 consola de sonidos con «📌 Mantener encima» se iba para atrás al darle clic a otra ventana (por ejemplo, la barra de título de LIVE Studio). Ahora se vuelve a poner encima sola en cuanto pierde el foco, y al abrirla espera a que Windows tenga lista la ventana antes de fijarla.
+
 ## 2.5.4
 - Abajo dice ahora «¿Te ha servido EC-Tok? Invítanos un café (PayPal): @blukastle».
 

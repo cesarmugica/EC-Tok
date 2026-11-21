@@ -28,7 +28,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, unquote, urlsplit
 
-APP_VERSION = "2.5.4"
+APP_VERSION = "2.5.5"
 
 try:  # lo genera windows/build.ps1
     from ectok_build import BUILD_DATE  # type: ignore[import-not-found]
@@ -1494,7 +1494,7 @@ class Handler(BaseHTTPRequestHandler):
 
     def log_message(self, fmt: str, *args) -> None:  # noqa: ANN002
         text = fmt % args
-        if any(x in text for x in ("/api/ping", "/api/stream", "/sound/", "/img/", "/anim/", '"GET /overlay', "/api/state")):
+        if any(x in text for x in ("/api/ping", "/api/stream", "/api/console/ontop", "/sound/", "/img/", "/anim/", '"GET /overlay', "/api/state")):
             return
         log("HTTP " + text)
 
@@ -1845,9 +1845,10 @@ class Handler(BaseHTTPRequestHandler):
             self.send_json({"ok": True})
         elif path == "/api/console/ontop":
             on = bool(data.get("on"))
-            with CONFIG_LOCK:
-                CONFIG["console"]["ontop"] = on
-            save_config(CONFIG)
+            if not data.get("refresh"):  # refresh: solo volver a subirla (la consola lo pide al perder el foco)
+                with CONFIG_LOCK:
+                    CONFIG["console"]["ontop"] = on
+                save_config(CONFIG)
             self.send_json({"ok": True, "windows": set_topmost(CONSOLE_TITLE, on)})
         elif path == "/api/anim/pick":
             # Paso 1: solo elegir (la ventana dice «elige el archivo»); paso 2: /api/anim/import convierte.
