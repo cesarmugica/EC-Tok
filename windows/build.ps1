@@ -40,6 +40,7 @@ Invoke-Checked 'python' @(
   '--hidden-import', 'ectok_build',
   '--hidden-import', 'ectok_update',
   '--hidden-import', 'ectok_live',
+  '--hidden-import', 'ectok_tts',
   '--collect-all', 'TikTokLive',
   '--exclude-module', 'tkinter',
   '--distpath', $distDir,

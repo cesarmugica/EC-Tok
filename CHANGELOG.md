@@ -1,5 +1,11 @@
 # Cambios de EC-Tok
 
+## 2.10.0 — 🔈 Audio de EC-Tok
+- En **⚙ Ajustes › 🔈 Audio de EC-Tok** eliges la **salida** por donde suena EC-Tok: sonidos de las reglas, 🎛 consola de sonidos y 🗣 la voz que lee el chat. Sin tocar la configuración de sonido de Windows.
+- La voz, con una salida elegida, se genera en tu PC con las voces de Windows para poder sacarla por esa salida. Si algo falla, sigue con la voz de siempre por la salida predeterminada y te avisa.
+- **Sonido de las 🌟 animaciones especiales**: por la fuente de LIVE Studio (como antes) o **por EC-Tok**, por la salida elegida. Ideal si tienes apagado el monitoreo de LIVE Studio y escuchas todo desde tu consola.
+- **Instrucciones** para los tres casos más comunes: consola que regresa el audio a la PC (Maono, Bomge…), música de la PC directo a LIVE Studio, y sin consola.
+
 ## 2.9.6
 - Se quitó la revisión del catálogo de regalos de la 2.9.5 (ya se revisó: las animaciones de los regalos de TikTok son efectos de su propio motor, no videos). EC-Tok borra los dos archivos de revisión que había creado.
 

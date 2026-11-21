@@ -455,20 +455,22 @@
     for (const el of $('#special').children) { el.classList.add('out'); setTimeout(() => { freeMedia(el); el.remove(); }, 450); }
   }
   function showSpecial(sp) {
+    // «Sonido por EC-Tok» (Ajustes › Audio): aquí solo se ve; el sonido lo pone la ventana de EC-Tok por la salida elegida
+    const appSound = !!(cfg && cfg.audio && cfg.audio.anim_sound === 'app');
     stopSpecial();
     const src = '/anim/' + encodeURIComponent(sp.file);
     const el = document.createElement(sp.video ? 'video' : 'img');
     el.className = 'sp'; el.src = src; el.style.height = sp.size + 'vh'; el.style.maxWidth = '100vw';
     if (sp.video) {
       // sound: sin nada = el sonido del video · mute = sin sonido · un sonido del banco en lugar del del video
-      el.playsInline = true; el.volume = Math.max(0, Math.min(1, sp.volume / 100)); el.muted = sp.volume === 0 || !!sp.mute || !!sp.sound;
+      el.playsInline = true; el.volume = Math.max(0, Math.min(1, sp.volume / 100)); el.muted = sp.volume === 0 || !!sp.mute || !!sp.sound || appSound;
       el.onended = () => { if (!sp.seconds) stopSpecial(); };
       el.play().catch(() => { el.muted = true; el.play().catch(() => {}); });  // si no deja con sonido, al menos que se vea
       if (sp.seconds) el.loop = true;
     }
     el.onerror = stopSpecial;
     $('#special').appendChild(el);
-    if (sp.sound && !sp.mute && sp.volume > 0) {
+    if (sp.sound && !sp.mute && sp.volume > 0 && !appSound) {
       spAudio = new Audio('/sound/' + encodeURIComponent(sp.sound));
       spAudio.volume = Math.max(0, Math.min(1, sp.volume / 100));
       spAudio.play().catch(() => {});

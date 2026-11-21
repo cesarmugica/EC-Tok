@@ -93,6 +93,7 @@
   function toggle(x) {
     if (playing.has(x.id)) { stop(x.id); return; }
     const a = new Audio('/sound/' + encodeURIComponent(x.file));
+    if (audioOut && a.setSinkId) a.setSinkId(audioOut).catch(() => {});  // la salida elegida en Ajustes › Audio
     a.volume = Math.min(1, (x.volume / 100) * (master.value / 100));
     a.ontimeupdate = () => { const el = grid.querySelector(`[data-id="${CSS.escape(x.id)}"] .prog`); if (el && a.duration) el.style.width = (100 * a.currentTime / a.duration) + '%'; };
     a.onended = a.onerror = () => { playing.delete(x.id); mark(x.id); };
@@ -120,12 +121,13 @@
   setInterval(() => { if (ontop.checked) setOntop(true, true); }, 4000);
   ontop.addEventListener('change', () => setOntop(ontop.checked));
 
+  let audioOut = '';
   async function load(first) {
     try {
       const r = await fetch('/api/console', {cache: 'no-store'}); if (!r.ok) throw new Error(r.status);
       const d = await r.json();
       if (version && d.version !== version) { location.reload(); return; }  // se actualizó EC-Tok
-      version = d.version;
+      version = d.version; audioOut = (d.audio && d.audio.out) || '';
       const newSig = JSON.stringify([d.lang, d.console.sounds]);
       LANG = d.lang || 'es';
       if (newSig !== sig) { sig = newSig; sounds = d.console.sounds || []; render(); }

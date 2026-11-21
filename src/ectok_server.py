@@ -29,7 +29,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, unquote, urlsplit
 
-APP_VERSION = "2.9.6"
+APP_VERSION = "2.10.0"
 
 try:  # lo genera windows/build.ps1
     from ectok_build import BUILD_DATE  # type: ignore[import-not-found]
@@ -118,6 +118,9 @@ DEFAULT_CONFIG: dict = {
     # Consola de sonidos para tocar a mano durante el live (ventana flotante)
     "console": {"sounds": [], "ontop": True},
     "keys_for_all": False,
+    # 🔈 Audio: por dónde suena EC-Tok (id del dispositivo en la ventana; "" = el predeterminado de Windows) y
+    # si el sonido de las animaciones especiales sale por la fuente de LIVE Studio ("source") o por EC-Tok ("app")
+    "audio": {"out": "", "out_label": "", "anim_sound": "source"},
     "console_seeded": False,
     "console_6x6": False,
     "style": {"color": "#FE2C55", "accent": "#25F4EE", "font_size": 34, "animation": "pop", "position": "top"},
@@ -590,6 +593,13 @@ def clean_config(data: dict) -> dict:
     if isinstance(likers, dict):
         cfg["likers"]["count"] = int(_num(likers.get("count"), cfg["likers"]["count"], 1, 10))
         cfg["likers"]["title"] = _text(likers.get("title"), cfg["likers"]["title"], 60)
+    audio = data.get("audio")
+    if isinstance(audio, dict):
+        au = cfg["audio"]
+        au["out"] = _text(audio.get("out"), au["out"], 200)
+        au["out_label"] = _text(audio.get("out_label"), au["out_label"], 200)
+        if audio.get("anim_sound") in ("source", "app"):
+            au["anim_sound"] = audio["anim_sound"]
     actions = data.get("actions")
     if isinstance(actions, dict):
         a = cfg["actions"]
@@ -1240,6 +1250,14 @@ def live_emit(event: dict) -> None:
 
 
 LIVE = Live(emit=live_emit, log=log)
+
+# 🗣 voz generada en la PC (para sacarla por la salida de audio elegida)
+import ectok_tts  # noqa: E402
+
+VOICE = ectok_tts.WinVoice(HOME / "voz", log)
+with contextlib.suppress(OSError):
+    for _w in (HOME / "voz").glob("*.wav"):  # lo que haya quedado de la vez pasada
+        _w.unlink()
 import ectok_live  # noqa: E402
 
 
@@ -1381,7 +1399,7 @@ def overlay_payload() -> dict:
     """Lo que necesitan los overlays: estilos, alertas, metas y el estado del live."""
     return {"style": CONFIG["style"], "alerts": CONFIG["alerts"], "goals": CONFIG["goals"], "top": CONFIG["top"], "likers": CONFIG["likers"],
             "actions": overlay_actions(), "stats": LIVE.stats.public(CONFIG["top"]["count"]), "brb": brb_payload(),
-            "lang": CONFIG["language"], "version": APP_VERSION}
+            "audio": CONFIG["audio"], "lang": CONFIG["language"], "version": APP_VERSION}
 
 
 def aliases_payload() -> list[list[str]]:
@@ -1778,7 +1796,7 @@ class Handler(BaseHTTPRequestHandler):
 
     def log_message(self, fmt: str, *args) -> None:  # noqa: ANN002
         text = fmt % args
-        if any(x in text for x in ("/api/ping", "/api/stream", "/api/console/ontop", "/sound/", "/img/", "/anim/", '"GET /overlay', "/api/state")):
+        if any(x in text for x in ("/api/ping", "/api/stream", "/api/console/ontop", "/api/tts", "/sound/", "/img/", "/anim/", '"GET /overlay', "/api/state")):
             return
         log("HTTP " + text)
 
@@ -1887,7 +1905,7 @@ class Handler(BaseHTTPRequestHandler):
         elif path.startswith("/sound/"):
             self._send_sound(unquote(path[len("/sound/"):]))
         elif path == "/api/console":  # la consola flotante (no cuenta como «ventana abierta» para el actualizador)
-            self.send_json({"console": CONFIG["console"], "lang": CONFIG["language"], "version": APP_VERSION})
+            self.send_json({"console": CONFIG["console"], "audio": CONFIG["audio"], "lang": CONFIG["language"], "version": APP_VERSION})
         elif path == "/api/info":
             LAST_PING = time.time()
             self.send_json({"version": APP_VERSION, "build_date": BUILD_DATE, "config": CONFIG, "brb": BRB, "aliases": aliases_payload(),
@@ -2038,6 +2056,29 @@ class Handler(BaseHTTPRequestHandler):
             event = test_event(str(data.get("type") or "gift"), str(data.get("gift") or ""))
             LIVE.push(event)
             self.send_json({"ok": True, "event": event})
+        elif path == "/api/tts":  # la voz como WAV, para reproducirla por la salida elegida
+            try:
+                wav = VOICE.speak_to_file(_text(data.get("text"), "", 600), _text(data.get("voice"), "", 120),
+                                          _text(data.get("lang"), "", 20), float(_num(data.get("rate"), 1, 0.1, 10)),
+                                          float(_num(data.get("pitch"), 1, 0, 2)), float(_num(data.get("volume"), 1, 0, 1)))
+            except Exception as exc:  # noqa: BLE001
+                self.send_json({"ok": False, "error": str(exc)[:300]}, 500)
+                return
+            try:
+                body = wav.read_bytes()
+            finally:
+                with contextlib.suppress(OSError):
+                    wav.unlink()
+            self.send_response(200)
+            self.send_header("Content-Type", "audio/wav")
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
+        elif path == "/api/tts/voices":
+            try:
+                self.send_json({"ok": True, "voices": VOICE.voices()})
+            except Exception as exc:  # noqa: BLE001
+                self.send_json({"ok": False, "error": str(exc)[:300]}, 500)
         elif path == "/api/sim/start":
             items = Simulator.clean(data.get("items"))
             if not items:
