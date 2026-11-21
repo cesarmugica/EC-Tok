@@ -1,5 +1,8 @@
 # Cambios de EC-Tok
 
+## 2.7.2
+- 🧪 Entorno de prueba: nuevos valores de fábrica, todo prendido: 500 likes cada 30 s · 1 seguidor cada 10 s · 1 regalo cada 20 s · 1 compartido cada 15 s · 2 comentarios cada 5 s.
+
 ## 2.7.1
 - 🧪 Entorno de prueba: arriba vienen las **instrucciones** (agregar antes en LIVE Studio / OBS las fuentes que quieras probar; no es obligatorio agregarlas todas, pero sí recomendable) y la **lista de direcciones** de las fuentes con su botón 📋 Copiar.
 

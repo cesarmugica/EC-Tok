@@ -789,9 +789,9 @@
 
   // ---------- 🧪 entorno de prueba ----------
   const SIM_DEFAULT = [
-    {kind: 'like', on: true, count: 500, every: 30}, {kind: 'follow', on: true, count: 4, every: 2},
-    {kind: 'gift', on: true, count: 1, every: 20, pick: ''}, {kind: 'share', on: false, count: 1, every: 15},
-    {kind: 'comment', on: false, count: 2, every: 5}];
+    {kind: 'like', on: true, count: 500, every: 30}, {kind: 'follow', on: true, count: 1, every: 10},
+    {kind: 'gift', on: true, count: 1, every: 20, pick: ''}, {kind: 'share', on: true, count: 1, every: 15},
+    {kind: 'comment', on: true, count: 2, every: 5}];
   let sim = SIM_DEFAULT.map(x => ({...x})), simTimer = null;
   try { const saved = JSON.parse(localStorage.getItem('ectok-sim') || 'null'); if (Array.isArray(saved) && saved.length) sim = saved; } catch (_) {}
   const simSave = () => { try { localStorage.setItem('ectok-sim', JSON.stringify(sim)); } catch (_) {} };
