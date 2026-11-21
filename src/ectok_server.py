@@ -29,7 +29,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, unquote, urlsplit
 
-APP_VERSION = "2.7.2"
+APP_VERSION = "2.7.3"
 
 try:  # lo genera windows/build.ps1
     from ectok_build import BUILD_DATE  # type: ignore[import-not-found]
@@ -1203,6 +1203,8 @@ def live_emit(event: dict) -> None:
     BUS.emit(event)
     if event.get("type") in ("gift", "follow", "share", "like", "subscribe", "superfan", "envelope", "battle", "booster"):
         for anim in anims_for(event) + alert_anims(event):
+            if event.get("sim"):
+                anim["sim"] = True  # de la simulación: al detenerla se quitan las que estén esperando turno
             BUS.emit(anim)
 
 
@@ -1264,8 +1266,12 @@ class Simulator:
     def stop(self, restore: bool, finish: bool = True) -> None:
         """finish=False: solo parar (se guarda la foto de los números para preguntar después si se regresan)."""
         with self.lock:
+            was = self.running
             self.running = False
             self.gen += 1
+        if was:  # que los overlays y la ventana suelten lo que quedó en fila de la simulación
+            BUS.emit(new_event("sim_stop"))
+        with self.lock:
             if not finish:
                 return
             snap, self.snapshot = self.snapshot, None
@@ -1315,6 +1321,7 @@ class Simulator:
                 if time.time() >= self.until:
                     self.running = False
                     log("Entorno de prueba: terminó el tiempo de la simulación")
+                    BUS.emit(new_event("sim_stop"))
                     BUS.emit(new_event("sim", running=False))
                     return
                 items = list(self.items)

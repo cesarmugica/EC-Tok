@@ -188,10 +188,10 @@
     if (ev.type === 'custom') return {on: true, text: ev.text || '', seconds: ev.seconds || 4};  // botón personalizado sin personaje
     return null;
   }
-  function likeMilestone(total) {
+  function likeMilestone(total, sim) {
     const a = cfg.alerts.like; if (!a.on || !a.every || a.banner === false) return;
     const mark = Math.floor(total / a.every) * a.every;
-    if (mark > likeMark && mark > 0) { queue.push({ev: {type: 'like', likes_total: mark}, conf: a}); likeMark = mark; next(); }
+    if (mark > likeMark && mark > 0) { queue.push({ev: {type: 'like', likes_total: mark, sim}, conf: a}); likeMark = mark; next(); }
   }
   function next() {
     if (showing || !queue.length) return;
@@ -204,8 +204,12 @@
     box.innerHTML = `<div class="pic">${img}</div><div><div class="txt shadow">${fill(conf.text, ev)}</div>${sub ? `<div class="sub shadow">${sub}</div>` : ''}</div>`;
     $('#alerts').replaceChildren(box);
     if (big) confetti(ev.gift.total >= 1000 ? 120 : 50);
-    setTimeout(() => { box.className = 'alert out'; setTimeout(() => { box.remove(); showing = false; next(); }, 450); }, conf.seconds * 1000);
+    let ended = false;
+    const end = () => { if (ended) return; ended = true; clearTimeout(timer); box.className = 'alert out'; setTimeout(() => { box.remove(); showing = false; next(); }, 450); };
+    const timer = setTimeout(end, conf.seconds * 1000);
+    alertNow = {sim: !!(ev.sim || ev.test), end};
   }
+  let alertNow = null, animNow = null;
   function confetti(n) {
     const colors = [cfg.style.color, cfg.style.accent, '#ffd600', '#ffffff', '#8b5cf6'];
     for (let i = 0; i < n; i++) {
@@ -361,6 +365,7 @@
     }
     const outClass = a.scene ? 'sc out' : el === media ? 'a center out' : 'w out';
     let done = false;
+    animNow = {sim: !!a.sim, finish: () => finish()};
     const finish = () => { if (done) return; done = true; el.className = outClass; setTimeout(() => { el.remove(); animShowing = false; nextAnim(); }, a.scene ? 520 : 400); };
     if (!videoScene) media.onerror = finish;
     $('#anim').appendChild(el);
@@ -436,6 +441,13 @@
     // Si EC-Tok se actualizó mientras el overlay estaba abierto en LIVE Studio u OBS, recargarlo con la versión nueva.
     if (ev.type === 'hello') { if (runningVersion && ev.version !== runningVersion) location.reload(); runningVersion = ev.version; return; }
     if (ev.preview && !isPreview) return;  // pruebas desde la vista previa de EC-Tok: no salen en el live
+    if (ev.type === 'sim_stop') {  // se detuvo la prueba: quitar las alertas y animaciones de prueba que esperaban turno
+      for (let i = queue.length - 1; i >= 0; i--) if (queue[i].ev.sim || queue[i].ev.test) queue.splice(i, 1);
+      for (let i = animQueue.length - 1; i >= 0; i--) if (animQueue[i].sim) animQueue.splice(i, 1);
+      if (alertNow && alertNow.sim) alertNow.end();    // y la que se está viendo, también se va
+      if (animNow && animNow.sim) animNow.finish();
+      return;
+    }
     if (ev.type === 'special') { if (which.includes('special')) showSpecial(ev); return; }
     if (ev.type === 'special_stop') { if (which.includes('special')) stopSpecial(); return; }
     if (ev.type === 'anim') { if (which.includes('anim')) playAnim(ev); return; }
@@ -445,7 +457,7 @@
     if (ev.type === 'stats_reset') { load(); return; }
     if (which.includes('alerts')) {
       const conf = wantAlert(ev); if (conf) { queue.push({ev, conf}); next(); }
-      if (ev.type === 'like' && stats) likeMilestone(stats.likes);
+      if (ev.type === 'like' && stats) likeMilestone(stats.likes, !!ev.sim);
     }
     drawGoals(); drawTop();
   }

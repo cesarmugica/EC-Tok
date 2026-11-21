@@ -697,6 +697,7 @@
 
   // ---------- sonidos ----------
   const soundQueue = [];
+  let soundNow = null;
   let soundPlaying = false;
   // Regalos con nombre en inglés o español («Heart Me» = «Quiéreme»): mismo sonido.
   let aliases = [];
@@ -722,8 +723,8 @@
   function nextSound() {
     if (soundPlaying || !soundQueue.length) return;
     const rule = soundQueue.shift(); soundPlaying = true;
-    const a = new Audio('/sound/' + encodeURIComponent(rule.file)); a.volume = rule.volume / 100;
-    const done = () => { soundPlaying = false; nextSound(); };
+    const a = new Audio('/sound/' + encodeURIComponent(rule.file)); a.volume = rule.volume / 100; soundNow = a;
+    const done = () => { if (soundNow === a) soundNow = null; soundPlaying = false; nextSound(); };
     a.onended = done; a.onerror = done; a.play().catch(done);
   }
   function soundsFor(ev) {
@@ -783,6 +784,10 @@
     if (ev.type === 'brb') { brbOn = !!ev.brb.on; showBrb(); return; }
     if (ev.type === 'stats_reset') { refresh(); return; }
     if (ev.type === 'sim') { simPoll(); return; }
+    if (ev.type === 'sim_stop') {  // se detuvo la prueba: callar todo lo que quedó (sonidos y voz) y terminar
+      soundQueue.length = 0; if (soundNow) { soundNow.pause(); soundNow = null; } soundPlaying = false;
+      speechSynthesis.cancel(); sayBacklog = 0; simPoll(); return;
+    }
     if (ev.stats) showStats(ev.stats);
     addFeed(ev); soundsFor(ev); speakFor(ev);
   }

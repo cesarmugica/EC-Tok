@@ -1,5 +1,8 @@
 # Cambios de EC-Tok
 
+## 2.7.3
+- Arreglado: en 🧪 Entorno de prueba, al darle ⏹ Detener seguían saliendo alertas, animaciones, sonidos y voz que se habían quedado en fila. Ahora Detener **corta todo al instante**: lo que se está viendo y lo que esperaba turno (solo lo de la prueba; lo de un live real no se toca).
+
 ## 2.7.2
 - 🧪 Entorno de prueba: nuevos valores de fábrica, todo prendido: 500 likes cada 30 s · 1 seguidor cada 10 s · 1 regalo cada 20 s · 1 compartido cada 15 s · 2 comentarios cada 5 s.
 
