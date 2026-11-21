@@ -467,4 +467,9 @@ T = {
 '⏹ Detener y SÍ borrar las estadísticas de la prueba': ('⏹ Stop and DO clear the test stats', '⏹ Parar e SIM apagar as estatísticas do teste'),
 '⏹ Detener y NO borrar las estadísticas de la prueba': ('⏹ Stop and do NOT clear the test stats', '⏹ Parar e NÃO apagar as estatísticas do teste'),
 'Cancelar, seguir con la prueba': ('Cancel, keep testing', 'Cancelar, continuar o teste'),
+'Elige un regalo de TikTok (su imagen oficial), una de EC-Tok (originales, libres de usar) o sube las tuyas.': ('Pick a TikTok gift (its official image), an EC-Tok one (originals, free to use) or upload your own.', 'Escolha um presente do TikTok (a imagem oficial), uma do EC-Tok (originais, livres para usar) ou envie as suas.'),
+'🎁 Regalos de TikTok': ('🎁 TikTok gifts', '🎁 Presentes do TikTok'),
+'✨ De EC-Tok': ('✨ From EC-Tok', '✨ Do EC-Tok'),
+'Aparecen cuando EC-Tok se conecta a un live: TikTok le manda su catálogo de regalos con sus imágenes oficiales. Conéctate una vez y vuelve a abrir esta ventana.': ('They show up when EC-Tok connects to a LIVE: TikTok sends its gift catalog with the official images. Connect once and open this window again.', 'Aparecem quando o EC-Tok se conecta a uma live: o TikTok envia o catálogo de presentes com as imagens oficiais. Conecte-se uma vez e abra esta janela de novo.'),
+'{0} Coins - ': ('{0} Coins - ', '{0} Coins - '),
 }

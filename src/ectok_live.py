@@ -40,6 +40,66 @@ def _get(obj, *paths, default=None):
     return default
 
 
+def _dget(obj, *paths, default=None):
+    """Como _get, pero también entra a diccionarios (las respuestas web de TikTok vienen como JSON)."""
+    for path in paths:
+        value = obj
+        try:
+            for part in path.split("."):
+                if part.isdigit():
+                    value = value[int(part)]
+                elif isinstance(value, dict):
+                    value = value[part]
+                else:
+                    value = getattr(value, part)
+        except (AttributeError, IndexError, KeyError, TypeError):
+            continue
+        if value not in (None, "", []):
+            return value
+    return default
+
+
+IMAGE_PATHS = ("image.url_list.0", "image.m_urls.0", "image.urlList.0", "info.image.url_list.0", "info.image.m_urls.0",
+               "icon.url_list.0", "icon.m_urls.0")
+
+
+def gift_info(g) -> dict | None:
+    """Nombre, monedas e imagen oficial de un regalo (de un evento o del catálogo). None si no se puede leer."""
+    name = _dget(g, "name", "info.name")
+    if not name:
+        return None
+    return {"name": str(name)[:60], "diamonds": int(_dget(g, "diamond_count", "diamondCount", "info.diamond_count", default=0) or 0),
+            "image": str(_dget(g, *IMAGE_PATHS, default="") or "")}
+
+
+def find_gifts(data, depth: int = 0) -> list[dict]:
+    """Buscar la lista de regalos dentro de lo que regrese TikTok, venga como venga (JSON u objetos)."""
+    if depth > 5 or data is None:
+        return []
+    if isinstance(data, (list, tuple)):
+        found = [g for g in (gift_info(x) for x in data) if g and g["image"]]
+        if found:
+            return found
+        out: list[dict] = []
+        for x in data[:50]:
+            out += find_gifts(x, depth + 1)
+        return out
+    if isinstance(data, dict):
+        for key in ("gifts", "data", "gift_list", "giftList"):
+            if key in data:
+                got = find_gifts(data[key], depth + 1)
+                if got:
+                    return got
+        return []
+    for key in ("gifts", "data", "gift_list"):
+        sub = getattr(data, key, None)
+        if sub is not None:
+            got = find_gifts(sub, depth + 1)
+            if got:
+                return got
+    return []
+
+
 def _user(u) -> dict:
     if u is None:
         return {"id": "", "name": "Alguien", "avatar": ""}
@@ -149,6 +209,7 @@ class Live:
         self.loop: asyncio.AbstractEventLoop | None = None
         self.client = None
         self.recent: deque[dict] = deque(maxlen=200)
+        self.on_gifts: Callable[[list[dict]], None] | None = None  # recibe el catálogo de regalos (nombre, monedas, imagen)
         self.lock = threading.Lock()
 
     # ---------- estado ----------
@@ -246,6 +307,7 @@ class Live:
         async def _connected(_event) -> None:
             self._set("live", msg("live", u=username))
             self.log(f"[live] conectado a @{username}")
+            asyncio.ensure_future(self._fetch_gifts(client))
 
         @client.on(DisconnectEvent)
         async def _disconnected(_event) -> None:
@@ -267,6 +329,10 @@ class Live:
                 return  # todavía va la racha: avisar solo al terminar
             count = int(_get(event, "repeat_count", default=1) or 1)
             each = int(_get(gift, "diamond_count", "info.diamond_count", default=0) or 0)
+            info = gift_info(gift)
+            if info and info["image"] and self.on_gifts:  # cada regalo que llega también enseña su imagen oficial
+                with contextlib.suppress(Exception):
+                    self.on_gifts([info])
             self.push(new_event("gift", user=_user(getattr(event, "user", None)), gift={
                 "name": str(_get(gift, "name", "info.name", default="Regalo")), "count": count, "diamonds": each,
                 "total": each * count,
@@ -294,6 +360,30 @@ class Live:
 
         self._extra_events(client)
         await client.connect()
+
+    async def _fetch_gifts(self, client) -> None:
+        """Pedir a TikTok el catálogo de regalos del live (nombre, monedas y dirección de su imagen oficial).
+        Las imágenes no se guardan: se muestran desde TikTok. Si la librería no lo tiene o falla, no pasa nada:
+        el catálogo se va llenando con los regalos que llegan."""
+        if not self.on_gifts:
+            return
+        web = getattr(client, "web", None)
+        for name in ("fetch_gift_list", "fetch_gifts", "gift_list"):
+            fn = getattr(web, name, None) if web is not None else None
+            if not callable(fn):
+                continue
+            try:
+                result = fn()
+                if asyncio.iscoroutine(result):
+                    result = await result
+                gifts = find_gifts(result)
+                if gifts:
+                    self.on_gifts(gifts)
+                    self.log(f"[live] catálogo de regalos: {len(gifts)} con imagen oficial")
+                    return
+            except Exception as exc:  # noqa: BLE001
+                self.log(f"[live] no se pudo leer el catálogo de regalos ({name}): {exc}")
+        self.log("[live] la librería no dio el catálogo de regalos; se llenará con los regalos que lleguen")
 
     # ---------- eventos «especiales» (suscripción, cofre, batallas…) ----------
     def _extra_events(self, client) -> None:

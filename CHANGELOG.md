@@ -1,5 +1,10 @@
 # Cambios de EC-Tok
 
+## 2.9.0 — 🎁 Regalos de TikTok en las Metas de acción
+- Al conectarse a un live, EC-Tok pide a TikTok su **catálogo de regalos** (nombre, monedas e imagen oficial) y lo recuerda. Además, cada regalo que llega en tus lives se agrega solo.
+- En **🎯 Metas de acción › Elige la imagen** hay una sección nueva, **🎁 Regalos de TikTok**, con los íconos oficiales y sus monedas. Al elegir uno, el texto se llena con sus monedas («5 Coins - ») para que solo escribas qué hace.
+- Las imágenes no vienen dentro de EC-Tok ni se descargan: se muestran directo desde TikTok. Si alguna no carga, sale 🎁 en su lugar.
+
 ## 2.8.0
 - 🏆 Top donadores y ❤️ Top likes: la cantidad (💎 o ❤️) va **debajo del nombre**, no al lado. El cuadro queda angosto y ya no se sale de la fuente aunque los números sean grandes (2,000 likes, 10,000 💎…).
 

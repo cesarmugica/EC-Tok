@@ -268,7 +268,7 @@
     const items = (a.items || []).filter(i => i.url || i.text);
     const tStyle = paint(a.title_color, a.title_outline), xStyle = paint(a.text_color, a.text_outline);
     box.innerHTML = (a.title ? `<h1 class="${a.title_outline ? '' : 'shadow'}" style="${tStyle}">${esc(a.title)}</h1>` : '') + items.map(i =>
-      `<div class="${stack ? 'st' : 'side'}">${i.url ? `<img src="${esc(i.url)}" alt="">` : '<div class="ph">🎁</div>'}${i.text ? `<span class="tx ${a.text_outline ? '' : 'shadow'}" style="${xStyle}">${esc(i.text)}</span>` : ''}</div>`).join('');
+      `<div class="${stack ? 'st' : 'side'}">${i.url ? `<img src="${esc(i.url)}" alt="" referrerpolicy="no-referrer" onerror="this.outerHTML='<div class=&quot;ph&quot;>🎁</div>'">` : '<div class="ph">🎁</div>'}${i.text ? `<span class="tx ${a.text_outline ? '' : 'shadow'}" style="${xStyle}">${esc(i.text)}</span>` : ''}</div>`).join('');
   }
 
   // ---------- animaciones (una a la vez, en fila) ----------

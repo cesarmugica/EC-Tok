@@ -29,7 +29,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, unquote, urlsplit
 
-APP_VERSION = "2.8.0"
+APP_VERSION = "2.9.0"
 
 try:  # lo genera windows/build.ps1
     from ectok_build import BUILD_DATE  # type: ignore[import-not-found]
@@ -609,7 +609,7 @@ def clean_config(data: dict) -> dict:
                 if isinstance(item, dict):
                     image = str(item.get("image") or "")
                     items.append({"id": re.sub(r"[^\w-]", "", str(item.get("id") or uuid.uuid4().hex[:8]))[:12] or uuid.uuid4().hex[:8],
-                                  "image": image if action_image_path(image) else "", "text": _text(item.get("text"), "", 60)})
+                                  "image": image if action_image_path(image) or gift_image_ok(image) else "", "text": _text(item.get("text"), "", 60)})
             a["items"] = items
     return cfg
 
@@ -1392,6 +1392,46 @@ ACTION_USER = HOME / "metas"              # las que sube cada quien
 ACTION_EXTS = {".png", ".webp", ".jpg", ".jpeg", ".gif"}
 
 
+# ---------- 🎁 catálogo de regalos de TikTok (nombre, monedas y dirección de su imagen oficial) ----------
+# Las imágenes NO se bajan ni se redistribuyen: se guarda la dirección y se muestran desde los servidores de TikTok.
+GIFT_CATALOG_FILE = HOME / "regalos_tiktok.json"
+GIFT_CATALOG: dict[str, dict] = {}
+GIFT_CATALOG_LOCK = threading.Lock()
+TIKTOK_IMG = re.compile(r"^https://[a-z0-9.-]+\.(tiktokcdn(-[a-z]+)?\.com|tiktokcdn\.com|ibyteimg\.com|byteimg\.com|tiktokv\.com)/", re.I)
+
+
+def _load_gift_catalog() -> None:
+    with contextlib.suppress(OSError, ValueError):
+        data = json.loads(GIFT_CATALOG_FILE.read_text(encoding="utf-8"))
+        if isinstance(data, dict):
+            GIFT_CATALOG.update({str(k): v for k, v in data.items() if isinstance(v, dict) and TIKTOK_IMG.match(str(v.get("image") or ""))})
+
+
+def gift_catalog_add(gifts: list[dict]) -> None:
+    changed = False
+    with GIFT_CATALOG_LOCK:
+        for g in gifts:
+            name, image = str(g.get("name") or "").strip()[:60], str(g.get("image") or "")
+            if not name or not TIKTOK_IMG.match(image):
+                continue
+            new = {"diamonds": int(g.get("diamonds") or 0), "image": image}
+            if GIFT_CATALOG.get(name) != new:
+                GIFT_CATALOG[name] = new
+                changed = True
+        if changed:
+            with contextlib.suppress(OSError):
+                GIFT_CATALOG_FILE.write_text(json.dumps(GIFT_CATALOG, ensure_ascii=False, indent=0), encoding="utf-8")
+
+
+def gift_image_ok(image_id: str) -> bool:
+    kind, _, name = str(image_id).partition("/")
+    return kind == "t" and name in GIFT_CATALOG
+
+
+_load_gift_catalog()
+LIVE.on_gifts = gift_catalog_add
+
+
 def action_image_path(image_id: str) -> Path | None:
     kind, _, name = str(image_id).partition("/")
     if not name or "/" in name or "\\" in name or name.startswith("."):
@@ -1403,6 +1443,8 @@ def action_image_path(image_id: str) -> Path | None:
 
 def action_image_url(image_id: str) -> str:
     kind, _, name = str(image_id).partition("/")
+    if kind == "t":  # regalo de TikTok: su imagen oficial, directo de TikTok
+        return GIFT_CATALOG.get(name, {}).get("image", "")
     if not action_image_path(image_id):
         return ""
     return ("/metas/" if kind == "b" else "/mis-metas/") + name.replace("%", "%25").replace(" ", "%20").replace("#", "%23")
@@ -1424,7 +1466,9 @@ def action_images() -> dict:
         for p in sorted(ACTION_USER.iterdir(), key=lambda x: x.name.lower()):
             if p.suffix.lower() in ACTION_EXTS:
                 mine.append({"id": f"u/{p.name}", "name": p.stem, "url": action_image_url(f"u/{p.name}")})
-    return {"bank": bank, "mine": mine}
+    tiktok = [{"id": f"t/{n}", "name": n, "diamonds": g["diamonds"], "url": g["image"]}
+              for n, g in sorted(GIFT_CATALOG.items(), key=lambda kv: (kv[1]["diamonds"], kv[0].lower()))]
+    return {"bank": bank, "mine": mine, "tiktok": tiktok}
 
 
 def import_action_image(path: Path) -> str:
