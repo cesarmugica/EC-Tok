@@ -398,9 +398,10 @@
   }
 
   // ---------- animaciones especiales: salen encima de todo, con su sonido, hasta que terminan ----------
-  let spTimer = null;
+  let spTimer = null, spAudio = null;
   function stopSpecial() {
     clearTimeout(spTimer);
+    if (spAudio) { const au = spAudio; spAudio = null; au.pause(); au.src = ''; }
     for (const el of $('#special').children) { el.classList.add('out'); if (el.pause) setTimeout(() => el.pause(), 400); setTimeout(() => el.remove(), 450); }
   }
   function showSpecial(sp) {
@@ -409,13 +410,19 @@
     const el = document.createElement(sp.video ? 'video' : 'img');
     el.className = 'sp'; el.src = src; el.style.height = sp.size + 'vh'; el.style.maxWidth = '100vw';
     if (sp.video) {
-      el.playsInline = true; el.volume = Math.max(0, Math.min(1, sp.volume / 100)); el.muted = sp.volume === 0;
+      // sound: sin nada = el sonido del video · mute = sin sonido · un sonido del banco en lugar del del video
+      el.playsInline = true; el.volume = Math.max(0, Math.min(1, sp.volume / 100)); el.muted = sp.volume === 0 || !!sp.mute || !!sp.sound;
       el.onended = () => { if (!sp.seconds) stopSpecial(); };
       el.play().catch(() => { el.muted = true; el.play().catch(() => {}); });  // si no deja con sonido, al menos que se vea
       if (sp.seconds) el.loop = true;
     }
     el.onerror = stopSpecial;
     $('#special').appendChild(el);
+    if (sp.sound && !sp.mute && sp.volume > 0) {
+      spAudio = new Audio('/sound/' + encodeURIComponent(sp.sound));
+      spAudio.volume = Math.max(0, Math.min(1, sp.volume / 100));
+      spAudio.play().catch(() => {});
+    }
     if (sp.seconds || !sp.video) spTimer = setTimeout(stopSpecial, (sp.seconds || 8) * 1000);
   }
 

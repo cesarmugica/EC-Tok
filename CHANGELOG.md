@@ -1,5 +1,13 @@
 # Cambios de EC-Tok
 
+## 2.5.0 — 🌟 Animaciones especiales, más fáciles
+- **📂 Subir mi animación…** ahora está arriba de la lista (sirve para agregar cualquier animación, no solo la de un renglón). Eliges el archivo, **le pones el nombre** con que quieres verla y se agrega sola a la lista, al botón de 🔴 En vivo y con su **tecla Ctrl+Alt+…**.
+- En la lista se ve el **nombre que tú le pusiste**, no el nombre del archivo. ✎ para cambiarlo cuando quieras (el archivo no cambia).
+- **ⓘ** en cada renglón: pasa el mouse y ves qué video es, de dónde lo subiste y dónde lo guarda EC-Tok.
+- **Teclas rápidas Ctrl+Alt+…** también para las especiales (las que ya tenías toman la siguiente tecla libre).
+- **🔊 Sonido**: el del video, **sin sonido**, o uno del **banco de sonidos** (o de tu consola) en su lugar.
+- ➕ «Usar una que ya tengo» para agregar una animación que ya está en tu banco.
+
 ## 2.4.4
 - Las preguntas («¿Quitar…?», «¿Borrar…?», «¿Empezar la cuenta de cero?») y los avisos de error ahora salen en una **ventanita con el estilo de EC-Tok**, en vez del aviso del navegador. Arriba va la pregunta, después lo que se pierde, y en verde lo que **NO** se borra. Botones Cancelar / Sí, continuar (Esc cancela, Enter acepta). Los avisos solo tienen «Entendido».
 

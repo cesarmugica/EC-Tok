@@ -28,7 +28,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, unquote, urlsplit
 
-APP_VERSION = "2.4.4"
+APP_VERSION = "2.5.0"
 
 try:  # lo genera windows/build.ps1
     from ectok_build import BUILD_DATE  # type: ignore[import-not-found]
@@ -211,7 +211,7 @@ def _scene_files() -> set:
 def assign_keys(a: dict) -> None:
     """Cada botón con una tecla distinta (Ctrl+Alt+tecla); los que no tienen, la siguiente libre."""
     used: set = set()
-    items = [*a.get("custom", []), *a.get("quick", [])]
+    items = [*a.get("custom", []), *a.get("quick", []), *a.get("special", [])]
     for item in items:
         key = item.get("key") or ""
         if key not in HOTKEY_KEYS or key in used:
@@ -483,14 +483,17 @@ def clean_config(data: dict) -> dict:
             a["custom"] = [{"id": _text(q.get("id"), uuid.uuid4().hex[:8], 20), "text": _text(q.get("text"), "", 60),
                             "file": Path(str(q.get("file") or "")).name, "char": q.get("char") is not False,
                             "key": _text(q.get("key"), "", 4)} for q in anims["custom"][:12] if isinstance(q, dict)]
-        assign_keys(a)
         a["quick_seconds"] = float(_num(anims.get("quick_seconds"), a["quick_seconds"], 1, 30))
         a["quick_size"] = int(_num(anims.get("quick_size"), a["quick_size"], 10, 100))
         if isinstance(anims.get("special"), list):
-            a["special"] = [{"id": _text(q.get("id"), uuid.uuid4().hex[:8], 20), "label": _text(q.get("label"), "Especial", 30),
+            # sound: "" = el sonido del video · "none" = sin sonido · un archivo de sonido (banco o tuyo) en lugar del del video
+            a["special"] = [{"id": _text(q.get("id"), uuid.uuid4().hex[:8], 20), "label": _text(q.get("label"), "Especial", 40),
                              "file": Path(str(q.get("file") or "")).name, "size": int(_num(q.get("size"), 100, 10, 100)),
-                             "volume": int(_num(q.get("volume"), 100, 0, 100)), "seconds": float(_num(q.get("seconds"), 0, 0, 120))}
+                             "volume": int(_num(q.get("volume"), 100, 0, 100)), "seconds": float(_num(q.get("seconds"), 0, 0, 120)),
+                             "key": _text(q.get("key"), "", 4), "sound": Path(_text(q.get("sound"), "", 120)).name,
+                             "_auto": "key" not in q}  # las de antes (sin tecla) toman la siguiente libre
                             for q in anims["special"][:SPECIAL_MAX] if isinstance(q, dict)]
+        assign_keys(a)
         brb = anims.get("brb")
         if isinstance(brb, dict):
             a["brb"]["file"] = Path(str(brb.get("file") or a["brb"]["file"])).name
@@ -583,15 +586,47 @@ def anim_label(stem: str) -> str:
     return text[:1].upper() + text[1:] if text else stem
 
 
+ANIM_NAMES_FILE = "nombres.json"    # en la carpeta de tus animaciones: el nombre con que tú las llamaste
+ANIM_ORIGIN_FILE = "origenes.json"  # y de qué archivo de tu PC salió cada una
+
+
+def _anim_map(name: str) -> dict:
+    with contextlib.suppress(OSError, ValueError):
+        data = json.loads((ANIM_USER / name).read_text(encoding="utf-8"))
+        if isinstance(data, dict):
+            return {str(k): str(v) for k, v in data.items()}
+    return {}
+
+
+def anim_names() -> dict:
+    return _anim_map(ANIM_NAMES_FILE)
+
+
+def _set_anim_map(name: str, file: str, value: str) -> None:
+    data = _anim_map(name)
+    if value:
+        data[file] = value
+    else:
+        data.pop(file, None)
+    ANIM_USER.mkdir(parents=True, exist_ok=True)
+    (ANIM_USER / name).write_text(json.dumps(data, ensure_ascii=False, indent=1), encoding="utf-8")
+
+
+def set_anim_name(file: str, name: str) -> None:
+    _set_anim_map(ANIM_NAMES_FILE, file, re.sub(r"\s+", " ", name).strip()[:40])
+
+
 def list_animations() -> list[dict]:
     found: dict[str, dict] = {}
+    names, origins = anim_names(), _anim_map(ANIM_ORIGIN_FILE)
     for folder, source in ((ANIM_DEFAULT, "ec-tok"), (ANIM_BANK, "ec-tok"), (ANIM_USER, "tuya")):
         if folder.is_dir():
             for path in sorted(folder.iterdir()):
                 if path.is_file() and path.suffix.lower() in ANIM_EXTS and "-parte-" not in path.name:
-                    found[path.name] = {"file": path.name, "name": anim_label(path.stem),
+                    found[path.name] = {"file": path.name, "name": (names.get(path.name) if source == "tuya" else None) or anim_label(path.stem),
                                         "source": source, "video": path.suffix.lower() in VIDEO_EXTS,
-                                        "scene": path.name in SCENES}
+                                        "scene": path.name in SCENES, "path": str(path),
+                                        "from": origins.get(path.name, "") if source == "tuya" else ""}
     return sorted(found.values(), key=lambda a: _norm(a["name"]))
 
 
@@ -795,12 +830,24 @@ def anim_event(file: str, seconds: float, size: int, label: str = "", manual: bo
                      label=label, manual=manual, who=who, caption=caption)
 
 
+def special_event(sp: dict, preview: bool = False) -> dict:
+    sound = sp.get("sound") or ""
+    return new_event("special", file=sp["file"], video=sp["file"].lower().endswith(VIDEO_EXTS), size=sp["size"],
+                     volume=sp["volume"], seconds=sp["seconds"], label=sp["label"], preview=bool(preview),
+                     mute=sound == "none", sound=sound if sound not in ("", "none") else "")
+
+
 def fire_button(kind: str, item_id: str, preview: bool = False) -> str:
     """Lanzar un botón de acceso rápido (clic o Ctrl+Alt+tecla). Regresa el error, o "" si salió."""
     a = CONFIG["anims"]
-    item = next((q for q in a.get(kind, []) if q.get("id") == item_id), None) if kind in ("custom", "quick") else None
+    item = next((q for q in a.get(kind, []) if q.get("id") == item_id), None) if kind in ("custom", "quick", "special") else None
     if not item:
         return "No encontré ese botón."
+    if kind == "special":
+        if not anim_path(item.get("file") or ""):
+            return "Esa animación especial no tiene archivo."
+        BUS.emit(special_event(item, preview))
+        return ""
     secs, size = a["quick_seconds"], a["quick_size"]
     if kind == "custom":
         text = (item.get("text") or "").strip()
@@ -873,7 +920,7 @@ class Hotkeys:
         self.problems = {}
         a = CONFIG["anims"]
         hid = 1
-        for kind in ("custom", "quick"):
+        for kind in ("custom", "quick", "special"):
             for item in a.get(kind, []):
                 key = item.get("key") or ""
                 if key not in HOTKEY_KEYS:
@@ -1757,6 +1804,10 @@ class Handler(BaseHTTPRequestHandler):
             for item in chosen:
                 try:
                     files.append(import_anim(Path(item)))
+                    with contextlib.suppress(OSError):
+                        _set_anim_map(ANIM_ORIGIN_FILE, files[-1], str(item))
+                    if data.get("name") and len(chosen) == 1:
+                        set_anim_name(files[-1], _text(data.get("name"), "", 40))
                 except (ValueError, OSError) as exc:
                     errors.append(f"{Path(item).name}: {exc}")
             if chosen and not files:
@@ -1764,6 +1815,18 @@ class Handler(BaseHTTPRequestHandler):
                 return
             self.send_json({"ok": True, "file": files[0] if files else None, "files": files, "errors": errors,
                             "animations": list_animations()})
+        elif path == "/api/anim/name":
+            name = Path(str(data.get("file") or "")).name
+            if not name or not (ANIM_USER / name).is_file():
+                self.send_json({"ok": False, "error": "Solo puedes ponerle nombre a tus animaciones."}, 400)
+                return
+            set_anim_name(name, _text(data.get("name"), "", 40))
+            label = anim_names().get(name) or anim_label(Path(name).stem)
+            for sp in CONFIG["anims"]["special"]:  # los botones especiales con esa animación toman su nombre
+                if sp.get("file") == name:
+                    sp["label"] = label
+            save_config(CONFIG)
+            self.send_json({"ok": True, "animations": list_animations(), "config": CONFIG})
         elif path == "/api/anim/delete":
             # Solo las del streamer (su carpeta); las de EC-Tok no se borran.
             name = Path(str(data.get("file") or "")).name
@@ -1772,6 +1835,9 @@ class Handler(BaseHTTPRequestHandler):
                 self.send_json({"ok": False, "error": "No encontré esa animación."}, 404)
                 return
             target.unlink()
+            with contextlib.suppress(OSError):
+                _set_anim_map(ANIM_NAMES_FILE, name, "")
+                _set_anim_map(ANIM_ORIGIN_FILE, name, "")
             self.send_json({"ok": True, "animations": list_animations()})
         elif path == "/api/special/play":
             specials = CONFIG["anims"]["special"]
@@ -1780,8 +1846,7 @@ class Handler(BaseHTTPRequestHandler):
             if not sp or not anim_path(sp["file"]):
                 self.send_json({"ok": False, "error": "No encontré esa animación."}, 404)
                 return
-            BUS.emit(new_event("special", file=sp["file"], video=sp["file"].lower().endswith(VIDEO_EXTS), size=sp["size"],
-                               volume=sp["volume"], seconds=sp["seconds"], label=sp["label"], preview=bool(data.get("preview"))))
+            BUS.emit(special_event(sp, bool(data.get("preview"))))
             self.send_json({"ok": True})
         elif path == "/api/special/stop":
             BUS.emit(new_event("special_stop"))
