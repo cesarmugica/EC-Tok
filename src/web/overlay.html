@@ -142,6 +142,11 @@
   #actions .st img, #actions .st .ph { width: calc(var(--au) * 2.3); height: calc(var(--au) * 2.3); object-fit: contain; filter: drop-shadow(0 3px 5px rgba(0,0,0,.55)); }
   #actions .st .tx { margin-top: calc(var(--au) * -.28); padding: calc(var(--au) * .05) calc(var(--au) * .38); border-radius: 999px; background: rgba(20,20,20,.82);
     border: calc(var(--au) * .07) solid #E9B949; font-size: calc(var(--au) * .5); font-weight: 800; white-space: nowrap; max-width: 60vw; overflow: hidden; text-overflow: ellipsis; position: relative; }
+  /* cuadrícula: N columnas de regalos, imagen arriba y su etiqueta abajo (recomendado hasta 6×6) */
+  #actions.grid .gr { display: grid; grid-template-columns: repeat(var(--cols, 4), auto); gap: calc(var(--au) * .18) calc(var(--au) * .22); justify-content: center; }
+  #actions.grid .st img, #actions.grid .st .ph { width: calc(var(--au) * 1.7); height: calc(var(--au) * 1.7); }
+  #actions.grid .st .tx { font-size: calc(var(--au) * .36); max-width: calc(var(--au) * 3.4); margin-top: calc(var(--au) * -.2); }
+  #actions.grid .st .ph { font-size: calc(var(--au) * 1.1); }
   #actions .ph { display: grid; place-items: center; font-size: calc(var(--au) * .8); }
   #actions .st .ph { font-size: calc(var(--au) * 1.5); } #actions .side .ph { font-size: calc(var(--au) * .95); }
   /* imagen dentro de un círculo oscuro semitransparente (opcional) */
@@ -260,15 +265,16 @@
   // ---------- metas de acción ----------
   function drawActions() {
     if (!which.includes('actions') || !cfg) return;
-    const a = cfg.actions || {items: []}, box = $('#actions'), stack = a.layout === 'stack';
-    box.className = (stack ? 'stack' : '') + (a.circle ? ' circle' : '');
+    const a = cfg.actions || {items: []}, box = $('#actions'), grid = a.layout === 'grid', stack = a.layout === 'stack' || grid;
+    box.className = (grid ? 'stack grid' : stack ? 'stack' : '') + (a.circle ? ' circle' : '');
+    box.style.setProperty('--cols', Math.max(1, Math.min(8, a.cols || 4)));
     // colores elegidos: letra y orilla (la orilla se hace con sombras alrededor, como en los subtítulos)
     const ring = c => { const o = []; for (let g = 0; g < 360; g += 30) o.push(`${(Math.cos(g * Math.PI / 180) * 0.06).toFixed(3)}em ${(Math.sin(g * Math.PI / 180) * 0.06).toFixed(3)}em 0 ${c}`); return o.join(',') + ',0 .1em .25em rgba(0,0,0,.5)'; };
     const paint = (color, outline) => (color ? `color:${color};` : '') + (outline ? `text-shadow:${ring(outline)};` : ''); box.style.setProperty('--asz', (a.size || 100) / 100);
     const items = (a.items || []).filter(i => i.url || i.text);
     const tStyle = paint(a.title_color, a.title_outline), xStyle = paint(a.text_color, a.text_outline);
-    box.innerHTML = (a.title ? `<h1 class="${a.title_outline ? '' : 'shadow'}" style="${tStyle}">${esc(a.title)}</h1>` : '') + items.map(i =>
-      `<div class="${stack ? 'st' : 'side'}">${i.url ? `<img src="${esc(i.url)}" alt="" referrerpolicy="no-referrer" onerror="this.outerHTML='<div class=&quot;ph&quot;>🎁</div>'">` : '<div class="ph">🎁</div>'}${i.text ? `<span class="tx ${a.text_outline ? '' : 'shadow'}" style="${xStyle}">${esc(i.text)}</span>` : ''}</div>`).join('');
+    box.innerHTML = (a.title ? `<h1 class="${a.title_outline ? '' : 'shadow'}" style="${tStyle}">${esc(a.title)}</h1>` : '') + (grid ? '<div class="gr">' : '') + items.map(i =>
+      `<div class="${stack ? 'st' : 'side'}">${i.url ? `<img src="${esc(i.url)}" alt="" referrerpolicy="no-referrer" onerror="this.outerHTML='<div class=&quot;ph&quot;>🎁</div>'">` : '<div class="ph">🎁</div>'}${i.text ? `<span class="tx ${a.text_outline ? '' : 'shadow'}" style="${xStyle}">${esc(i.text)}</span>` : ''}</div>`).join('') + (grid ? '</div>' : '');
   }
 
   // ---------- animaciones (una a la vez, en fila) ----------

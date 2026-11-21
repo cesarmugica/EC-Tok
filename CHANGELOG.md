@@ -1,5 +1,9 @@
 # Cambios de EC-Tok
 
+## 2.9.1 — 🎯 Metas de acción en cuadrícula
+- Nuevo diseño **Cuadrícula**: los regalos en N columnas (de 1 a 8), con la imagen arriba y su etiqueta abajo. Recomendado: hasta 6×6.
+- En cuadrícula caben hasta 48 metas (en lista siguen siendo 10). Si pasas de cuadrícula a lista con más de 10, te avisa antes y solo se quitan de la lista (las imágenes no se borran).
+
 ## 2.9.0 — 🎁 Regalos de TikTok en las Metas de acción
 - Al conectarse a un live, EC-Tok pide a TikTok su **catálogo de regalos** (nombre, monedas e imagen oficial) y lo recuerda. Además, cada regalo que llega en tus lives se agrega solo.
 - En **🎯 Metas de acción › Elige la imagen** hay una sección nueva, **🎁 Regalos de TikTok**, con los íconos oficiales y sus monedas. Al elegir uno, el texto se llena con sus monedas («5 Coins - ») para que solo escribas qué hace.

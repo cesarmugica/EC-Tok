@@ -472,4 +472,9 @@ T = {
 '✨ De EC-Tok': ('✨ From EC-Tok', '✨ Do EC-Tok'),
 'Aparecen cuando EC-Tok se conecta a un live: TikTok le manda su catálogo de regalos con sus imágenes oficiales. Conéctate una vez y vuelve a abrir esta ventana.': ('They show up when EC-Tok connects to a LIVE: TikTok sends its gift catalog with the official images. Connect once and open this window again.', 'Aparecem quando o EC-Tok se conecta a uma live: o TikTok envia o catálogo de presentes com as imagens oficiais. Conecte-se uma vez e abra esta janela de novo.'),
 '{0} Coins - ': ('{0} Coins - ', '{0} Coins - '),
+'Cuadrícula': ('Grid', 'Grade'),
+'Columnas': ('Columns', 'Colunas'),
+'Recomendado: hasta 6×6': ('Recommended: up to 6×6', 'Recomendado: até 6×6'),
+'{0} de {1}': ('{0} of {1}', '{0} de {1}'),
+'En lista caben hasta 10 metas y tienes {0}.\n\nSe quedan solo las primeras 10; las demás se quitan de la lista (sus imágenes NO se borran).': ('A list fits up to 10 goals and you have {0}.\n\nOnly the first 10 stay; the rest are removed from the list (their images are NOT deleted).', 'Em lista cabem até 10 metas e você tem {0}.\n\nSó as 10 primeiras ficam; as outras saem da lista (as imagens NÃO são apagadas).'),
 }

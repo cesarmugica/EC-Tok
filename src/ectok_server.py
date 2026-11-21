@@ -29,7 +29,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, unquote, urlsplit
 
-APP_VERSION = "2.9.0"
+APP_VERSION = "2.9.1"
 
 try:  # lo genera windows/build.ps1
     from ectok_build import BUILD_DATE  # type: ignore[import-not-found]
@@ -131,7 +131,7 @@ DEFAULT_CONFIG: dict = {
     "top": {"count": 5, "title": "Top donadores"},
     "likers": {"count": 5, "title": "Top likes"},
     # Metas de acción: lista fija (hasta 10) de imagen + texto, ej. «🌌 Baile con canto»
-    "actions": {"title": "", "layout": "side", "size": 100, "circle": False, "items": [],
+    "actions": {"title": "", "layout": "side", "cols": 4, "size": 100, "circle": False, "items": [],
                 # colores: vacío = el de siempre (título en el color de acento, texto blanco con sombra)
                 "title_color": "", "title_outline": "", "text_color": "", "text_outline": ""},
     "likes_rule_added": True,
@@ -594,8 +594,9 @@ def clean_config(data: dict) -> dict:
     if isinstance(actions, dict):
         a = cfg["actions"]
         a["title"] = _text(actions.get("title"), a["title"], 60)
-        if actions.get("layout") in ("side", "stack"):
+        if actions.get("layout") in ("side", "stack", "grid"):  # grid: cuadrícula de N columnas (recomendado hasta 6×6)
             a["layout"] = actions["layout"]
+        a["cols"] = int(_num(actions.get("cols"), a.get("cols", 4), 1, 8))
         a["size"] = int(_num(actions.get("size"), a["size"], 40, 250))
         if isinstance(actions.get("circle"), bool):
             a["circle"] = actions["circle"]
@@ -605,7 +606,7 @@ def clean_config(data: dict) -> dict:
                 a[key] = value.upper() if HEX.fullmatch(value) else ""
         if isinstance(actions.get("items"), list):
             items = []
-            for item in actions["items"][:10]:
+            for item in actions["items"][:ACTIONS_MAX]:
                 if isinstance(item, dict):
                     image = str(item.get("image") or "")
                     items.append({"id": re.sub(r"[^\w-]", "", str(item.get("id") or uuid.uuid4().hex[:8]))[:12] or uuid.uuid4().hex[:8],
@@ -617,6 +618,9 @@ def clean_config(data: dict) -> dict:
 # ---------------------------------------------------------------------------
 # Eventos en vivo para la ventana y los overlays (Server-Sent Events)
 # ---------------------------------------------------------------------------
+ACTIONS_MAX = 48  # metas de acción: hasta 48 (en cuadrícula se recomienda hasta 6×6 = 36)
+
+
 def _peer_closed(sock) -> bool:
     """¿La otra punta cerró la conexión? (sin esperar a que falle un envío)."""
     import select
