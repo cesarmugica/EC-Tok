@@ -69,8 +69,21 @@
   }
   // Si agregas más sonidos (más de 6×6), la ventana crece para que se vean todos (hasta lo que dé la pantalla).
   // Solo crece, nunca se encoge: si tú la acomodaste más grande, se respeta.
+  // Al abrir: del tamaño justo para 6 columnas y los renglones que haya (Edge recuerda el último tamaño de la
+  // ventana; aquí se corrige). Después solo crece si agregas sonidos; si tú la acomodas, se respeta.
+  let sized = false;
   function fitWindow() {
     try {
+      if (!sized && sounds.length) {
+        sized = true;
+        const frameW = outerWidth - innerWidth, wantW = Math.min(screen.availWidth, 24 + 6 * 108 + 5 * 8 + frameW + 2);
+        if (Math.abs(outerWidth - wantW) > 8) window.resizeTo(wantW, outerHeight);
+        requestAnimationFrame(() => requestAnimationFrame(() => {
+          const wantH = Math.min(screen.availHeight, document.getElementById('grid').getBoundingClientRect().bottom + 6 + (outerHeight - innerHeight));
+          if (Math.abs(outerHeight - wantH) > 8) window.resizeTo(outerWidth, wantH);
+        }));
+        return;
+      }
       const needH = document.documentElement.scrollHeight - innerHeight, maxH = screen.availHeight - outerHeight;
       if (needH > 4 && maxH > 0) window.resizeBy(0, Math.min(needH, maxH));
     } catch (_) {}

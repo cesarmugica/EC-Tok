@@ -1,5 +1,9 @@
 # Cambios de EC-Tok
 
+## 2.6.3
+- Arreglado de raíz: «📌 Mantener encima» de la 🎛 consola no funcionaba en Windows de 64 bits (la orden a Windows iba mal armada), por eso se iba para atrás al darle clic a LIVE Studio.
+- La consola **abre del tamaño justo del 6×6** (Edge recordaba el último tamaño y la abría más grande). Si agregas más sonidos, crece; si tú la acomodas, se respeta mientras esté abierta.
+
 ## 2.6.2
 - Arreglado: al actualizar con el botón, EC-Tok se cerraba pero **ya no se abría la versión nueva** si tenías fuentes de EC-Tok en LIVE Studio u OBS (sobre todo ☕ Ya regresamos). Las fuentes se reconectaban al instante y EC-Tok creía que su ventana ya estaba abierta. Ahora solo cuenta la ventana de EC-Tok.
 

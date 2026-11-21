@@ -28,7 +28,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, unquote, urlsplit
 
-APP_VERSION = "2.6.2"
+APP_VERSION = "2.6.3"
 
 try:  # lo genera windows/build.ps1
     from ectok_build import BUILD_DATE  # type: ignore[import-not-found]
@@ -1521,22 +1521,35 @@ def set_topmost(title_prefix: str, on: bool) -> int:
     from ctypes import wintypes
 
     user32 = ctypes.windll.user32  # type: ignore[attr-defined]
+    # Tipos explícitos: sin ellos, en Windows de 64 bits HWND_TOPMOST (-1) y los HWND grandes no llegaban bien
+    # y la ventana nunca quedaba «siempre encima».
+    proc = ctypes.WINFUNCTYPE(wintypes.BOOL, wintypes.HWND, wintypes.LPARAM)
+    user32.EnumWindows.argtypes = [proc, wintypes.LPARAM]
+    user32.GetWindowTextLengthW.argtypes = [wintypes.HWND]
+    user32.GetWindowTextW.argtypes = [wintypes.HWND, wintypes.LPWSTR, ctypes.c_int]
+    user32.IsWindowVisible.argtypes = [wintypes.HWND]
+    user32.SetWindowPos.argtypes = [wintypes.HWND, wintypes.HWND, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_int, wintypes.UINT]
+    user32.SetWindowPos.restype = wintypes.BOOL
     found: list = []
 
-    @ctypes.WINFUNCTYPE(wintypes.BOOL, wintypes.HWND, wintypes.LPARAM)
+    @proc
     def each(hwnd, _lparam):
         length = user32.GetWindowTextLengthW(hwnd)
         if length and user32.IsWindowVisible(hwnd):
             buf = ctypes.create_unicode_buffer(length + 1)
             user32.GetWindowTextW(hwnd, buf, length + 1)
-            if buf.value.startswith(title_prefix):
+            title = buf.value
+            if title.startswith(title_prefix) or title.startswith(title_prefix.split(" ", 1)[-1] + " · "):
                 found.append(hwnd)
         return True
 
     user32.EnumWindows(each, 0)
-    for hwnd in found:  # HWND_TOPMOST = -1, HWND_NOTOPMOST = -2; SWP_NOSIZE | SWP_NOMOVE | SWP_NOACTIVATE
-        user32.SetWindowPos(hwnd, -1 if on else -2, 0, 0, 0, 0, 0x0001 | 0x0002 | 0x0010)
-    return len(found)
+    insert = wintypes.HWND(-1 if on else -2)  # HWND_TOPMOST / HWND_NOTOPMOST
+    done = 0
+    for hwnd in found:  # SWP_NOSIZE | SWP_NOMOVE | SWP_NOACTIVATE
+        if user32.SetWindowPos(hwnd, insert, 0, 0, 0, 0, 0x0001 | 0x0002 | 0x0010):
+            done += 1
+    return done
 
 
 # ---------------------------------------------------------------------------
@@ -1931,7 +1944,10 @@ class Handler(BaseHTTPRequestHandler):
                 with CONFIG_LOCK:
                     CONFIG["console"]["ontop"] = on
                 save_config(CONFIG)
-            self.send_json({"ok": True, "windows": set_topmost(CONSOLE_TITLE, on)})
+            n = set_topmost(CONSOLE_TITLE, on)
+            if not data.get("refresh"):
+                log(f"Consola: «siempre encima» {'sí' if on else 'no'} ({n} ventana(s))")
+            self.send_json({"ok": True, "windows": n})
         elif path == "/api/anim/pick":
             # Paso 1: solo elegir (la ventana dice «elige el archivo»); paso 2: /api/anim/import convierte.
             chosen = pick_anim(multi=bool(data.get("multi")))[:20]
