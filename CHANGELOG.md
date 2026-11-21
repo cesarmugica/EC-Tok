@@ -1,5 +1,8 @@
 # Cambios de EC-Tok
 
+## 2.6.2
+- Arreglado: al actualizar con el botón, EC-Tok se cerraba pero **ya no se abría la versión nueva** si tenías fuentes de EC-Tok en LIVE Studio u OBS (sobre todo ☕ Ya regresamos). Las fuentes se reconectaban al instante y EC-Tok creía que su ventana ya estaba abierta. Ahora solo cuenta la ventana de EC-Tok.
+
 ## 2.6.1 — 🎛 Consola recomendada 6×6
 - La consola viene con **36 sonidos recomendados (6×6)** en vez de todo el banco: 2 renglones de festejo, 1 de risas, 2 de efectos y 1 de voces. Si en la 2.6.0 te llegaron los 63 y no los tocaste, se cambian solos a los 36.
 - La ventana de la consola abre del tamaño justo para el 6×6; si agregas más sonidos (🎛 en el banco), **crece** para que se vean todos.

@@ -28,7 +28,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, unquote, urlsplit
 
-APP_VERSION = "2.6.1"
+APP_VERSION = "2.6.2"
 
 try:  # lo genera windows/build.ps1
     from ectok_build import BUILD_DATE  # type: ignore[import-not-found]
@@ -1716,7 +1716,9 @@ class Handler(BaseHTTPRequestHandler):
                         continue
                     self.wfile.write(b": sigo aqui\n\n")
                 self.wfile.flush()
-                last_write = LAST_PING = time.time()
+                last_write = time.time()
+                if who == "panel":  # solo la ventana de EC-Tok cuenta como «ventana abierta» (no los overlays de LIVE Studio)
+                    LAST_PING = last_write
         except (ConnectionError, OSError):
             pass
         finally:
