@@ -29,7 +29,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, unquote, urlsplit
 
-APP_VERSION = "2.9.5"
+APP_VERSION = "2.9.6"
 
 try:  # lo genera windows/build.ps1
     from ectok_build import BUILD_DATE  # type: ignore[import-not-found]
@@ -1441,49 +1441,10 @@ _load_gift_catalog()
 LIVE.on_gifts = gift_catalog_add
 
 
-def _plain(obj, depth: int = 0):
-    """Pasar lo que mande TikTok (JSON u objetos de la librería) a algo que se pueda guardar como JSON."""
-    if depth > 12:
-        return "…"
-    if obj is None or isinstance(obj, (bool, int, float, str)):
-        return obj
-    if isinstance(obj, bytes):
-        return f"<{len(obj)} bytes>"
-    if isinstance(obj, dict):
-        return {str(k): _plain(v, depth + 1) for k, v in obj.items()}
-    if isinstance(obj, (list, tuple, set)):
-        return [_plain(v, depth + 1) for v in obj]
-    for attr in ("to_dict", "to_pydict"):
-        fn = getattr(obj, attr, None)
-        if callable(fn):
-            with contextlib.suppress(Exception):
-                return _plain(fn(), depth + 1)
-    if hasattr(obj, "__dict__"):
-        return {k: _plain(v, depth + 1) for k, v in vars(obj).items() if not k.startswith("_")}
-    return str(obj)
-
-
-def gift_catalog_raw(result) -> None:
-    """Guardar UNA vez todo lo que TikTok manda de cada regalo (para revisar si trae animaciones aprovechables)."""
-    target = HOME / "regalos_tiktok_completo.json"
-    if target.exists():
-        return
-    with contextlib.suppress(Exception):
-        target.write_text(json.dumps(_plain(result), ensure_ascii=False, indent=1), encoding="utf-8")
-        log(f"Catálogo completo de regalos guardado para revisión: {target}")
-
-
-LIVE.on_gifts_raw = gift_catalog_raw
-
-
-def gift_event_raw(event) -> None:
-    target = HOME / "regalo_evento_ejemplo.json"
-    if not target.exists():
-        with contextlib.suppress(Exception):
-            target.write_text(json.dumps(_plain(event), ensure_ascii=False, indent=1), encoding="utf-8")
-
-
-LIVE.on_gift_event_raw = gift_event_raw
+# 2.9.6: ya no se guarda el catálogo completo para revisión; EC-Tok borra solo esos dos archivos que él mismo creó
+for _old in ("regalos_tiktok_completo.json", "regalo_evento_ejemplo.json"):
+    with contextlib.suppress(OSError):
+        (HOME / _old).unlink()
 
 
 def action_image_path(image_id: str) -> Path | None:

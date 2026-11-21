@@ -1,5 +1,8 @@
 # Cambios de EC-Tok
 
+## 2.9.6
+- Se quitó la revisión del catálogo de regalos de la 2.9.5 (ya se revisó: las animaciones de los regalos de TikTok son efectos de su propio motor, no videos). EC-Tok borra los dos archivos de revisión que había creado.
+
 ## 2.9.5
 - Para revisión: la primera vez que te conectes a un live, EC-Tok guarda en su carpeta todo lo que TikTok manda del catálogo de regalos (regalos_tiktok_completo.json) y un ejemplo de un regalo recibido (regalo_evento_ejemplo.json). No cambia nada de lo que ves.
 
