@@ -915,12 +915,12 @@
     if (DN.solo_style === 'ring') {  // ⭕ foto redonda con su avance alrededor
       box.innerHTML = `<div class="rg" style="--c:${d.color}"><div class="ring" style="--p:${pct.toFixed(1)}"><div class="in">${d.photo ? `<img src="${esc(d.photo)}" alt="">` : `<span class="noph">💃</span>`}</div></div>
         <div class="txt"><span class="nm big">${esc(d.name)}</span><span class="pc">${Math.floor(pct)}%</span><span class="pg">${dnFmt(so.pts)} / ${dnFmt(so.goal)}</span></div>
-        <div class="tbox"><small>${tword}</small><span class="clk dsclk"></span></div>${stampS}</div>`;
+        <div class="tbox"${so.active ? '' : ' style="visibility:hidden"'}><small>${tword}</small><span class="clk dsclk"></span></div>${stampS}</div>`;
       dnStyle(box, 'solo'); return;
     }
     box.innerHTML = `<div class="so" style="--c:${d.color}"><div class="ph">${d.photo ? `<img src="${esc(d.photo)}" alt="">` : `<span class="noph">💃</span>`}</div>
       <div class="mid"><div class="bar"><div class="fill" style="width:${pct}%"></div></div><span class="pg">${dnFmt(so.pts)} / ${dnFmt(so.goal)}</span><span class="nm big">${esc(d.name)}</span></div>
-      <div class="tbox"><small>${esc((cfg && cfg.lang) === 'en' ? 'TIME' : (cfg && cfg.lang) === 'pt' ? 'TEMPO' : 'TIEMPO')}</small><span class="clk dsclk"></span></div>
+      <div class="tbox"${so.active ? '' : ' style="visibility:hidden"'}><small>${esc((cfg && cfg.lang) === 'en' ? 'TIME' : (cfg && cfg.lang) === 'pt' ? 'TEMPO' : 'TIEMPO')}</small><span class="clk dsclk"></span></div>
       ${so.show_result && so.result ? `<div class="stamp ${so.result}">${so.result === 'win' ? ((cfg && cfg.lang) === 'en' ? 'WON!' : (cfg && cfg.lang) === 'pt' ? 'GANHOU!' : '¡GANÓ!') : ((cfg && cfg.lang) === 'en' ? 'LOST!' : (cfg && cfg.lang) === 'pt' ? 'PERDEU!' : '¡PERDIÓ!')}</div>` : ''}</div>`;
     dnStyle(box, 'solo');
   }

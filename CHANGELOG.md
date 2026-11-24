@@ -1,5 +1,9 @@
 # Cambios de EC-Tok
 
+## 4.4.4
+- 🎤 Turno sola: al terminar, su reloj (TIEMPO) ya no se queda en 00:00; se quita y la barra con «¡GANÓ! / ¡PERDIÓ!» se queda.
+- Así quedan las tres (cuadrícula, barra Vs. y turno sola): ninguna desaparece sola; la que eliges sustituye a la otra. Su reloj solo se ve mientras corre; al acabar se quita el reloj y la barra se queda hasta que eliges otro juego.
+
 ## 4.4.3
 - 🏆 **«¡GANÓ …!» se queda en pantalla** (con la barra Vs.) hasta que empiece otra cosa: el juego de activación, otra batalla o un turno sola. Antes se quitaba solo a los 7 segundos. Igual el «¡GANÓ! / ¡PERDIÓ!» del turno sola.
 - Para quitarlo antes: «↺ A cero» de la barra Vs. o «👁 Mostrar / ocultar» de la cuadrícula (regresa la cuadrícula).
