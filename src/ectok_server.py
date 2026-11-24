@@ -30,7 +30,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, unquote, urlsplit
 
-APP_VERSION = "4.0.2"
+APP_VERSION = "4.1.0"
 
 try:  # lo genera windows/build.ps1
     from ectok_build import BUILD_DATE  # type: ignore[import-not-found]
@@ -202,19 +202,19 @@ def _dance_style_default(bg: int = 0) -> dict:
 
 
 DANCE_KEYS = ("grid_show", "grid_ref", "total_show", "total_ref", "clock_run", "clock_show", "logo_show", "logo_ref",
-              "vs_show", "vs_ref", "vs_alt", "bar_show", "bar_ref")
+              "vs_show", "vs_ref", "vs_alt", "bar_show", "bar_ref", "round_next")
 
 
 def dance_default() -> dict:
     return {"on": False, "layout": "bar", "show_total": True, "show_vs": True, "auto_remove": False, "battle_add": True,
             "total_title": "Puntos de hoy", "dancers": [_dancer_default(i) for i in range(6)],
-            "clock": {"seconds": 180}, "logo": {"file": "", "size": 60, "opacity": 100, "float": True},
+            "total_style": "classic", "clock": {"seconds": 180, "attach": False, "rounds": False}, "logo": {"file": "", "size": 60, "opacity": 100, "float": True},
             "vs": {"effect": "rain", "opacity": 75, "auto": True},
             "styles": {"grid": _dance_style_default(0), "total": _dance_style_default(55), "clock": _dance_style_default(45),
                        "bar": _dance_style_default(0)},
             # teclas Ctrl+Alt+… ya puestas (letras, para no chocar con las de las animaciones: números y F1–F12)
             "keys": {"grid_show": "G", "grid_ref": "H", "total_show": "Y", "total_ref": "U", "clock_run": "R", "clock_show": "T",
-                     "logo_show": "L", "logo_ref": "K", "vs_show": "V", "vs_ref": "B", "vs_alt": "C", "bar_show": "N", "bar_ref": "M"}}
+                     "logo_show": "L", "logo_ref": "K", "vs_show": "V", "vs_ref": "B", "vs_alt": "C", "bar_show": "N", "bar_ref": "M", "round_next": "J"}}
 
 
 def dance_fix_config(cfg: dict) -> None:
@@ -1466,9 +1466,9 @@ DANCE_LOCK = threading.Lock()
 DANCE_IMG_EXTS = {".png", ".jpg", ".jpeg", ".webp", ".gif"}
 DANCE_FONTS = ("", "Impact", "Arial Black", "Bahnschrift", "Segoe UI Black", "Trebuchet MS", "Georgia", "Comic Sans MS", "Segoe Script")
 DANCE_EFFECTS = ("rain", "glass", "ice", "curtain")
-DANCE_LAYOUTS = ("bar", "row", "rows2", "rows3", "col")
+DANCE_LAYOUTS = ("bar", "plates", "row", "rows2", "rows3", "col")
 def _dance_state_default() -> dict:
-    return {"points": {}, "bpoints": {}, "battle": False, "roster": {"grid": None, "total": None},
+    return {"points": {}, "bpoints": {}, "wins": {}, "round": 0, "battle": False, "roster": {"grid": None, "total": None},
             "show": {"grid": True, "total": True, "clock": False, "logo": True, "vs": False, "bar": False},
             "clock": {"left": float(CONFIG["dance"]["clock"]["seconds"]), "end": 0.0, "running": False},
             "side": "", "logo_v": 0}
@@ -1477,7 +1477,8 @@ def _dance_load() -> dict:
     with contextlib.suppress(OSError, ValueError, TypeError):
         saved = json.loads(DANCE_FILE.read_text(encoding="utf-8"))
         if isinstance(saved, dict):
-            for key in ("points", "bpoints"):
+            state["round"] = int(saved.get("round") or 0) if isinstance(saved.get("round"), (int, float)) else 0
+            for key in ("points", "bpoints", "wins"):
                 if isinstance(saved.get(key), dict):
                     state[key] = {str(k): int(v) for k, v in saved[key].items() if isinstance(v, (int, float))}
             if isinstance(saved.get("show"), dict):
@@ -1553,7 +1554,7 @@ def dance_side() -> str:
 def dance_payload() -> dict:
     d = CONFIG["dance"]
     with DANCE_LOCK:
-        pts, bpts = dict(DANCE["points"]), dict(DANCE["bpoints"])
+        pts, bpts, wins = dict(DANCE["points"]), dict(DANCE["bpoints"]), dict(DANCE["wins"])
         show, roster, clock = dict(DANCE["show"]), {k: v for k, v in DANCE["roster"].items()}, dict(DANCE["clock"])
     present = [x["id"] for x in _present()]
     dancers = []
@@ -1565,7 +1566,7 @@ def dance_payload() -> dict:
                         "gift_url": _gift_url(x.get("gift", "")), "battle_gift": x.get("battle_gift") or x.get("gift", ""),
                         "battle_gift_url": _gift_url(x.get("battle_gift") or x.get("gift", "")),
                         "photo": f"/baile/foto/{_q(photo.name)}?v={int(photo.stat().st_mtime)}" if photo else "",
-                        "points": pts.get(x["id"], 0), "bpoints": bpts.get(x["id"], 0)})
+                        "points": pts.get(x["id"], 0), "bpoints": bpts.get(x["id"], 0), "wins": wins.get(x["id"], 0)})
     left, right = _fighters()
     logo = dance_logo_path(d["logo"].get("file"))
     return {"on": bool(d["on"]), "layout": d["layout"], "dancers": dancers,
@@ -1573,7 +1574,9 @@ def dance_payload() -> dict:
             "total": [i for i in (roster["total"] if roster["total"] is not None else present)],
             "show": show, "battle": bool(DANCE["battle"]), "left": left["id"] if left else "", "right": right["id"] if right else "",
             "side": dance_side(), "clock": {"total": d["clock"]["seconds"], "left": clock["left"], "running": clock["running"],
-                                            "end_ms": int(clock["end"] * 1000)},
+                                            "end_ms": int(clock["end"] * 1000), "attach": bool(d["clock"].get("attach")),
+                                            "rounds": bool(d["clock"].get("rounds")), "round": DANCE["round"]},
+            "total_style": d.get("total_style", "classic"),
             "logo": {**d["logo"], "url": f"/baile/logo/{_q(logo.name)}?v={int(logo.stat().st_mtime)}-{DANCE['logo_v']}" if logo else ""},
             "vs": d["vs"], "styles": d["styles"],
             "total_title": {"en": "Today's points", "pt": "Pontos de hoje"}.get(CONFIG["language"], d["total_title"]) if d["total_title"] == "Puntos de hoy" else d["total_title"], "show_total": d["show_total"],
@@ -1662,6 +1665,12 @@ def dance_action(action: str) -> str:
             s["vs"] = True
         elif action == "bar_show":  # empezar / terminar la batalla
             if DANCE["battle"]:
+                left, right = _fighters()  # la que tenga más puntos gana la batalla (🏆); si empatan, nadie
+                if left and right:
+                    a, b = DANCE["bpoints"].get(left["id"], 0), DANCE["bpoints"].get(right["id"], 0)
+                    if a != b:
+                        win = left if a > b else right
+                        DANCE["wins"][win["id"]] = DANCE["wins"].get(win["id"], 0) + 1
                 DANCE["battle"], s["bar"], DANCE["side"] = False, False, ""
             else:
                 left, right = _fighters()
@@ -1670,8 +1679,12 @@ def dance_action(action: str) -> str:
                 DANCE["battle"], s["bar"], DANCE["bpoints"], DANCE["side"] = True, True, {}, ""  # la barra Vs. siempre empieza en 0
         elif action == "bar_ref":
             DANCE["bpoints"] = {}
+        elif action == "round_next":  # la ronda (R1, R2…) que sale junto al reloj
+            DANCE["round"] += 1
+        elif action == "round_reset":
+            DANCE["round"] = 0
         elif action == "reset_points":
-            DANCE["points"], DANCE["bpoints"] = {}, {}
+            DANCE["points"], DANCE["bpoints"], DANCE["wins"], DANCE["round"] = {}, {}, {}, 0
         else:
             return "No encontré ese botón."
     dance_save()
@@ -1761,6 +1774,11 @@ def clean_dance(new: dict, cur: dict) -> dict:
     clock = new.get("clock")
     if isinstance(clock, dict):
         out["clock"]["seconds"] = int(_num(clock.get("seconds"), out["clock"]["seconds"], 5, 6 * 3600))
+        for k in ("attach", "rounds"):
+            if isinstance(clock.get(k), bool):
+                out["clock"][k] = clock[k]
+    if new.get("total_style") in ("classic", "dynasty"):
+        out["total_style"] = new["total_style"]
     logo = new.get("logo")
     if isinstance(logo, dict):
         out["logo"]["size"] = int(_num(logo.get("size"), out["logo"]["size"], 10, 100))

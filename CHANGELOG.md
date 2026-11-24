@@ -1,5 +1,13 @@
 # Cambios de EC-Tok
 
+## 4.1.0 — 💃 Más diseños para el live de baile
+- Cuadrícula de activación: nuevo arreglo **«Placas inclinadas»** (una placa por bailarina con su color, rayitas, foto, nombre, puntos y su regalo arriba).
+- **👑 Corona** a la que va ganando (se mueve sola), en todos los arreglos.
+- **🏆 Batallas ganadas**: al terminar cada batalla, la que tenga más puntos suma una (si empatan, nadie). Se ven en la cuadrícula, en la lista y en cada bailarina.
+- Diamantes por bailarina: nuevo estilo **«Dynasty»** (renglones inclinados, lugar en amarillo, 🏆 y puntos). Se elige en su ➕.
+- Reloj: opción **pegado abajo de la cuadrícula** (y de la barra Vs.) y opción **mostrar la ronda (R1, R2…)**, con botones y tecla (Ctrl+Alt+J) para pasar a la siguiente ronda.
+- «Poner los puntos en cero» ahora también borra las batallas ganadas y la ronda (el aviso lo dice).
+
 ## 4.0.2
 - 💃 Live de Baile: cada bailarina tiene, debajo de su @, el campo **✏ Nombre en el live** (por ejemplo @chicagogo → «Hecate»). El @ solo sirve para traer su foto; en el live sale el nombre que escribas. Si lo dejas vacío, usa su nombre de TikTok.
 

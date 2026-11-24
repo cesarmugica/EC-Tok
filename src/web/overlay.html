@@ -184,6 +184,30 @@
   #dgrid .card .nm { font-weight: 900; font-size: calc(2.4vw * var(--dz)); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-transform: uppercase; font-style: italic; }
   #dgrid .card .pt { font-weight: 900; font-size: calc(3vw * var(--dz)); }
   #dgrid .card .gi { width: calc(5.4vw * var(--dz)); height: calc(5.4vw * var(--dz)); }
+  /* cuadrícula de activación: placas inclinadas */
+  #dgrid .plates { display: flex; gap: calc(1.4vw * var(--dz)); padding: calc(2.6vw * var(--dz)) calc(1vw * var(--dz)) calc(1vw * var(--dz)); }
+  #dgrid .pl { position: relative; flex: 1 1 0; min-width: 0; transform: skewX(-12deg); border-radius: calc(.8vw * var(--dz));
+    border: calc(.35vw * var(--dz)) solid rgba(255,255,255,.95); box-shadow: 0 .6vw 1.4vw rgba(0,0,0,.45);
+    background: repeating-linear-gradient(-45deg, rgba(255,255,255,.14) 0 .5vw, transparent .5vw 1.3vw),
+      linear-gradient(180deg, color-mix(in srgb, var(--c) 75%, #fff), var(--c) 55%, color-mix(in srgb, var(--c) 70%, #000)); }
+  #dgrid .pl > .in { transform: skewX(12deg); display: flex; align-items: center; gap: calc(.8vw * var(--dz)); padding: calc(.6vw * var(--dz)) calc(1.2vw * var(--dz)); }
+  #dgrid .pl .av { width: calc(5.8vw * var(--dz)); height: calc(5.8vw * var(--dz)); border: calc(.35vw * var(--dz)) solid #fff; margin-left: calc(-1.8vw * var(--dz)); }
+  #dgrid .pl .tx { display: flex; flex-direction: column; min-width: 0; flex: 1; line-height: 1; }
+  #dgrid .pl .nm { font-weight: 900; font-style: italic; text-transform: uppercase; font-size: calc(1.6vw * var(--dz)); letter-spacing: -.02em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  #dgrid .pl .pt { font-weight: 900; font-style: italic; font-size: calc(3vw * var(--dz)); white-space: nowrap; }
+  #dgrid .pl .gi { position: absolute; top: calc(-1.9vw * var(--dz)); right: calc(.4vw * var(--dz)); width: calc(3.4vw * var(--dz)); height: calc(3.4vw * var(--dz)); }
+  #dgrid .pl .win { position: absolute; right: calc(-.6vw * var(--dz)); bottom: calc(-1.3vw * var(--dz)); transform: skewX(12deg); background: #111; color: #ffd54a;
+    font-weight: 900; font-style: italic; font-size: calc(1.2vw * var(--dz)); padding: calc(.15vw * var(--dz)) calc(.7vw * var(--dz)); border-radius: calc(.4vw * var(--dz)); border: 1px solid #ffd54a; }
+  /* corona: la que va ganando */
+  .dz .crwrap { position: relative; display: inline-grid; flex: none; }
+  .dz .crown { position: absolute; left: 50%; top: 0; transform: translate(-50%, -78%) rotate(-12deg); font-size: calc(3vw * var(--dz)); filter: drop-shadow(0 .2vw .3vw rgba(0,0,0,.6)); animation: dcrown 2.4s ease-in-out infinite; }
+  @keyframes dcrown { 50% { transform: translate(-50%, -88%) rotate(-6deg); } }
+  /* reloj pegado abajo de la cuadrícula / barra */
+  .dz .dclkbox { display: flex; justify-content: center; margin-top: calc(.6vw * var(--dz)); }
+  .dz .dclkbox .clk { font-weight: 900; font-style: italic; font-variant-numeric: tabular-nums; font-size: calc(3.6vw * var(--dz)); padding: calc(.1vw * var(--dz)) calc(1.6vw * var(--dz));
+    background: linear-gradient(180deg, #ffe45c, #f5b900); color: #111 !important; text-shadow: none !important; border-radius: calc(.6vw * var(--dz)); transform: skewX(-10deg); box-shadow: 0 .4vw 1vw rgba(0,0,0,.45); }
+  .dz .rtag { display: inline-block; background: #111; color: #fff; font-weight: 900; font-style: italic; padding: 0 .5em; margin-right: .35em; border-radius: .2em; font-size: .62em; vertical-align: middle; transform: translateY(-.1em); }
+  .dz .clk.low { color: #ff4d5e !important; } .dz .clk.zero { animation: dblink .7s steps(2, start) infinite; }
   /* total por bailarina («Puntos de hoy») */
   #dtotal { margin: 12px; display: inline-block; }
   #dtotal .box { border-radius: calc(1.6vw * var(--dz)); padding: calc(1vw * var(--dz)) calc(1.2vw * var(--dz)); min-width: calc(36vw * var(--dz)); }
@@ -197,6 +221,17 @@
   #dtotal .nm { font-weight: 900; font-style: italic; font-size: calc(2.3vw * var(--dz)); text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   #dtotal .pt { font-weight: 900; font-size: calc(2.6vw * var(--dz)); white-space: nowrap; }
   #dtotal .pt small { font-size: .62em; opacity: .85; }
+  #dtotal .tr { font-size: .72em; color: #ffd54a; margin-right: .5em; font-weight: 800; }
+  /* estilo «Dynasty» */
+  #dtotal.dyn .box { background: transparent !important; padding: 0; }
+  #dtotal.dyn h1 { display: inline-block; transform: skewX(-12deg); background: linear-gradient(180deg, #ffe45c, #f5b900); color: #111 !important; text-shadow: none !important; font-style: italic;
+    padding: calc(.3vw * var(--dz)) calc(2vw * var(--dz)); border-radius: calc(.4vw * var(--dz)); margin: 0 0 calc(.6vw * var(--dz)) calc(1vw * var(--dz)); }
+  #dtotal.dyn .r { transform: skewX(-12deg); gap: 0; margin-top: calc(.5vw * var(--dz)); box-shadow: 0 .3vw .8vw rgba(0,0,0,.4); }
+  #dtotal.dyn .n { width: calc(4.4vw * var(--dz)); height: calc(4.4vw * var(--dz)); display: grid; place-items: center; background: linear-gradient(180deg, #ffe45c, #f5b900); color: #111; font-size: calc(2.6vw * var(--dz)); font-style: italic; }
+  #dtotal.dyn .av { margin: 0 calc(-2.2vw * var(--dz)) 0 calc(.6vw * var(--dz)); position: relative; z-index: 1; transform: skewX(12deg); }
+  #dtotal.dyn .b { border-radius: 0; height: calc(4.4vw * var(--dz)); padding-left: calc(2.8vw * var(--dz)); box-shadow: none;
+    background: repeating-linear-gradient(-45deg, rgba(255,255,255,.1) 0 .4vw, transparent .4vw 1vw), linear-gradient(90deg, color-mix(in srgb, var(--c) 80%, #000), var(--c)); }
+  #dtotal.dyn .b > * { transform: skewX(12deg); }
   /* reloj */
   #dclock { position: fixed; inset: 0; display: grid; place-items: center; }
   #dclock .clk { font-weight: 900; font-variant-numeric: tabular-nums; font-size: calc(min(17vw, 52vh) * var(--dz)); padding: calc(.6vw * var(--dz)) calc(3vw * var(--dz)); border-radius: 999px; letter-spacing: .02em; }
@@ -592,10 +627,17 @@
     const bg = Math.max(0, Math.min(100, st.bg || 0)) / 100, wrap = box.querySelector('.wrap, .box, .clk');
     if (wrap) wrap.style.background = bg ? `rgba(10,10,20,${bg})` : '';
   }
+  const dnLeader = list => { const top = Math.max(0, ...list.map(d => d.points)); return top > 0 ? (list.find(d => d.points === top) || {}).id : ''; };
+  const dnAvC = (d, lead) => d.id === lead ? `<span class="crwrap">${dnAv(d)}<span class="crown">👑</span></span>` : dnAv(d);
+  const dnClockHtml = () => { const c = DN.clock || {}; return `<div class="dclkbox"><span class="clk dclk">${c.rounds && c.round ? `<span class="rtag">R${c.round}</span>` : ''}<span class="tm"></span></span></div>`; };
+  function dnTickClocks() {
+    const left = dnClockLeft(), sec = Math.ceil(left - 0.001), txt = `${Math.floor(sec / 60)}:${String(sec % 60).padStart(2, '0')}`;
+    document.querySelectorAll('.dclk').forEach(el => { const tm = el.querySelector('.tm') || el; tm.textContent = txt; el.classList.toggle('low', sec > 0 && sec <= 10); el.classList.toggle('zero', sec <= 0); });
+  }
   function drawDance() {
     if (!DN) return;
     const on = !!DN.on, s = DN.show || {};
-    const vis = {dgrid: on && s.grid && !DN.battle, dtotal: on && DN.show_total && s.total, dclock: on && s.clock, dlogo: on && s.logo && !!(DN.logo || {}).url,
+    const vis = {dgrid: on && s.grid && !DN.battle, dtotal: on && DN.show_total && s.total, dclock: on && s.clock && !(DN.clock || {}).attach, dlogo: on && s.logo && !!(DN.logo || {}).url,
       dbar: on && DN.show_vs && DN.battle && s.bar, dvs: on && DN.show_vs && s.vs && !!DN.side};
     for (const k of Object.keys(vis)) $('#' + k).hidden = !(which.includes(k) && vis[k]);
     if (which.includes('dgrid') && vis.dgrid) drawDGrid();
@@ -604,39 +646,40 @@
     if (which.includes('dlogo') && vis.dlogo) drawDLogo();
     if (which.includes('dbar') && vis.dbar) drawDBar();
     if (which.includes('dvs')) drawDVs(vis.dvs);
+    clearInterval(dnClockTimer);
+    if (document.querySelector('.dclk')) { dnTickClocks(); dnClockTimer = setInterval(dnTickClocks, 200); }
   }
   function drawDGrid() {
     const box = $('#dgrid'), list = (DN.grid || []).map(dnBy).filter(Boolean), n = list.length;
     if (!n) { box.innerHTML = ''; return; }
-    if (DN.layout === 'bar') {
+    const lead = dnLeader(list), clk = (DN.clock || {}).attach && (DN.show || {}).clock ? dnClockHtml() : '';
+    const wins = d => d.wins ? `<span class="win">🏆 ${d.wins}</span>` : '';
+    if (DN.layout === 'plates') {
+      box.innerHTML = `<div class="wrap"><div class="plates">${list.map(d => `<div class="pl" style="--c:${d.color}"><div class="in">${dnAvC(d, lead)}<span class="tx"><span class="nm">${esc(d.name)}</span><span class="pt">${dnFmt(d.points)}</span></span>${dnGift(d.gift_url, d.circle)}</div>${wins(d)}</div>`).join('')}</div>${clk}</div>`;
+    } else if (DN.layout === 'bar') {
       const sum = list.reduce((a, d) => a + d.points, 0);
-      box.innerHTML = `<div class="wrap"><div class="tops">${list.map(d => `<div style="--c:${d.color}">${dnAv(d)}<span class="nm">${esc(d.name)}</span></div>`).join('')}</div>
+      box.innerHTML = `<div class="wrap"><div class="tops">${list.map(d => `<div style="--c:${d.color}">${dnAvC(d, lead)}<span class="nm">${esc(d.name)}${d.wins ? ` <small style="color:#ffd54a">🏆${d.wins}</small>` : ''}</span></div>`).join('')}</div>
         <div class="segs">${list.map(d => `<div style="--c:${d.color};flex-grow:${sum ? Math.max(d.points / sum, 0.001) : 1}"><span class="pt">${dnFmt(d.points)}</span></div>`).join('')}</div>
-        <div class="gifts">${list.map(d => `<div>${dnGift(d.gift_url, d.circle)}</div>`).join('')}</div></div>`;
+        <div class="gifts">${list.map(d => `<div>${dnGift(d.gift_url, d.circle)}</div>`).join('')}</div>${clk}</div>`;
     } else {
       const cols = DN.layout === 'row' ? n : DN.layout === 'rows2' ? Math.ceil(n / 2) : DN.layout === 'rows3' ? Math.ceil(n / 3) : 1;
-      box.innerHTML = `<div class="wrap"><div class="cards" style="--cols:${cols}">${list.map(d => `<div class="card" style="--c:${d.color}">${dnAv(d)}<span class="tx"><span class="nm">${esc(d.name)}</span><span class="pt">${dnFmt(d.points)}</span></span>${dnGift(d.gift_url, d.circle)}</div>`).join('')}</div></div>`;
+      box.innerHTML = `<div class="wrap"><div class="cards" style="--cols:${cols}">${list.map(d => `<div class="card" style="--c:${d.color}">${dnAvC(d, lead)}<span class="tx"><span class="nm">${esc(d.name)}${d.wins ? ` <small style="color:#ffd54a">🏆${d.wins}</small>` : ''}</span><span class="pt">${dnFmt(d.points)}</span></span>${dnGift(d.gift_url, d.circle)}</div>`).join('')}</div>${clk}</div>`;
     }
     dnStyle(box, 'grid');
   }
   function drawDTotal() {
     const box = $('#dtotal'), list = (DN.total || []).map(dnBy).filter(Boolean).sort((a, b) => b.points - a.points);
-    box.innerHTML = `<div class="box">${DN.total_title ? `<h1>${esc(DN.total_title)}</h1>` : ''}${list.map((d, i) => `<div class="r" style="--c:${d.color}"><span class="n">${i + 1}</span>${dnAv(d)}<div class="b"><span class="nm">${esc(d.name)}</span><span class="pt">${dnFmt(d.points)}${d.goal ? `<small> / ${dnFmt(d.goal)}</small>` : ''}</span></div></div>`).join('')}</div>`;
+    box.classList.toggle('dyn', DN.total_style === 'dynasty');
+    box.innerHTML = `<div class="box">${DN.total_title ? `<h1>${esc(DN.total_title)}</h1>` : ''}${list.map((d, i) => `<div class="r" style="--c:${d.color}"><span class="n">${i + 1}</span>${dnAv(d)}<div class="b"><span class="nm">${esc(d.name)}</span><span class="pt">${d.wins || DN.total_style === 'dynasty' ? `<span class="tr">🏆 ${d.wins || 0}</span>` : ''}${dnFmt(d.points)}${d.goal ? `<small> / ${dnFmt(d.goal)}</small>` : ''}</span></div></div>`).join('')}</div>`;
     dnStyle(box, 'total');
   }
   function dnClockLeft() { const c = DN.clock || {}; return c.running ? Math.max(0, (c.end_ms - (Date.now() + dnSkew)) / 1000) : Math.max(0, c.left || 0); }
   function drawDClock() {
-    clearInterval(dnClockTimer);
-    if ($('#dclock').hidden) return;
     const box = $('#dclock');
-    if (!box.querySelector('.clk')) box.innerHTML = '<div class="clk"></div>';
+    if (box.hidden) { box.innerHTML = ''; return; }
+    const c = DN.clock || {};
+    box.innerHTML = `<div class="clk dclk">${c.rounds && c.round ? `<span class="rtag">R${c.round}</span>` : ''}<span class="tm"></span></div>`;
     dnStyle(box, 'clock');
-    const tick = () => {
-      const left = dnClockLeft(), sec = Math.ceil(left - 0.001), m = Math.floor(sec / 60), el = box.querySelector('.clk');
-      el.textContent = `${m}:${String(sec % 60).padStart(2, '0')}`;
-      el.classList.toggle('low', sec > 0 && sec <= 10); el.classList.toggle('zero', sec <= 0);
-    };
-    tick(); dnClockTimer = setInterval(tick, 200);
   }
   function drawDLogo() {
     const box = $('#dlogo'), l = DN.logo || {};
@@ -652,7 +695,7 @@
     box.innerHTML = `<div class="wrap"><div class="tops"><div class="who" style="--c:${a.color}">${dnAv(a)}<span class="nm">${esc(a.name)}</span>${dnGift(a.battle_gift_url, a.circle)}</div><span class="vs">VS</span>
       <div class="who r" style="--c:${b.color}">${dnAv(b)}<span class="nm">${esc(b.name)}</span>${dnGift(b.battle_gift_url, b.circle)}</div></div>
       <div class="bar"><div style="--c:${a.color};flex-grow:${Math.max(pa, 0.001)}"><span class="pt">${dnFmt(a.bpoints)}</span></div><div class="r" style="--c:${b.color};flex-grow:${Math.max(1 - pa, 0.001)}"><span class="pt">${dnFmt(b.bpoints)}</span></div>
-      <span class="bolt" style="left:${Math.min(92, Math.max(8, pa * 100))}%">⚡</span></div></div>`;
+      <span class="bolt" style="left:${Math.min(92, Math.max(8, pa * 100))}%">⚡</span></div>${(DN.clock || {}).attach && (DN.show || {}).clock ? dnClockHtml() : ''}</div>`;
     dnStyle(box, 'bar');
   }
   function drawDVs(visible) {
