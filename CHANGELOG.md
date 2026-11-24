@@ -1,5 +1,8 @@
 # Cambios de EC-Tok
 
+## 4.2.3
+- 💃 Live de Baile: en cada bailarina, el botón ➕ / regalo de activación (y su casilla y foto) quedan centrados a la altura del @ y del nombre.
+
 ## 4.2.2
 - 💃 Live de Baile: en EC-Tok, «Va en» del reloj se quedaba en 0:00 aunque en el live sí corría. Ya se ve cómo va, igual que el tiempo que queda de la batalla y del turno sola.
 

@@ -201,13 +201,15 @@
     .dnd { display: grid; grid-template-columns: auto auto minmax(0, 1fr) auto; grid-template-rows: auto auto auto; gap: 3px 8px; align-items: center;
       padding: 8px 10px; border: 1px solid var(--border); border-radius: 12px; background: var(--bg); border-left: 5px solid var(--c, var(--border)); }
     .dnd.off { opacity: .55; }
-    .dnd .av { grid-row: span 3; width: 42px; height: 42px; border-radius: 50%; object-fit: cover; background: var(--surface-2); display: grid; place-items: center; font-size: 20px; }
-    .dnd input[type=checkbox] { grid-row: span 3; }
+    .dnd .av { grid-column: 2; grid-row: 1 / span 2; align-self: center; width: 42px; height: 42px; border-radius: 50%; object-fit: cover; background: var(--surface-2); display: grid; place-items: center; font-size: 20px; }
+    .dnd input[type=checkbox] { grid-column: 1; grid-row: 1 / span 2; align-self: center; }
+    .dnd .at:not(.nmx) { grid-column: 3; grid-row: 1; }
+    .dnd .nmx { grid-row: 2; }
     .dnd .nmx { grid-column: 3; }
-    .dnd .pts { grid-column: 3 / span 2; }
+    .dnd .pts { grid-column: 3 / span 2; grid-row: 3; }
     .dnd .at { display: flex; align-items: center; gap: 4px; color: var(--muted); min-width: 0; }
     .dnd .at input { width: 100%; min-width: 0; padding: 6px 8px; }
-    .dnd .plus { grid-row: span 2; align-self: start; width: 44px; height: 44px; padding: 0; border-radius: 12px; display: grid; place-items: center; font-size: 20px; }
+    .dnd .plus { grid-column: 4; grid-row: 1 / span 2; align-self: center; width: 44px; height: 44px; padding: 0; border-radius: 12px; display: grid; place-items: center; font-size: 20px; }
     .dnd .plus img { width: 34px; height: 34px; object-fit: contain; }
     .dnd .pts { font-size: .82rem; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .dnd .pts b { color: var(--text); }
