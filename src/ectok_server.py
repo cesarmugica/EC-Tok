@@ -30,7 +30,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, unquote, urlsplit
 
-APP_VERSION = "4.2.3"
+APP_VERSION = "4.3.0"
 
 try:  # lo genera windows/build.ps1
     from ectok_build import BUILD_DATE  # type: ignore[import-not-found]
@@ -1346,6 +1346,7 @@ class Simulator:
 
     def __init__(self) -> None:
         self.lock = threading.Lock()
+        self.dance: dict | None = None
         self.running = False
         self.items: list[dict] = []
         self.until = 0.0
@@ -1371,10 +1372,11 @@ class Simulator:
             return copy.deepcopy({k: getattr(st, k) for k in ("started", "likes", "diamonds", "follows", "shares", "gifts",
                                                                "comments", "donors", "likers", "gift_names")})
 
-    def start(self, items: list[dict], minutes: float) -> None:
+    def start(self, items: list[dict], minutes: float, dance: dict | None = None) -> None:
         with self.lock:
             if not self.running:
                 self.snapshot = self._snap()  # cómo estaban los números antes de la prueba
+            self.dance = dance
             self.gen += 1
             self.items, self.running = items, True
             self.started = time.time()
@@ -1392,6 +1394,7 @@ class Simulator:
             self.gen += 1
         if was:  # que los overlays y la ventana suelten lo que quedó en fila de la simulación
             BUS.emit(new_event("sim_stop"))
+        dance_sim_end(restore if finish else None)
         with self.lock:
             if not finish:
                 return
@@ -1408,7 +1411,7 @@ class Simulator:
 
     def public(self) -> dict:
         with self.lock:
-            return {"running": self.running, "left": max(0, round(self.until - time.time())) if self.running else 0,
+            return {"dance": {"dancers": int((self.dance or {}).get("dancers") or 0)} if self.dance else None, "running": self.running, "left": max(0, round(self.until - time.time())) if self.running else 0,
                     "sent": dict(self.sent), "changed": self.snapshot is not None}
 
     def _event(self, item: dict) -> list[dict]:
@@ -1435,6 +1438,7 @@ class Simulator:
 
     def _run(self, gen: int) -> None:
         due = [time.time() + 0.3 + i * 0.15 for i in range(len(self.items))]
+        script = DanceScript(self.dance) if getattr(self, "dance", None) else None
         while True:
             with self.lock:
                 if gen != self.gen or not self.running:
@@ -1444,6 +1448,8 @@ class Simulator:
                     log("Entorno de prueba: terminó el tiempo de la simulación")
                     BUS.emit(new_event("sim_stop"))
                     BUS.emit(new_event("sim", running=False))
+                    if script:
+                        threading.Thread(target=dance_sim_end, args=(None,), daemon=True).start()
                     return
                 items = list(self.items)
             now = time.time()
@@ -1454,10 +1460,151 @@ class Simulator:
                         LIVE.push(ev)
                     with self.lock:
                         self.sent[item["kind"]] = self.sent.get(item["kind"], 0) + item["count"]
+            if script:
+                n = script.step()
+                if n:
+                    with self.lock:
+                        self.sent["dance"] = self.sent.get("dance", 0) + n
             time.sleep(0.1)
 
 
 SIM = Simulator()
+
+
+def dance_sim_begin(opts: dict) -> None:
+    """Empieza la prueba del live de baile: foto de cómo estaba todo (para dejarlo igual al terminar)."""
+    with DANCE_LOCK:
+        if not DANCE_SIM["active"]:
+            DANCE_SIM["snap"] = json.loads(json.dumps(DANCE))
+        n = opts.get("dancers", 0)
+        if n:  # bailarinas de prueba: no tocan las tuyas
+            base = dance_default()["dancers"]
+            DANCE_SIM["dancers"] = [{**base[i], "user": "", "label": SIM_DANCER_NAMES[i], "gift": SIM_DANCER_GIFTS[i], "on": True,
+                                     "goal": 3000, "fight": i < 2, "side": "left" if i == 0 else "right"} for i in range(n)]
+            DANCE.update(points={}, bpoints={}, wins={}, round=0)
+            DANCE["roster"] = {"grid": None, "total": None}
+        else:
+            DANCE_SIM["dancers"] = None
+        DANCE_SIM["active"] = True
+        DANCE["show"].update(grid=True, total=True, logo=True)
+    if opts.get("clock") and not DANCE["clock"]["running"]:
+        dance_action("clock_run")
+    dance_emit()
+
+
+def dance_sim_end(restore: bool | None) -> None:
+    """Termina la prueba del live de baile. restore=None: solo parar (todavía se va a preguntar)."""
+    if not DANCE_SIM["active"]:
+        if restore is not None:
+            snap, DANCE_SIM["snap"] = DANCE_SIM["snap"], None
+            if restore and snap:
+                with DANCE_LOCK:
+                    DANCE.update(snap)
+                dance_save()
+                dance_emit()
+        return
+    with DANCE_LOCK:
+        if DANCE["battle"]:
+            DANCE.update(battle=False, side="", bend=0.0)
+            DANCE["show"]["bar"] = False
+        DANCE["solo"].update(active=False, result="", until=0.0)
+        DANCE["bres"] = {"winner": "", "until": 0.0, "a": "", "b": ""}
+        test_dancers = DANCE_SIM["dancers"] is not None
+        DANCE_SIM["active"] = False
+        snap = DANCE_SIM["snap"]
+        if test_dancers and snap:  # lo de las bailarinas de prueba nunca se queda
+            DANCE.update(snap)
+            DANCE_SIM["snap"] = None
+        DANCE_SIM["dancers"] = None
+        if restore and snap and not test_dancers:
+            DANCE.update(snap)
+            DANCE_SIM["snap"] = None
+        elif restore is not None and not test_dancers:
+            DANCE_SIM["snap"] = None
+    dance_save()
+    dance_emit()
+
+
+class DanceScript:
+    """El guion de la prueba: baile de todas → batalla → baile → turno sola → … (lo que elegiste)."""
+
+    def __init__(self, opts: dict) -> None:
+        self.o = opts
+        self.phase, self.until, self.next_gift = "", 0.0, 0.0
+        self.order = ["grid"] + (["battle"] if opts.get("battle") else []) + (["grid"] if opts.get("battle") and opts.get("solo") else []) \
+            + (["solo"] if opts.get("solo") else [])
+        self.i = -1
+        dance_sim_begin(opts)
+        self._next()
+
+    def _next(self) -> None:
+        self.i = (self.i + 1) % len(self.order)
+        self.phase = self.order[self.i]
+        now = time.time()
+        d = CONFIG["dance"]
+        if self.phase == "grid":
+            self.until = now + 25
+        elif self.phase == "battle":
+            pres = _present()
+            for k, x in enumerate(pres):  # pelean las 2 primeras (las de prueba) o las que tú elegiste
+                if DANCE_SIM["dancers"] is not None:
+                    x["fight"], x["side"] = k < 2, "left" if k == 0 else "right"
+            secs = int(d.get("battle_secs") or 0)
+            span = min(secs, 60) if secs else 30
+            self.until = now + span + 0.5
+            if dance_action("bar_show"):
+                self.until = now  # no se pudo (faltan las 2): sigue con lo demás
+            elif DANCE.get("bend"):
+                with DANCE_LOCK:  # en la prueba la batalla dura máx. 1 min (y su reloj lo dice)
+                    DANCE["bend"] = min(DANCE["bend"], now + span)
+                threading.Thread(target=_battle_watch, args=(DANCE["bend"],), daemon=True).start()
+                dance_emit()
+        elif self.phase == "solo":
+            pres = _present()
+            if pres:
+                dance_action("solo_set", random.choice(pres)["id"])
+                if not dance_action("solo_run"):
+                    self.until = DANCE["solo"]["end"] + 8
+                    return
+            self.until = now
+
+    def step(self) -> int:
+        """Manda los regalos que tocan; regresa cuántos mandó."""
+        now = time.time()
+        if self.phase == "battle" and not DANCE["battle"] and now < self.until and DANCE.get("bres", {}).get("until", 0) < now:
+            self.until = now  # la batalla ya terminó sola
+        if self.phase == "solo" and not DANCE["solo"]["active"] and DANCE["solo"]["until"] < now:
+            self.until = min(self.until, now)
+        if now >= self.until:
+            if self.phase == "battle" and DANCE["battle"]:
+                dance_action("bar_show")  # termina la batalla y sale quién ganó
+                self.until = now + 8
+                return 0
+            self._next()
+            return 0
+        if now < self.next_gift:
+            return 0
+        self.next_gift = now + float(self.o.get("every", 2))
+        pres = _present()
+        if not pres:
+            return 0
+        if self.phase == "battle" and DANCE["battle"]:
+            left, right = _fighters()
+            x = random.choice([y for y in (left, right) if y] or pres)
+            name = x.get("battle_gift") or x.get("gift")
+        elif self.phase == "solo" and DANCE["solo"]["active"]:
+            name = random.choice(ectok_live.TEST_GIFTS[:9])[0]
+        else:
+            x = random.choice(pres)
+            name = x.get("gift")
+        if not name:
+            return 0
+        each = _gift_coins(name) or next((g[1] for g in ectok_live.TEST_GIFTS if g[0] == name), 1)
+        count = random.choice([1, 1, 2, 5]) if each < 100 else 1
+        fan = random.choice(ectok_live.TEST_USERS)
+        LIVE.push(new_event("gift", user={"id": fan.replace(" ", "_").lower(), "name": fan, "avatar": ""}, test=True, sim=True,
+                            gift={"name": name, "count": count, "diamonds": each, "total": each * count, "image": _gift_url(name)}))
+        return 1
 
 # ---------------------------------------------------------------------------
 # 💃 Live de baile: cada bailarina con su regalo de activación (los regalos llegan al live del anfitrión; aquí solo se
@@ -1471,6 +1618,20 @@ DANCE_IMG_EXTS = {".png", ".jpg", ".jpeg", ".webp", ".gif"}
 DANCE_FONTS = ("", "Impact", "Arial Black", "Bahnschrift", "Segoe UI Black", "Trebuchet MS", "Georgia", "Comic Sans MS", "Segoe Script")
 DANCE_EFFECTS = ("rain", "glass", "ice", "curtain")
 DANCE_LAYOUTS = ("bar", "plates", "row", "rows2", "rows3", "col")
+# 🧪 entorno de prueba del live de baile: bailarinas de prueba (no tocan las tuyas) y un guion que se repite
+DANCE_SIM: dict = {"active": False, "dancers": None, "snap": None}
+SIM_DANCER_NAMES = ["LUNA", "SOFI", "MIA", "ARI", "VALE", "NINA"]
+SIM_DANCER_GIFTS = ["Rose", "Doughnut", "Finger Heart", "Hand Hearts", "Corgi", "Money Gun"]
+
+
+def _dancers() -> list[dict]:
+    return DANCE_SIM["dancers"] if DANCE_SIM["active"] and DANCE_SIM["dancers"] is not None else CONFIG["dance"]["dancers"]
+
+
+def dance_on() -> bool:
+    return bool(CONFIG["dance"]["on"] or DANCE_SIM["active"])
+
+
 def _dance_state_default() -> dict:
     return {"points": {}, "bpoints": {}, "wins": {}, "round": 0, "battle": False,
             "solo": {"active": False, "id": "", "pts": 0, "goal": 0, "end": 0.0, "result": "", "until": 0.0},
@@ -1543,7 +1704,7 @@ def _gift_coins(name: str) -> int:
     hit = GIFT_CATALOG.get(name) or next((g for n, g in GIFT_CATALOG.items() if same_gift(n, name)), None)
     return int(hit.get("diamonds", 0)) if hit else 0
 def _present() -> list[dict]:
-    return [d for d in CONFIG["dance"]["dancers"] if d.get("on") and (d.get("user") or d.get("label"))]
+    return [d for d in _dancers() if d.get("on") and (d.get("user") or d.get("label"))]
 def _fighters() -> tuple[dict | None, dict | None]:
     """Las 2 de la batalla: una a la izquierda y otra a la derecha."""
     fight = [d for d in _present() if d.get("fight")]
@@ -1566,7 +1727,7 @@ def dance_payload() -> dict:
         show, roster, clock = dict(DANCE["show"]), {k: v for k, v in DANCE["roster"].items()}, dict(DANCE["clock"])
     present = [x["id"] for x in _present()]
     dancers = []
-    for x in d["dancers"]:
+    for x in _dancers():
         photo = dance_photo_path(x.get("photo"))
         dancers.append({"id": x["id"], "on": bool(x.get("on")), "user": x.get("user", ""),
                         "name": x.get("label") or x.get("user") or "", "color": x.get("color", "#FF3B8D"),
@@ -1577,7 +1738,7 @@ def dance_payload() -> dict:
                         "points": pts.get(x["id"], 0), "bpoints": bpts.get(x["id"], 0), "wins": wins.get(x["id"], 0)})
     left, right = _fighters()
     logo = dance_logo_path(d["logo"].get("file"))
-    return {"on": bool(d["on"]), "layout": d["layout"], "dancers": dancers,
+    return {"on": dance_on(), "test": bool(DANCE_SIM["active"]), "layout": d["layout"], "dancers": dancers,
             "grid": [i for i in (roster["grid"] if roster["grid"] is not None else present)],
             "total": [i for i in (roster["total"] if roster["total"] is not None else present)],
             "show": show, "battle": bool(DANCE["battle"]), "left": left["id"] if left else "", "right": right["id"] if right else "",
@@ -1592,14 +1753,14 @@ def dance_payload() -> dict:
                      "show_result": DANCE["solo"]["until"] > time.time()},
             "logo": {**d["logo"], "url": f"/baile/logo/{_q(logo.name)}?v={int(logo.stat().st_mtime)}-{DANCE['logo_v']}" if logo else ""},
             "vs": d["vs"], "styles": d["styles"],
-            "total_title": {"en": "Today's points", "pt": "Pontos de hoje"}.get(CONFIG["language"], d["total_title"]) if d["total_title"] == "Puntos de hoy" else d["total_title"], "show_total": d["show_total"],
-            "show_vs": d["show_vs"], "now_ms": int(time.time() * 1000)}
+            "total_title": {"en": "Today's points", "pt": "Pontos de hoje"}.get(CONFIG["language"], d["total_title"]) if d["total_title"] == "Puntos de hoy" else d["total_title"], "show_total": d["show_total"] or DANCE_SIM["active"],
+            "show_vs": d["show_vs"] or DANCE_SIM["active"], "now_ms": int(time.time() * 1000)}
 def dance_emit() -> None:
     BUS.emit(new_event("dance", dance=dance_payload()))
 def dance_gift(ev: dict) -> None:
     """Un regalo: le suma a la bailarina que tiene ese regalo de activación (y en batalla, a la barra Vs.)."""
     d = CONFIG["dance"]
-    if not d["on"] or ev.get("type") != "gift":
+    if not dance_on() or ev.get("type") != "gift":
         return
     g = ev.get("gift") or {}
     name, total = str(g.get("name") or ""), int(g.get("total") or 0)
@@ -1610,7 +1771,7 @@ def dance_gift(ev: dict) -> None:
     changed, reached = False, []
     solo = DANCE["solo"]
     if solo["active"]:  # 🎤 turno sola: cualquier regalo le cuenta a ella
-        x = next((y for y in d["dancers"] if y["id"] == solo["id"]), None)
+        x = next((y for y in _dancers() if y["id"] == solo["id"]), None)
         if x:
             with DANCE_LOCK:
                 solo["pts"] += total
@@ -1661,7 +1822,7 @@ def msg_goal(x: dict) -> str:
 def dance_action(action: str, arg: str = "") -> str:
     """Las teclas y botones del live de baile. Regresa el error, o «» si salió."""
     d = CONFIG["dance"]
-    if not d["on"]:
+    if not dance_on():
         return "Primero prende «Live de Baile» en 🔴 En vivo."
     now = time.time()
     with DANCE_LOCK:
@@ -1711,7 +1872,7 @@ def dance_action(action: str, arg: str = "") -> str:
         elif action == "solo_set":  # 🎤 elegir quién pasa sola
             if DANCE["solo"]["active"]:
                 return "Termina el turno antes de cambiar de bailarina."
-            if any(x["id"] == arg for x in d["dancers"]):
+            if any(x["id"] == arg for x in _dancers()):
                 DANCE["solo"]["id"], DANCE["solo"]["result"] = arg, ""
         elif action == "solo_next":  # 🎤 la siguiente bailarina presente para el turno sola
             pres = [x["id"] for x in _present()]
@@ -2715,11 +2876,23 @@ class Handler(BaseHTTPRequestHandler):
             except Exception as exc:  # noqa: BLE001
                 self.send_json({"ok": False, "error": str(exc)[:300]}, 500)
         elif path == "/api/sim/start":
-            items = Simulator.clean(data.get("items"))
-            if not items:
+            mode = data.get("mode") if data.get("mode") in ("live", "dance", "both") else "live"
+            items = Simulator.clean(data.get("items")) if mode != "dance" else []
+            dance = None
+            if mode != "live":  # 💃 la prueba del live de baile
+                raw = data.get("dance") if isinstance(data.get("dance"), dict) else {}
+                n = int(_num(raw.get("dancers"), 4, 0, 6))
+                if n == 1:
+                    n = 2
+                if not n and not [x for x in CONFIG["dance"]["dancers"] if x.get("on") and x.get("gift") and (x.get("user") or x.get("label"))]:
+                    self.send_json({"ok": False, "error": "Tus bailarinas todavía no tienen regalo: elige «bailarinas de prueba» o configúralas en 🔴 En vivo."}, 400)
+                    return
+                dance = {"dancers": n, "battle": raw.get("battle") is not False, "solo": raw.get("solo") is not False,
+                         "clock": raw.get("clock") is not False, "every": _num(raw.get("every"), 2, 0.5, 60)}
+            if not items and not dance:
                 self.send_json({"ok": False, "error": "Prende al menos una simulación."}, 400)
                 return
-            SIM.start(items, 5)  # se detiene sola a los 5 minutos, por si se te olvida
+            SIM.start(items, 5, dance)  # se detiene sola a los 5 minutos, por si se te olvida
             self.send_json({"ok": True, "sim": SIM.public()})
         elif path == "/api/sim/stop":
             SIM.stop(bool(data.get("restore")), data.get("finish") is not False)

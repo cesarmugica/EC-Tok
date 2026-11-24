@@ -1,5 +1,12 @@
 # Cambios de EC-Tok
 
+## 4.3.0
+- 🧪 **El entorno de prueba ahora también prueba el Live de Baile.** Arriba eliges «¿Qué quieres probar?»: **🔴 Live normal** (como siempre, viene así), **💃 Live de baile** o **🔴 + 💃 Los dos**.
+- 💃 La prueba de baile va sola, en ciclo: todas bailan con su regalo de activación → **batalla Vs.** con su reloj (máx. 1 min en la prueba) → **turno sola** → y otra vez. Usa tus mismos diseños, relojes y metas, y sale en las fuentes del live de baile (sus direcciones están ahí mismo para copiarlas).
+- **Bailarinas de prueba: 2, 3, 4, 5 o 6** (LUNA, SOFI, MIA, ARI, VALE, NINA), o «Las mías». Las de prueba **no tocan las tuyas**: al detener se quitan solas con sus puntos. Con «Las mías», al detener te pregunta si sus puntos regresan a como estaban.
+- Puedes elegir cada cuántos segundos llega un regalo y si incluye batalla, turno sola y reloj.
+- 🎤 Turno sola: si la bailarina no tiene foto, sale 💃 en vez del cuadro vacío.
+
 ## 4.2.3
 - 💃 Live de Baile: en cada bailarina, el botón ➕ / regalo de activación (y su casilla y foto) quedan centrados a la altura del @ y del nombre.
 

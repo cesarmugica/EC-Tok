@@ -277,6 +277,7 @@
   #dsolo .so { position: relative; display: flex; align-items: flex-start; gap: calc(1.2vw * var(--dz)); }
   #dsolo .ph { flex: none; width: calc(17vw * var(--dz)); height: calc(19vw * var(--dz)); transform: skewX(-6deg); border: calc(.6vw * var(--dz)) solid #fff;
     box-shadow: calc(.8vw * var(--dz)) calc(.8vw * var(--dz)) 0 #111; background: #222; overflow: hidden; }
+  #dsolo .ph .noph { display: flex; width: 100%; height: 100%; align-items: center; justify-content: center; transform: skewX(6deg); font-size: calc(9vw * var(--dz)); }
   #dsolo .ph img { width: 100%; height: 100%; object-fit: cover; transform: skewX(6deg) scale(1.15); }
   #dsolo .mid { flex: 1; min-width: 0; display: flex; flex-direction: column; padding-top: calc(1.5vw * var(--dz)); }
   #dsolo .bar { position: relative; height: calc(5vw * var(--dz)); transform: skewX(-14deg); background: #1c1c1c; border: calc(.4vw * var(--dz)) solid #fff;
@@ -728,7 +729,7 @@
     const box = $('#dsolo'), so = DN.solo || {}, d = dnBy(so.id);
     if (!d) { box.innerHTML = ''; return; }
     const pct = so.goal ? Math.min(100, so.pts / so.goal * 100) : 0;
-    box.innerHTML = `<div class="so" style="--c:${d.color}"><div class="ph">${d.photo ? `<img src="${esc(d.photo)}" alt="">` : ''}</div>
+    box.innerHTML = `<div class="so" style="--c:${d.color}"><div class="ph">${d.photo ? `<img src="${esc(d.photo)}" alt="">` : `<span class="noph">💃</span>`}</div>
       <div class="mid"><div class="bar"><div class="fill" style="width:${pct}%"></div></div><span class="pg">${dnFmt(so.pts)} / ${dnFmt(so.goal)}</span><span class="nm big">${esc(d.name)}</span></div>
       <div class="tbox"><small>${esc((cfg && cfg.lang) === 'en' ? 'TIME' : (cfg && cfg.lang) === 'pt' ? 'TEMPO' : 'TIEMPO')}</small><span class="clk dsclk"></span></div>
       ${so.show_result && so.result ? `<div class="stamp ${so.result}">${so.result === 'win' ? ((cfg && cfg.lang) === 'en' ? 'WON!' : (cfg && cfg.lang) === 'pt' ? 'GANHOU!' : '¡GANÓ!') : ((cfg && cfg.lang) === 'en' ? 'LOST!' : (cfg && cfg.lang) === 'pt' ? 'PERDEU!' : '¡PERDIÓ!')}</div>` : ''}</div>`;
