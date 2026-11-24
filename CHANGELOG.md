@@ -1,5 +1,8 @@
 # Cambios de EC-Tok
 
+## 4.0.1
+- 💃 Live de Baile: las fuentes se acomodan en **tarjetas** (2 por renglón): arriba el nombre y si se ve, luego la **dirección completa** con 📋 Copiar, sus 2 teclas con su nombre y los botones. Ya se lee toda la URL.
+
 ## 4.0.0 — 💃 Live de Baile
 - Nueva casilla **💃 Live de Baile** en 🔴 En vivo. Solo si está prendida aparece todo lo del live de baile.
 - **Bailarinas (hasta 6):** casilla = está presente en el live, su **@usuario** (EC-Tok trae su foto de TikTok; también puedes subir una) y **➕** para su **regalo de activación**, **regalo para batallas**, **meta**, **color**, nombre en pantalla y si el regalo va transparente o en círculo negro.

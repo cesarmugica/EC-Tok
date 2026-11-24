@@ -211,17 +211,24 @@
     .dnd .pts b { color: var(--text); }
     .dnd .pts.done b { color: var(--ok); }
     .dn-h3 { margin: 18px 0 6px; font-size: 1rem; }
-    .dn-src { display: grid; grid-template-columns: minmax(150px, auto) minmax(180px, 1fr) auto auto auto auto; gap: 6px 10px; align-items: center; }
-    .dn-src .hd { color: var(--muted); font-size: .78rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; }
-    .dn-src .nm { font-weight: 700; display: flex; align-items: center; gap: 6px; }
-    .dn-src code { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: .8rem; padding: 7px 9px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg); }
-    .dn-src .k { display: flex; flex-direction: column; gap: 2px; }
-    .dn-src .k small { color: var(--muted); font-size: .72rem; }
-    .dn-src .k select { padding: 6px 8px; }
-    .dn-src .bt { display: flex; gap: 6px; flex-wrap: wrap; }
-    .dn-src .sub { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; padding: 2px 0 8px 26px; border-bottom: 1px dashed var(--border); }
-    .dn-src .st { font-size: .78rem; padding: 2px 8px; border-radius: 999px; background: var(--surface-2); color: var(--muted); white-space: nowrap; }
-    .dn-src .st.on { background: color-mix(in srgb, var(--ok) 22%, transparent); color: var(--ok); }
+    /* fuentes del live de baile: una tarjeta por fuente (la dirección completa a lo ancho) */
+    .dn-src { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+    @media (max-width: 1150px) { .dn-src { grid-template-columns: minmax(0, 1fr); } }
+    .dsc { border: 1px solid var(--border); border-radius: 12px; background: var(--bg); padding: 10px 12px; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+    .dsc .h { display: flex; align-items: center; gap: 8px; }
+    .dsc .h b { font-size: 1rem; }
+    .dsc .h .grow { flex: 1; }
+    .dsc .u { display: flex; gap: 6px; align-items: center; min-width: 0; }
+    .dsc .u code { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: .82rem; padding: 7px 9px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); user-select: all; }
+    .dsc .ks { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+    .dsc .k { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+    .dsc .k small { color: var(--muted); font-size: .74rem; }
+    .dsc .k select { padding: 6px 8px; width: 100%; }
+    .dsc .bt { display: flex; gap: 6px; flex-wrap: wrap; }
+    .dsc .ex { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; padding-top: 6px; border-top: 1px dashed var(--border); }
+    .dsc .ex .k { flex: 1 1 200px; }
+    .dsc .st { font-size: .76rem; padding: 2px 8px; border-radius: 999px; background: var(--surface-2); color: var(--muted); white-space: nowrap; }
+    .dsc .st.on { background: color-mix(in srgb, var(--ok) 22%, transparent); color: var(--ok); }
     .dn-fight { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px 12px; }
     @media (max-width: 1100px) { .dn-fight { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
     .dnf { display: flex; align-items: center; gap: 8px; padding: 6px 10px; border: 1px solid var(--border); border-radius: 12px; background: var(--bg); border-left: 5px solid var(--c, var(--border)); }
@@ -1537,16 +1544,16 @@
   function fillDanceSources() {
     const d = cfg.dance, rows = DN_SRC.filter(r => (r.k !== 'total' || d.show_total) && (!['vs', 'bar'].includes(r.k) || d.show_vs));
     const fmtClock = n => `${Math.floor(n / 60)}:${String(n % 60).padStart(2, '0')}`;
-    $('#dnSources').innerHTML = `<span class="hd">${t('Fuente')}</span><span class="hd">${t('Dirección')}</span><span></span><span class="hd">${t('Tecla 1')}</span><span class="hd">${t('Tecla 2')}</span><span class="hd">${t('Ahora')}</span>`
-      + rows.map(r => `<span class="nm">${r.icon} ${t(r.name)}</span><code>${esc(dnUrl(r.w))}</code>
-        <span class="bt"><button type="button" class="secondary small" data-copy="${esc(dnUrl(r.w))}">${t('📋 Copiar')}</button><button type="button" class="secondary small" data-set="${r.k}" title="${t('Cómo se ve')}">➕</button></span>
-        ${r.keys.map(([k, l]) => `<span class="k">${dnKeySel(k)}<small>${t(l)}</small></span>`).join('')}
-        <span class="st" data-st="${r.k}"></span>
-        <div class="sub"><span class="bt">${r.acts.map(([a, l]) => `<button type="button" class="secondary small" data-act="${a}">${t(l)}</button>`).join('')}</span>
-          ${r.k === 'clock' ? `<label class="field">${t('Tiempo')} <input type="text" id="dnClockSecs" value="${fmtClock(d.clock.seconds)}" style="width:80px" placeholder="3:00"></label><span class="field">${t('Va en')} <b id="dnClockNow"></b></span>` : ''}
-          ${r.k === 'vs' ? `<label class="check"><input type="checkbox" id="dnVsAuto" ${d.vs.auto ? 'checked' : ''}> ${t('Congelamiento automático (cubre a la que va perdiendo)')}</label><span class="k">${dnKeySel('vs_alt')}<small>${t('Manual: cambiar de lado')}</small></span>` : ''}
-          ${r.k === 'logo' ? `<button type="button" class="secondary small" data-logo>${t('🖼 Elegir logotipo…')}</button>` : ''}
-        </div>`).join('');
+    $('#dnSources').innerHTML = rows.map(r => `<div class="dsc">
+        <div class="h"><b>${r.icon} ${t(r.name)}</b><span class="st" data-st="${r.k}"></span><span class="grow"></span>
+          <button type="button" class="secondary small" data-set="${r.k}" title="${t('Cómo se ve')}">➕ ${t('Cómo se ve')}</button></div>
+        <div class="u"><code title="${esc(dnUrl(r.w))}">${esc(dnUrl(r.w))}</code><button type="button" class="secondary small" data-copy="${esc(dnUrl(r.w))}">${t('📋 Copiar')}</button></div>
+        <div class="ks">${r.keys.map(([k, l]) => `<span class="k"><small>${t(l)}</small>${dnKeySel(k)}</span>`).join('')}</div>
+        <div class="bt">${r.acts.map(([a, l]) => `<button type="button" class="secondary small" data-act="${a}">${t(l)}</button>`).join('')}</div>
+        ${r.k === 'clock' ? `<div class="ex"><label class="field">${t('Tiempo')} <input type="text" id="dnClockSecs" value="${fmtClock(d.clock.seconds)}" style="width:80px" placeholder="3:00"></label><span class="field">${t('Va en')} <b id="dnClockNow"></b></span></div>` : ''}
+        ${r.k === 'vs' ? `<div class="ex"><label class="check"><input type="checkbox" id="dnVsAuto" ${d.vs.auto ? 'checked' : ''}> ${t('Congelamiento automático (cubre a la que va perdiendo)')}</label><span class="k"><small>${t('Manual: cambiar de lado')}</small>${dnKeySel('vs_alt')}</span></div>` : ''}
+        ${r.k === 'logo' ? `<div class="ex"><button type="button" class="secondary small" data-logo>${t('🖼 Elegir logotipo…')}</button></div>` : ''}
+      </div>`).join('');
     showKeyProblems(); showDanceLive();
   }
   function fillFight() {
