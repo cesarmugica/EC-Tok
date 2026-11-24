@@ -1,5 +1,11 @@
 # Cambios de EC-Tok
 
+## 4.3.1
+- ⏱ **Cada cosa tiene su propio reloj.** El reloj del juego de activación ahora vive **en la cuadrícula de activación**: ya no es una fuente aparte (si agregaste la fuente «Reloj» en LIVE Studio, ya no saca nada y la puedes quitar).
+- El reloj **solo se ve cuando el juego está corriendo** (o en pausa a medio juego). Antes y después no sale. Al llegar a 0 parpadea «0:00» unos segundos y se quita solo.
+- Sus botones (▶ Empezar / ⏸ Pausar / ↺ Reiniciar), su tiempo, la ronda y su tecla (Ctrl+Alt+R) están ahora en la tarjeta de la cuadrícula. Se quitó la tecla «Reloj: mostrar / ocultar» porque ya no hace falta.
+- La batalla Vs. y el turno sola siguen con su propio reloj, que solo sale mientras están activos.
+
 ## 4.3.0
 - 🧪 **El entorno de prueba ahora también prueba el Live de Baile.** Arriba eliges «¿Qué quieres probar?»: **🔴 Live normal** (como siempre, viene así), **💃 Live de baile** o **🔴 + 💃 Los dos**.
 - 💃 La prueba de baile va sola, en ciclo: todas bailan con su regalo de activación → **batalla Vs.** con su reloj (máx. 1 min en la prueba) → **turno sola** → y otra vez. Usa tus mismos diseños, relojes y metas, y sale en las fuentes del live de baile (sus direcciones están ahí mismo para copiarlas).

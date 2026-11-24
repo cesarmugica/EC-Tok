@@ -30,7 +30,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, unquote, urlsplit
 
-APP_VERSION = "4.3.0"
+APP_VERSION = "4.3.1"
 
 try:  # lo genera windows/build.ps1
     from ectok_build import BUILD_DATE  # type: ignore[import-not-found]
@@ -201,7 +201,7 @@ def _dance_style_default(bg: int = 0) -> dict:
     return {"bg": bg, "size": 100, "font": "", "color": "", "outline": ""}
 
 
-DANCE_KEYS = ("grid_show", "grid_ref", "total_show", "total_ref", "clock_run", "clock_show", "logo_show", "logo_ref",
+DANCE_KEYS = ("grid_show", "grid_ref", "total_show", "total_ref", "clock_run", "logo_show", "logo_ref",
               "vs_show", "vs_ref", "vs_alt", "bar_show", "bar_ref", "round_next", "solo_run", "solo_next")
 
 
@@ -216,7 +216,7 @@ def dance_default() -> dict:
             "styles": {"grid": _dance_style_default(0), "total": _dance_style_default(55), "clock": _dance_style_default(45),
                        "bar": _dance_style_default(0), "solo": _dance_style_default(0)},
             # teclas Ctrl+Alt+… ya puestas (letras, para no chocar con las de las animaciones: números y F1–F12)
-            "keys": {"grid_show": "G", "grid_ref": "H", "total_show": "Y", "total_ref": "U", "clock_run": "R", "clock_show": "T",
+            "keys": {"grid_show": "G", "grid_ref": "H", "total_show": "Y", "total_ref": "U", "clock_run": "R",
                      "logo_show": "L", "logo_ref": "K", "vs_show": "V", "vs_ref": "B", "vs_alt": "C", "bar_show": "N", "bar_ref": "M", "round_next": "J",
                      "solo_run": "P", "solo_next": "O"}}
 
@@ -1637,7 +1637,7 @@ def _dance_state_default() -> dict:
             "solo": {"active": False, "id": "", "pts": 0, "goal": 0, "end": 0.0, "result": "", "until": 0.0},
             "bend": 0.0, "bres": {"winner": "", "until": 0.0, "a": "", "b": ""}, "roster": {"grid": None, "total": None},
             "show": {"grid": True, "total": True, "clock": False, "logo": True, "vs": False, "bar": False},
-            "clock": {"left": float(CONFIG["dance"]["clock"]["seconds"]), "end": 0.0, "running": False},
+            "clock": {"left": float(CONFIG["dance"]["clock"]["seconds"]), "end": 0.0, "running": False, "done": 0.0},
             "side": "", "logo_v": 0}
 def _dance_load() -> dict:
     state = _dance_state_default()
@@ -1661,6 +1661,8 @@ def _dance_load() -> dict:
             clock = saved.get("clock") or {}
             if isinstance(clock.get("left"), (int, float)):
                 state["clock"]["left"] = max(0.0, float(clock["left"]))  # al abrir EC-Tok el reloj queda en pausa
+                if state["clock"]["left"] <= 0.05:  # el juego ya había terminado: listo para el siguiente
+                    state["clock"]["left"] = float(CONFIG["dance"]["clock"]["seconds"])
     return state
 DANCE = _dance_load()
 _DANCE_SAVE = {"timer": None}
@@ -1743,7 +1745,7 @@ def dance_payload() -> dict:
             "total": [i for i in (roster["total"] if roster["total"] is not None else present)],
             "show": show, "battle": bool(DANCE["battle"]), "left": left["id"] if left else "", "right": right["id"] if right else "",
             "side": dance_side(), "clock": {"total": d["clock"]["seconds"], "left": clock["left"], "running": clock["running"],
-                                            "end_ms": int(clock["end"] * 1000), "attach": bool(d["clock"].get("attach")),
+                                            "end_ms": int(clock["end"] * 1000), "done_ms": int(clock.get("done", 0.0) * 1000),
                                             "rounds": bool(d["clock"].get("rounds")), "round": DANCE["round"]},
             "total_style": d.get("total_style", "classic"), "battle_secs": int(d.get("battle_secs") or 0),
             "battle_end_ms": int(DANCE.get("bend", 0) * 1000),
@@ -1838,10 +1840,11 @@ def dance_action(action: str, arg: str = "") -> str:
             else:
                 if c["left"] <= 0.05:
                     c["left"] = float(d["clock"]["seconds"])
-                c["end"], c["running"] = now + c["left"], True
+                c["end"], c["running"], c["done"] = now + c["left"], True, 0.0
                 s["clock"] = True
+                threading.Thread(target=_clock_watch, args=(c["end"],), daemon=True).start()
         elif action == "clock_reset":
-            c["left"], c["running"], c["end"] = float(d["clock"]["seconds"]), False, 0.0
+            c["left"], c["running"], c["end"], c["done"] = float(d["clock"]["seconds"]), False, 0.0, 0.0
         elif action == "logo_ref":
             DANCE["logo_v"] += 1
         elif action == "vs_ref":
@@ -1949,6 +1952,23 @@ def _solo_finish_locked() -> None:
     so.update(active=False, result="win" if win else "lose", until=time.time() + 7)
     if win and CONFIG["dance"]["solo"]["count_win"]:  # cuenta como batalla ganada (🏆)
         DANCE["wins"][so["id"]] = DANCE["wins"].get(so["id"], 0) + 1
+
+
+def _clock_watch(end: float) -> None:
+    """⏱ el reloj del juego de activación: al llegar a 0 se para solo, parpadea 0:00 unos segundos y se quita."""
+    c = DANCE["clock"]
+    while time.time() < end:
+        time.sleep(0.2)
+        if not c["running"] or c["end"] != end:
+            return  # lo pausaron o lo reiniciaron
+    with DANCE_LOCK:
+        if not (c["running"] and c["end"] == end):
+            return
+        c["left"], c["running"], c["end"], c["done"] = 0.0, False, 0.0, end
+    dance_save()
+    dance_emit()
+    time.sleep(5.2)
+    dance_emit()  # ya no se ve el reloj
 
 
 def _solo_watch(end: float) -> None:

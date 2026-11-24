@@ -680,7 +680,7 @@
     if (!DN) return;
     const on = !!DN.on, s = DN.show || {};
     const so = DN.solo || {}, soloOn = !!(so.active || so.show_result);
-    const vis = {dsolo: on && soloOn, dgrid: on && s.grid && !DN.battle && !soloOn, dtotal: on && DN.show_total && s.total, dclock: on && s.clock && !(DN.clock || {}).attach, dlogo: on && s.logo && !!(DN.logo || {}).url,
+    const vis = {dsolo: on && soloOn, dgrid: on && s.grid && !DN.battle && !soloOn, dtotal: on && DN.show_total && s.total, dclock: false, dlogo: on && s.logo && !!(DN.logo || {}).url,
       dbar: on && DN.show_vs && ((DN.battle && s.bar) || !!(DN.bres || {}).show) && !soloOn, dvs: on && DN.show_vs && s.vs && !!DN.side};
     for (const k of Object.keys(vis)) $('#' + k).hidden = !(which.includes(k) && vis[k]);
     if (which.includes('dgrid') && vis.dgrid) drawDGrid();
@@ -696,7 +696,7 @@
   function drawDGrid() {
     const box = $('#dgrid'), list = (DN.grid || []).map(dnBy).filter(Boolean), n = list.length;
     if (!n) { box.innerHTML = ''; return; }
-    const lead = dnLeader(list), clk = (DN.clock || {}).attach && (DN.show || {}).clock ? dnClockHtml() : '';
+    const lead = dnLeader(list), clk = dnClockOn() ? dnClockHtml() : '';
     const wins = d => d.wins ? `<span class="win">🏆 ${d.wins}</span>` : '';
     if (DN.layout === 'plates') {
       box.innerHTML = `<div class="wrap"><div class="plates">${list.map(d => `<div class="pl" style="--c:${d.color}"><div class="in">${dnAvC(d, lead)}<span class="tx"><span class="nm">${esc(d.name)}</span><span class="pt">${dnFmt(d.points)}</span></span>${dnGift(d.gift_url, d.circle)}</div>${wins(d)}</div>`).join('')}</div>${clk}</div>`;
@@ -717,6 +717,8 @@
     box.innerHTML = `<div class="box">${DN.total_title ? `<h1>${esc(DN.total_title)}</h1>` : ''}${list.map((d, i) => `<div class="r" style="--c:${d.color}"><span class="n">${i + 1}</span>${dnAv(d)}<div class="b"><span class="nm">${esc(d.name)}</span><span class="pt">${d.wins || DN.total_style === 'dynasty' ? `<span class="tr">🏆 ${d.wins || 0}</span>` : ''}${dnFmt(d.points)}${d.goal ? `<small> / ${dnFmt(d.goal)}</small>` : ''}</span></div></div>`).join('')}</div>`;
     dnStyle(box, 'total');
   }
+  // ⏱ el reloj del juego de activación vive en la cuadrícula: solo se ve mientras corre (o en pausa a medio juego) y al llegar a 0 parpadea unos segundos
+  function dnClockOn() { const c = DN.clock || {}; return !!(c.running || (c.left > 0.05 && c.left < (c.total || 0) - 0.05) || (c.done_ms && Date.now() + dnSkew < c.done_ms + 5000)); }
   function dnClockLeft() { const c = DN.clock || {}; return c.running ? Math.max(0, (c.end_ms - (Date.now() + dnSkew)) / 1000) : Math.max(0, c.left || 0); }
   function drawDClock() {
     const box = $('#dclock');

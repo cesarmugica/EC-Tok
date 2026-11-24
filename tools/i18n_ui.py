@@ -725,4 +725,11 @@ T = {
 '💃 Los puntos de tus bailarinas (live de baile, batallas ganadas y ronda) también regresan a como estaban.': ("💃 Your dancers' points (dance LIVE, battles won and round) also go back to how they were.", '💃 Os pontos das suas dançarinas (live de dança, batalhas ganhas e rodada) também voltam como estavam.'),
 'Tus bailarinas todavía no tienen regalo: elige «bailarinas de prueba» o configúralas en 🔴 En vivo.': ("Your dancers don't have a gift yet: choose “test dancers” or set them up in 🔴 LIVE.", 'Suas dançarinas ainda não têm presente: escolha «dançarinas de teste» ou configure-as em 🔴 Ao vivo.'),
 '💃 Las bailarinas de prueba se quitan solas con sus puntos, elijas lo que elijas. Tus bailarinas no se tocaron.': ("💃 The test dancers are removed by themselves with their points, whatever you choose. Your dancers weren't touched.", '💃 As dançarinas de teste somem sozinhas com os pontos, escolha o que escolher. Suas dançarinas não foram tocadas.'),
+'⏱ Reloj: empezar / pausar': ('⏱ Timer: start / pause', '⏱ Relógio: iniciar / pausar'),
+'▶ Empezar el reloj': ('▶ Start the timer', '▶ Iniciar o relógio'),
+'↺ Reiniciar el reloj': ('↺ Reset the timer', '↺ Reiniciar o relógio'),
+'⏸ Pausar el reloj': ('⏸ Pause the timer', '⏸ Pausar o relógio'),
+'▶ Seguir el reloj': ('▶ Resume the timer', '▶ Continuar o relógio'),
+'Cuadrícula: reloj empezar / pausar': ('Grid: timer start / pause', 'Grade: relógio iniciar / pausar'),
+'⏱ El reloj del juego de activación (el tiempo para que donen y baile su favorita) sale en la cuadrícula solo mientras corre. Al llegar a 0 parpadea y se quita solo.': ('⏱ The activation game timer (the time viewers have to gift so their favorite dances) shows in the grid only while it runs. When it reaches 0 it blinks and goes away by itself.', '⏱ O relógio do jogo de ativação (o tempo para doarem e a favorita dançar) aparece na grade só enquanto corre. Ao chegar a 0 pisca e some sozinho.'),
 }
