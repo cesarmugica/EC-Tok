@@ -846,7 +846,7 @@
     if (!DN) return;
     const on = !!DN.on, s = DN.show || {};
     const so = DN.solo || {}, soloOn = !!(so.active || so.show_result);
-    const vis = {dsolo: on && soloOn, dgrid: on && s.grid && !DN.battle && !soloOn, dtotal: on && DN.show_total && s.total, dclock: false, dlogo: on && s.logo && !!(DN.logo || {}).url,
+    const vis = {dsolo: on && soloOn, dgrid: on && s.grid && !DN.battle && !soloOn && !(DN.bres || {}).show, dtotal: on && DN.show_total && s.total, dclock: false, dlogo: on && s.logo && !!(DN.logo || {}).url,
       dbar: on && DN.show_vs && ((DN.battle && s.bar) || !!(DN.bres || {}).show) && !soloOn, dvs: on && DN.show_vs && s.vs && !!DN.side};
     for (const k of Object.keys(vis)) $('#' + k).hidden = !(which.includes(k) && vis[k]);
     if (which.includes('dgrid') && vis.dgrid) drawDGrid();

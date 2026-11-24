@@ -1,5 +1,12 @@
 # Cambios de EC-Tok
 
+## 4.4.1
+- ⏱ **Un solo reloj a la vez.** Al empezar uno de los tres (juego de activación, batalla Vs. o turno sola), los otros dos se **detienen y se ocultan** solos. Si había una batalla o un turno a medias, se termina (y cuenta quién ganó) sin poner el letrero encima de lo nuevo.
+- Reloj detenido = no se ve. Si lo pausas tú a mano, se queda con su tiempo; nunca se reanuda solo (lo vuelves a empezar con ▶).
+- ⚔ Al terminar la batalla, mientras sale «¡GANÓ …!», ya **no aparece encima la cuadrícula** con su reloj.
+- Ya puedes empezar una batalla durante el turno sola (o al revés) sin que te pida terminar el otro primero.
+- 🧪 Entorno de prueba en «🔴 Live normal»: ya no sale el cuadro de botones del live de baile.
+
 ## 4.4.0
 - 🎨 **Cada fuente del live de baile tiene su selector de estilo**, en su propia tarjeta, y **su reloj se viste igual** que el estilo elegido.
 - 🟪 **Estilo de cuadrícula** (antes «Arreglo de la cuadrícula», arriba): ahora está en la tarjeta de la Cuadrícula de activación, con 16 estilos: barra, placas inclinadas, tarjetas (1, 2 o 3 renglones, columna), **burbujas**, **podio** (columnas que crecen con los puntos) y los temas Neón, Cristal, Dorado, Marcador deportivo, Minimalista, Cómic, Retro arcade, Pastel y Fuego.

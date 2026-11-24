@@ -1110,6 +1110,7 @@
     $('#simMode').value = simDance.mode; $('#simDancers').value = String(simDance.dancers); $('#simDanceEvery').value = simDance.every;
     $('#simDanceBattle').checked = simDance.battle; $('#simDanceSolo').checked = simDance.solo; $('#simDanceClock').checked = simDance.clock;
     $('#simLiveBox').hidden = simDance.mode === 'dance'; $('#simDanceOpts').hidden = simDance.mode === 'live';
+    if (cfg) fillSimDance();
     const base = `http://localtest.me:${port}/overlay?w=`;
     $('#simDanceUrls').innerHTML = DN_SRC.map(r => `<div class="url"><b>${r.icon} ${t(r.name)}</b><code>${esc(base + r.w)}</code><button type="button" class="secondary small" data-copy="${esc(base + r.w)}">${t('📋 Copiar')}</button></div>`).join('');
   }
@@ -1833,7 +1834,7 @@
   document.addEventListener('keydown', e => { if (e.key !== 'Escape') return; if (!$('#dnGifts').hidden) $('#dnGifts').hidden = true; else if (!$('#dnModal').hidden) { $('#dnModal').hidden = true; fillDance(); } });
   // 🧪 en el entorno de prueba: el regalo de cada bailarina
   function fillSimDance() {
-    const d = cfg && cfg.dance; $('#simDance').hidden = !(d && d.on); if (!d || !d.on) return;
+    const d = cfg && cfg.dance; $('#simDance').hidden = !(d && d.on) || simDance.mode === 'live'; if (!d || !d.on) return;  // «Live normal»: nada del baile
     const list = d.dancers.filter(x => x.on && (x.user || x.label));
     $('#simDanceBtns').innerHTML = list.length ? list.map(x => `<button type="button" class="secondary small" data-dn-test="${x.id}" ${x.gift ? '' : 'disabled'} style="border-left:4px solid ${x.color}">🎁 ${esc(x.label || '@' + x.user)}${x.gift ? ` · ${esc(x.gift)}` : ''}</button>${x.fight ? `<button type="button" class="secondary small" data-dn-test="${x.id}" data-battle="1" style="border-left:4px solid ${x.color}">⚔ ${esc(x.label || '@' + x.user)}</button>` : ''}`).join('')
       : `<p class="help">${t('Primero escribe el @usuario de las bailarinas en 🔴 En vivo.')}</p>`;

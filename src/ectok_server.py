@@ -30,7 +30,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, unquote, urlsplit
 
-APP_VERSION = "4.4.0"
+APP_VERSION = "4.4.1"
 
 try:  # lo genera windows/build.ps1
     from ectok_build import BUILD_DATE  # type: ignore[import-not-found]
@@ -1544,6 +1544,8 @@ class DanceScript:
         d = CONFIG["dance"]
         if self.phase == "grid":
             self.until = now + 25
+            if self.o.get("clock") and not DANCE["clock"]["running"]:
+                dance_action("clock_run")  # cada ronda de baile con su reloj (la batalla y el turno lo detienen)
         elif self.phase == "battle":
             pres = _present()
             for k, x in enumerate(pres):  # pelean las 2 primeras (las de prueba) o las que tú elegiste
@@ -1845,6 +1847,7 @@ def dance_action(action: str, arg: str = "") -> str:
             else:
                 if c["left"] <= 0.05:
                     c["left"] = float(d["clock"]["seconds"])
+                _only_one_clock_locked("clock")
                 c["end"], c["running"], c["done"] = now + c["left"], True, 0.0
                 s["clock"] = True
                 threading.Thread(target=_clock_watch, args=(c["end"],), daemon=True).start()
@@ -1865,10 +1868,9 @@ def dance_action(action: str, arg: str = "") -> str:
                 _battle_finish_locked()
             else:
                 left, right = _fighters()
-                if DANCE["solo"]["active"]:
-                    return "Primero termina el turno sola."
                 if not (left and right):
                     return "Elige exactamente 2 bailarinas para la batalla: una a la izquierda y otra a la derecha."
+                _only_one_clock_locked("battle")
                 DANCE["battle"], s["bar"], DANCE["bpoints"], DANCE["side"] = True, True, {}, ""  # la barra Vs. siempre empieza en 0
                 DANCE["bres"] = {"winner": "", "until": 0.0, "a": left["id"], "b": right["id"]}
                 secs = int(d.get("battle_secs") or 0)  # ⏱ el reloj propio de la batalla (0 = sin reloj)
@@ -1898,11 +1900,10 @@ def dance_action(action: str, arg: str = "") -> str:
                 t.daemon = True
                 t.start()
             else:
-                if DANCE["battle"]:
-                    return "Primero termina la batalla."
                 x = next((y for y in _present() if y["id"] == DANCE["solo"]["id"]), None)
                 if not x:
                     return "Elige a la bailarina que va a pasar sola (tiene que estar presente)."
+                _only_one_clock_locked("solo")
                 so = d["solo"]
                 goal = int(x.get("solo_goal") or 0) if so["goal_mode"] == "each" else 0
                 DANCE["solo"].update(active=True, pts=0, goal=goal or int(so["goal"]), end=now + so["seconds"], result="", until=0.0)
@@ -1919,6 +1920,24 @@ def dance_action(action: str, arg: str = "") -> str:
     dance_save()
     dance_emit()
     return ""
+def _clock_stop_locked() -> None:
+    """⏱ detener el reloj del juego de activación (detenido = a cero y no se ve; no se reanuda solo)."""
+    c = DANCE["clock"]
+    c["left"], c["running"], c["end"], c["done"] = float(CONFIG["dance"]["clock"]["seconds"]), False, 0.0, 0.0
+
+
+def _only_one_clock_locked(keep: str) -> None:
+    """Un solo reloj a la vez: al empezar uno (activación, batalla o turno sola) los otros dos se detienen y se ocultan."""
+    if keep != "clock":
+        _clock_stop_locked()
+    if keep != "battle" and DANCE["battle"]:
+        _battle_finish_locked()
+    if keep != "solo" and DANCE["solo"]["active"]:
+        _solo_finish_locked()
+    DANCE["bres"]["until"] = 0.0  # sin letreros de resultado encima de lo que empieza
+    DANCE["solo"]["until"] = 0.0
+
+
 def _battle_finish_locked() -> None:
     """Se acabó la batalla: la que tenga más puntos gana (🏆); si empatan, nadie. El resultado se ve unos segundos."""
     if not DANCE["battle"]:
