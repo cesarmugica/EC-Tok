@@ -9,6 +9,7 @@ Servidor local (solo 127.0.0.1):
 
 from __future__ import annotations
 
+import concurrent.futures
 import argparse
 import contextlib
 import copy
@@ -30,7 +31,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, unquote, urlsplit
 
-APP_VERSION = "4.4.7"
+APP_VERSION = "4.5.0"
 
 try:  # lo genera windows/build.ps1
     from ectok_build import BUILD_DATE  # type: ignore[import-not-found]
@@ -2267,9 +2268,30 @@ def _load_gift_catalog() -> None:
             GIFT_CATALOG.update({str(k): v for k, v in data.items() if isinstance(v, dict) and TIKTOK_IMG.match(str(v.get("image") or ""))})
 
 
-def gift_catalog_add(gifts: list[dict]) -> None:
+def _gifts_in_use() -> set[str]:
+    """Los regalos que ya usas (bailarinas, metas de acción): no se pierden al cambiar de lista."""
+    used = set()
+    for x in CONFIG["dance"]["dancers"]:
+        used.update(n for n in (x.get("gift"), x.get("battle_gift")) if n)
+    for it in CONFIG.get("actions", {}).get("items", []):
+        img = str(it.get("image") or "")
+        if img.startswith("t/"):
+            used.add(img[2:])
+    return used
+
+
+def gift_catalog_add(gifts: list[dict], replace: bool = False) -> None:
+    """replace=True: es la lista que TikTok mandó para ESTE live: se quitan los regalos de lives anteriores
+    (menos los que ya usas en tus bailarinas o metas)."""
     changed = False
     with GIFT_CATALOG_LOCK:
+        if replace:
+            fresh = {str(g.get("name") or "").strip()[:60] for g in gifts}
+            keep = _gifts_in_use()
+            for name in list(GIFT_CATALOG):
+                if name not in fresh and not any(same_gift(name, u) for u in keep):
+                    del GIFT_CATALOG[name]
+                    changed = True
         for g in gifts:
             name, image = str(g.get("name") or "").strip()[:60], str(g.get("image") or "")
             if not name or not TIKTOK_IMG.match(image):
@@ -2887,6 +2909,16 @@ class Handler(BaseHTTPRequestHandler):
             ectok_live.LANG["value"] = CONFIG["language"]
             BUS.emit(new_event("config", overlay=overlay_payload()))
             self.send_json({"ok": True, "config": CONFIG})
+        elif path == "/api/gifts/refresh":  # 🔄 actualizar la lista de regalos con la del live conectado
+            try:
+                n = LIVE.refresh_gifts()
+            except (ValueError, TimeoutError, concurrent.futures.TimeoutError) as exc:
+                self.send_json({"ok": False, "error": str(exc) or "TikTok no contestó. Intenta otra vez en un momento."}, 400)
+                return
+            except Exception:  # noqa: BLE001
+                self.send_json({"ok": False, "error": "TikTok no mandó la lista de regalos. Intenta otra vez en un momento."}, 400)
+                return
+            self.send_json({"ok": True, "count": n})
         elif path == "/api/dance/action":  # 💃 botones del live de baile (lo mismo que sus teclas)
             err = dance_action(str(data.get("action") or ""), str(data.get("id") or ""), str(data.get("resolve") or ""))
             if err.startswith("ASK:"):  # hay una batalla o un turno a medias: que el operador decida

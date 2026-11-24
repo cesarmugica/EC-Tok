@@ -209,7 +209,7 @@ class Live:
         self.loop: asyncio.AbstractEventLoop | None = None
         self.client = None
         self.recent: deque[dict] = deque(maxlen=200)
-        self.on_gifts: Callable[[list[dict]], None] | None = None  # recibe el catálogo de regalos (nombre, monedas, imagen)
+        self.on_gifts: Callable[..., None] | None = None  # recibe el catálogo de regalos (nombre, monedas, imagen); replace=True: es la lista nueva de este live
 
         self.lock = threading.Lock()
 
@@ -308,7 +308,7 @@ class Live:
         async def _connected(_event) -> None:
             self._set("live", msg("live", u=username))
             self.log(f"[live] conectado a @{username}")
-            asyncio.ensure_future(self._fetch_gifts(client))
+            asyncio.ensure_future(self._fetch_gifts(client, replace=True))  # la lista de ESTE live (cada streamer puede tener otros regalos)
 
         @client.on(DisconnectEvent)
         async def _disconnected(_event) -> None:
@@ -362,29 +362,44 @@ class Live:
         self._extra_events(client)
         await client.connect()
 
-    async def _fetch_gifts(self, client) -> None:
+    def refresh_gifts(self, timeout: float = 25) -> int:
+        """🔄 Volver a pedirle a TikTok la lista de regalos del live al que estás conectado. Regresa cuántos llegaron."""
+        loop, client = self.loop, self.client
+        if self.state != "live" or not loop or not client:
+            raise ValueError("Primero conéctate a tu live: la lista de regalos la manda TikTok para ese live.")
+        got = asyncio.run_coroutine_threadsafe(self._fetch_gifts(client, replace=True), loop).result(timeout=timeout)
+        if not got:
+            raise ValueError("TikTok no mandó la lista de regalos. Intenta otra vez en un momento.")
+        return got
+
+    async def _fetch_gifts(self, client, replace: bool = False) -> int:
         """Pedir a TikTok el catálogo de regalos del live (nombre, monedas y dirección de su imagen oficial).
         Las imágenes no se guardan: se muestran desde TikTok. Si la librería no lo tiene o falla, no pasa nada:
         el catálogo se va llenando con los regalos que llegan."""
         if not self.on_gifts:
-            return
+            return 0
         web = getattr(client, "web", None)
+        room = getattr(client, "room_id", None)
         for name in ("fetch_gift_list", "fetch_gifts", "gift_list"):
             fn = getattr(web, name, None) if web is not None else None
             if not callable(fn):
                 continue
             try:
-                result = fn()
+                try:
+                    result = fn(room_id=room) if room else fn()  # la del cuarto de este live, si la librería lo permite
+                except TypeError:
+                    result = fn()
                 if asyncio.iscoroutine(result):
                     result = await result
                 gifts = find_gifts(result)
                 if gifts:
-                    self.on_gifts(gifts)
+                    self.on_gifts(gifts, replace=replace)
                     self.log(f"[live] catálogo de regalos: {len(gifts)} con imagen oficial")
-                    return
+                    return len(gifts)
             except Exception as exc:  # noqa: BLE001
                 self.log(f"[live] no se pudo leer el catálogo de regalos ({name}): {exc}")
         self.log("[live] la librería no dio el catálogo de regalos; se llenará con los regalos que lleguen")
+        return 0
 
     # ---------- eventos «especiales» (suscripción, cofre, batallas…) ----------
     def _extra_events(self, client) -> None:

@@ -752,4 +752,11 @@ T = {
 '🏆 Al terminar, «¡GANÓ …!» se queda en pantalla hasta que empiece otra cosa (juego de activación, otra batalla o un baile individual). Para quitarlo antes: «↺ A cero» o «👁 Mostrar / ocultar» de la barra de activación.': ('🏆 When it ends, “… WINS!” stays on screen until something else starts (activation game, another battle or a solo dance). To remove it sooner: “↺ Reset” or the activation bar’s “👁 Show / hide”.', '🏆 Ao terminar, «GANHOU …!» fica na tela até começar outra coisa (jogo de ativação, outra batalha ou uma dança individual). Para tirar antes: «↺ Zerar» ou «👁 Mostrar / ocultar» da barra de ativação.'),
 '⏱ Reloj en 0:00 visible': ('⏱ Timer visible at 0:00', '⏱ Relógio visível em 0:00'),
 'Aplica a todos los relojes: juego de activación, batalla 1vs1 y baile individual': ('Applies to all timers: activation game, 1vs1 battle and solo dance', 'Vale para todos os relógios: jogo de ativação, batalha 1vs1 e dança individual'),
+'🔄 Actualizar lista de regalos': ('🔄 Refresh gift list', '🔄 Atualizar lista de presentes'),
+'Pedirle a TikTok la lista de regalos de este live (cada streamer puede tener regalos distintos, como el de la comunidad)': ('Ask TikTok for this LIVE’s gift list (each streamer can have different gifts, like the community gift)', 'Pedir ao TikTok a lista de presentes desta live (cada streamer pode ter presentes diferentes, como o da comunidade)'),
+'⏳ Pidiendo la lista…': ('⏳ Requesting the list…', '⏳ Pedindo a lista…'),
+'✅ Lista de regalos actualizada con la de este live: {0} regalos.': ('✅ Gift list updated with this LIVE’s: {0} gifts.', '✅ Lista de presentes atualizada com a desta live: {0} presentes.'),
+'Primero conéctate a tu live: la lista de regalos la manda TikTok para ese live.': ('Connect to your LIVE first: TikTok sends the gift list for that LIVE.', 'Primeiro conecte-se à sua live: o TikTok manda a lista de presentes dessa live.'),
+'TikTok no mandó la lista de regalos. Intenta otra vez en un momento.': ("TikTok didn't send the gift list. Try again in a moment.", 'O TikTok não mandou a lista de presentes. Tente de novo em um momento.'),
+'TikTok no contestó. Intenta otra vez en un momento.': ("TikTok didn't answer. Try again in a moment.", 'O TikTok não respondeu. Tente de novo em um momento.'),
 }

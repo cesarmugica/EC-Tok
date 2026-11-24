@@ -1,5 +1,10 @@
 # Cambios de EC-Tok
 
+## 4.5.0
+- 🎁 **La lista de regalos ahora es la del live al que te conectas.** Antes EC-Tok iba juntando los regalos de todos los lives a los que te habías conectado (por eso salía, por ejemplo, el regalo de la comunidad de otro live). Al conectarte, la lista se cambia por la que TikTok manda para ese live.
+- 🔄 **Botón «Actualizar lista de regalos»**: junto a «Desconectar» (cuando estás en vivo) y en la ventana para elegir el regalo de cada bailarina. Le vuelve a pedir a TikTok la lista de ese live.
+- Los regalos que ya usas (los de tus bailarinas y tus metas de acción) no se pierden al cambiar de lista.
+
 ## 4.4.7
 - ✏ «Al llegar a su meta, quitarla **automáticamente** de la barra de activación y de la lista».
 
