@@ -781,4 +781,6 @@ T = {
 '✖ NO, cancelarlo sin puntos ni victoria': ('✖ NO, cancel it without points or win', '✖ NÃO, cancelar sem pontos nem vitória'),
 '↩ Cancelar (sigue lo que está en curso)': ('↩ Cancel (keep what is in progress)', '↩ Cancelar (continua o que está em andamento)'),
 '🏆 Al terminar, «¡GANÓ …!» se queda en pantalla hasta que empiece otra cosa (juego de activación, otra batalla o un turno sola). Para quitarlo antes: «↺ A cero» o «👁 Mostrar / ocultar» de la cuadrícula.': ('🏆 When it ends, “… WINS!” stays on screen until something else starts (activation game, another battle or a solo turn). To remove it sooner: “↺ Reset” or the grid’s “👁 Show / hide”.', '🏆 Ao terminar, «GANHOU …!» fica na tela até começar outra coisa (jogo de ativação, outra batalha ou um turno solo). Para tirar antes: «↺ Zerar» ou «👁 Mostrar / ocultar» da grade.'),
+'⏱ Reloj en 0:00 visible': ('⏱ Timer visible at 0:00', '⏱ Relógio visível em 0:00'),
+'Aplica a todos los relojes: juego de activación, batalla Vs. y turno sola': ('Applies to all timers: activation game, Vs. battle and solo turn', 'Vale para todos os relógios: jogo de ativação, batalha Vs. e turno solo'),
 }

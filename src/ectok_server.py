@@ -30,7 +30,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, unquote, urlsplit
 
-APP_VERSION = "4.4.4"
+APP_VERSION = "4.4.5"
 
 try:  # lo genera windows/build.ps1
     from ectok_build import BUILD_DATE  # type: ignore[import-not-found]
@@ -209,6 +209,7 @@ def dance_default() -> dict:
     return {"on": False, "layout": "bar", "show_total": True, "show_vs": True, "auto_remove": False, "battle_add": True,
             "total_title": "Puntos de hoy", "dancers": [_dancer_default(i) for i in range(6)],
             "battle_secs": 120,  # ⏱ reloj propio de la batalla (0 = sin reloj)
+            "clock_hold": 3,  # ⏱ segundos que se queda cada reloj en 0:00 antes de quitarse (1 a 5)
             # 🎤 turno sola: pasa una bailarina y TODO lo que se done en su turno le cuenta a ella
             "solo": {"seconds": 60, "goal_mode": "same", "goal": 1000, "add_live": True, "count_win": True},
             "total_style": "classic", "bar_style": "classic", "solo_style": "poster", "clock": {"seconds": 180, "attach": False, "rounds": False}, "logo": {"file": "", "size": 60, "opacity": 100, "float": True},
@@ -1760,7 +1761,7 @@ def dance_payload() -> dict:
             "side": dance_side(), "clock": {"total": d["clock"]["seconds"], "left": clock["left"], "running": clock["running"],
                                             "end_ms": int(clock["end"] * 1000), "done_ms": int(clock.get("done", 0.0) * 1000),
                                             "rounds": bool(d["clock"].get("rounds")), "round": DANCE["round"]},
-            "total_style": d.get("total_style", "classic"), "bar_style": d.get("bar_style", "classic"), "solo_style": d.get("solo_style", "poster"),
+            "total_style": d.get("total_style", "classic"), "bar_style": d.get("bar_style", "classic"), "clock_hold": int(_hold()), "solo_style": d.get("solo_style", "poster"),
             "battle_secs": int(d.get("battle_secs") or 0),
             "battle_end_ms": int(DANCE.get("bend", 0) * 1000),
             "bres": {**DANCE.get("bres", {}), "until": 0, "show": DANCE.get("bres", {}).get("until", 0) > time.time()},
@@ -1942,6 +1943,17 @@ def dance_action(action: str, arg: str = "", resolve: str = "") -> str:
     dance_save()
     dance_emit()
     return ""
+def _hold() -> float:
+    """⏱ cuánto se queda un reloj en 0:00 antes de quitarse (lo elige el operador: 1 a 5 s)."""
+    return float(max(1, min(5, int(CONFIG["dance"].get("clock_hold", 3) or 3))))
+
+
+def _emit_later(secs: float) -> None:
+    t = threading.Timer(secs, dance_emit)
+    t.daemon = True
+    t.start()
+
+
 RESULT_HOLD = 365 * 86400.0  # «¡GANÓ …!» se queda en pantalla hasta que empiece otra cosa (o lo quites)
 
 
@@ -1997,7 +2009,8 @@ def _battle_finish_locked() -> None:
     win = "" if pa == pb else (a if pa > pb else b)
     if win:
         DANCE["wins"][win] = DANCE["wins"].get(win, 0) + 1
-    DANCE["bres"] = {"winner": win, "until": time.time() + RESULT_HOLD, "a": a, "b": b}  # se queda hasta el siguiente evento
+    DANCE["bres"] = {"winner": win, "until": time.time() + RESULT_HOLD, "a": a, "b": b, "at": time.time()}  # se queda hasta el siguiente evento
+    _emit_later(_hold() + 0.2)  # su reloj se queda unos segundos en 0:00 y se quita
     DANCE["battle"], DANCE["show"]["bar"], DANCE["side"], DANCE["bend"] = False, False, "", 0.0
     t = threading.Timer(7.3, dance_emit)  # se quita el letrero del resultado
     t.daemon = True
@@ -2022,7 +2035,8 @@ def _solo_finish_locked() -> None:
     if not so["active"]:
         return
     win = so["pts"] >= so["goal"] > 0
-    so.update(active=False, result="win" if win else "lose", until=time.time() + RESULT_HOLD)  # se queda hasta el siguiente evento
+    so.update(active=False, result="win" if win else "lose", until=time.time() + RESULT_HOLD, ended=time.time())  # se queda hasta el siguiente evento
+    _emit_later(_hold() + 0.2)  # su reloj se queda unos segundos en 0:00 y se quita
     if win and CONFIG["dance"]["solo"]["count_win"]:  # cuenta como batalla ganada (🏆)
         DANCE["wins"][so["id"]] = DANCE["wins"].get(so["id"], 0) + 1
 
@@ -2040,7 +2054,7 @@ def _clock_watch(end: float) -> None:
         c["left"], c["running"], c["end"], c["done"] = 0.0, False, 0.0, end
     dance_save()
     dance_emit()
-    time.sleep(5.2)
+    time.sleep(_hold() + 0.2)
     dance_emit()  # ya no se ve el reloj
 
 
@@ -2156,6 +2170,8 @@ def clean_dance(new: dict, cur: dict) -> dict:
         for k in ("add_live", "count_win"):
             if isinstance(solo.get(k), bool):
                 so[k] = solo[k]
+    if "clock_hold" in new:
+        out["clock_hold"] = int(_num(new.get("clock_hold"), out.get("clock_hold", 3), 1, 5))
     if "battle_secs" in new:
         out["battle_secs"] = int(_num(new.get("battle_secs"), out.get("battle_secs", 120), 0, 3600))
     for key, allowed in (("total_style", DANCE_TOTAL_STYLES), ("bar_style", DANCE_BAR_STYLES), ("solo_style", DANCE_SOLO_STYLES)):

@@ -1,5 +1,9 @@
 # Cambios de EC-Tok
 
+## 4.4.5
+- ⏱ **Todos los relojes** (juego de activación, batalla Vs. y turno sola) se quedan **parpadeando en 0:00 unos segundos** al terminar y luego se quitan, para que no desaparezcan de golpe. La barra se queda.
+- Nueva opción arriba del Live de Baile: **«⏱ Reloj en 0:00 visible»**: de 1 a 5 segundos (3 de fábrica).
+
 ## 4.4.4
 - 🎤 Turno sola: al terminar, su reloj (TIEMPO) ya no se queda en 00:00; se quita y la barra con «¡GANÓ! / ¡PERDIÓ!» se queda.
 - Así quedan las tres (cuadrícula, barra Vs. y turno sola): ninguna desaparece sola; la que eliges sustituye a la otra. Su reloj solo se ve mientras corre; al acabar se quita el reloj y la barra se queda hasta que eliges otro juego.
