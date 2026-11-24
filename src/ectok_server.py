@@ -30,7 +30,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, unquote, urlsplit
 
-APP_VERSION = "4.3.1"
+APP_VERSION = "4.4.0"
 
 try:  # lo genera windows/build.ps1
     from ectok_build import BUILD_DATE  # type: ignore[import-not-found]
@@ -211,7 +211,7 @@ def dance_default() -> dict:
             "battle_secs": 120,  # ⏱ reloj propio de la batalla (0 = sin reloj)
             # 🎤 turno sola: pasa una bailarina y TODO lo que se done en su turno le cuenta a ella
             "solo": {"seconds": 60, "goal_mode": "same", "goal": 1000, "add_live": True, "count_win": True},
-            "total_style": "classic", "clock": {"seconds": 180, "attach": False, "rounds": False}, "logo": {"file": "", "size": 60, "opacity": 100, "float": True},
+            "total_style": "classic", "bar_style": "classic", "solo_style": "poster", "clock": {"seconds": 180, "attach": False, "rounds": False}, "logo": {"file": "", "size": 60, "opacity": 100, "float": True},
             "vs": {"effect": "rain", "opacity": 75, "auto": True},
             "styles": {"grid": _dance_style_default(0), "total": _dance_style_default(55), "clock": _dance_style_default(45),
                        "bar": _dance_style_default(0), "solo": _dance_style_default(0)},
@@ -1616,8 +1616,12 @@ DANCE_FILE = HOME / "baile.json"
 DANCE_LOCK = threading.Lock()
 DANCE_IMG_EXTS = {".png", ".jpg", ".jpeg", ".webp", ".gif"}
 DANCE_FONTS = ("", "Impact", "Arial Black", "Bahnschrift", "Segoe UI Black", "Trebuchet MS", "Georgia", "Comic Sans MS", "Segoe Script")
-DANCE_EFFECTS = ("rain", "glass", "ice", "curtain")
-DANCE_LAYOUTS = ("bar", "plates", "row", "rows2", "rows3", "col")
+DANCE_EFFECTS = ("rain", "glass", "ice", "curtain", "fire", "snow", "smoke", "jail", "tv", "cracked", "hearts")
+DANCE_THEMES = ("neon", "glass", "gold", "sport", "minimal", "comic", "retro", "pastel", "fire")  # 🎨 estilos que comparten todas las fuentes
+DANCE_LAYOUTS = ("bar", "plates", "row", "rows2", "rows3", "col", "bubbles", "podium", *(f"t-{t}" for t in DANCE_THEMES))
+DANCE_TOTAL_STYLES = ("classic", "dynasty", *DANCE_THEMES)
+DANCE_BAR_STYLES = ("classic", "fighter", *DANCE_THEMES)
+DANCE_SOLO_STYLES = ("poster", "ring", *DANCE_THEMES)
 # 🧪 entorno de prueba del live de baile: bailarinas de prueba (no tocan las tuyas) y un guion que se repite
 DANCE_SIM: dict = {"active": False, "dancers": None, "snap": None}
 SIM_DANCER_NAMES = ["LUNA", "SOFI", "MIA", "ARI", "VALE", "NINA"]
@@ -1747,7 +1751,8 @@ def dance_payload() -> dict:
             "side": dance_side(), "clock": {"total": d["clock"]["seconds"], "left": clock["left"], "running": clock["running"],
                                             "end_ms": int(clock["end"] * 1000), "done_ms": int(clock.get("done", 0.0) * 1000),
                                             "rounds": bool(d["clock"].get("rounds")), "round": DANCE["round"]},
-            "total_style": d.get("total_style", "classic"), "battle_secs": int(d.get("battle_secs") or 0),
+            "total_style": d.get("total_style", "classic"), "bar_style": d.get("bar_style", "classic"), "solo_style": d.get("solo_style", "poster"),
+            "battle_secs": int(d.get("battle_secs") or 0),
             "battle_end_ms": int(DANCE.get("bend", 0) * 1000),
             "bres": {**DANCE.get("bres", {}), "until": 0, "show": DANCE.get("bres", {}).get("until", 0) > time.time()},
             "solo": {**{k: v for k, v in DANCE["solo"].items() if k not in ("end", "until")}, "end_ms": int(DANCE["solo"]["end"] * 1000),
@@ -2085,8 +2090,9 @@ def clean_dance(new: dict, cur: dict) -> dict:
                 so[k] = solo[k]
     if "battle_secs" in new:
         out["battle_secs"] = int(_num(new.get("battle_secs"), out.get("battle_secs", 120), 0, 3600))
-    if new.get("total_style") in ("classic", "dynasty"):
-        out["total_style"] = new["total_style"]
+    for key, allowed in (("total_style", DANCE_TOTAL_STYLES), ("bar_style", DANCE_BAR_STYLES), ("solo_style", DANCE_SOLO_STYLES)):
+        if new.get(key) in allowed:
+            out[key] = new[key]
     logo = new.get("logo")
     if isinstance(logo, dict):
         out["logo"]["size"] = int(_num(logo.get("size"), out["logo"]["size"], 10, 100))

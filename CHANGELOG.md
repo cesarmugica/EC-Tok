@@ -1,5 +1,14 @@
 # Cambios de EC-Tok
 
+## 4.4.0
+- 🎨 **Cada fuente del live de baile tiene su selector de estilo**, en su propia tarjeta, y **su reloj se viste igual** que el estilo elegido.
+- 🟪 **Estilo de cuadrícula** (antes «Arreglo de la cuadrícula», arriba): ahora está en la tarjeta de la Cuadrícula de activación, con 16 estilos: barra, placas inclinadas, tarjetas (1, 2 o 3 renglones, columna), **burbujas**, **podio** (columnas que crecen con los puntos) y los temas Neón, Cristal, Dorado, Marcador deportivo, Minimalista, Cómic, Retro arcade, Pastel y Fuego.
+- 💎 **Diamantes por bailarina**: 11 estilos (Clásico, Dynasty y los 9 temas; el Dorado lleva medallas 🥇🥈🥉).
+- ⚔ **Barra Vs.**: 11 estilos, incluido **🥊 Pelea** (barras de vida desde el centro, como juego de peleas). Su reloj sigue el estilo.
+- 🎤 **Turno sola**: 11 estilos, incluido **⭕ Anillo** (foto redonda con su avance alrededor y el %). Su reloj (TIEMPO) sigue el estilo.
+- 🌧 **Pantalla Vs.**: de 4 a 11 capas: Lluvia, Cristal opaco, Hielo, Cortina, **Fuego, Nieve, Humo, Tras las rejas, Tele sin señal, Pantalla rota y Corazones rotos**.
+- El tamaño, fondo, letra y orilla de «➕ Cómo se ve» siguen funcionando encima de cualquier estilo.
+
 ## 4.3.1
 - ⏱ **Cada cosa tiene su propio reloj.** El reloj del juego de activación ahora vive **en la cuadrícula de activación**: ya no es una fuente aparte (si agregaste la fuente «Reloj» en LIVE Studio, ya no saca nada y la puedes quitar).
 - El reloj **solo se ve cuando el juego está corriendo** (o en pausa a medio juego). Antes y después no sale. Al llegar a 0 parpadea «0:00» unos segundos y se quita solo.

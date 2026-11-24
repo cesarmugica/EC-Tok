@@ -154,9 +154,9 @@
   #actions.circle .st img, #actions.circle .st .ph { padding: calc(var(--au) * .26); border-radius: 50%; background: rgba(0,0,0,.5); box-sizing: border-box; }
 
   /* ---------- 💃 live de baile ---------- */
-  .dz { --dz: 1; font-family: var(--dfont, inherit); }
-  .dz .nm, .dz .pt, .dz h1, .dz .clk { color: var(--dcol, #fff); }
-  .dz.ring .nm, .dz.ring .pt, .dz.ring h1, .dz.ring .clk { text-shadow: var(--dring); }
+  .dz { --dz: 1; --dring: 0 .15em .35em rgba(0,0,0,.8); font-family: var(--dfont, var(--tfont, inherit)); }
+  .dz .nm, .dz .pt, .dz h1, .dz .clk { color: var(--dcol, var(--tc, #fff)); }
+  .dz.ring .nm, .dz.ring .pt, .dz.ring h1, .dz.ring .clk { text-shadow: var(--tsh, var(--dring)); }
   /* los nombres en cursiva y con sombra no se cortan: espacio para la inclinación y la sombra (sin mover nada) */
   .dz .nm { padding: .3em .45em .35em .3em; margin: -.3em -.45em -.35em -.3em; box-sizing: content-box; }
   .dz .av { border-radius: 50%; object-fit: cover; background: rgba(255,255,255,.18); display: grid; place-items: center; flex: none; overflow: hidden; }
@@ -168,20 +168,21 @@
   #dgrid .tops, #dgrid .gifts { display: flex; }
   #dgrid .tops > div, #dgrid .gifts > div { flex: 1 1 0; min-width: 0; display: flex; align-items: center; justify-content: center; gap: .6vw; }
   #dgrid .tops > div { flex-direction: column; gap: .2vw; }
-  #dgrid .tops .av { width: calc(5.4vw * var(--dz)); height: calc(5.4vw * var(--dz)); border: calc(.4vw * var(--dz)) solid var(--c); }
+  #dgrid .tops .av { width: calc(5.4vw * var(--dz)); height: calc(5.4vw * var(--dz)); border: calc(.4vw * var(--dz)) solid var(--avb, var(--c)); box-shadow: var(--avg, none); }
   #dgrid .tops .nm { font-weight: 900; font-size: calc(2.2vw * var(--dz)); max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-transform: uppercase; font-style: italic; }
-  #dgrid .segs { display: flex; height: calc(4.6vw * var(--dz)); margin: calc(.7vw * var(--dz)) 0; border-radius: 999px; overflow: hidden;
-    box-shadow: 0 0 0 calc(.35vw * var(--dz)) rgba(255,255,255,.85), 0 .6vw 1.6vw rgba(0,0,0,.45); }
+  #dgrid .segs { display: flex; height: calc(4.6vw * var(--dz)); margin: calc(.7vw * var(--dz)) 0; border-radius: var(--rad, 999px); overflow: hidden;
+    box-shadow: var(--frame, 0 0 0 calc(.35vw * var(--dz)) rgba(255,255,255,.85), 0 .6vw 1.6vw rgba(0,0,0,.45)); }
   #dgrid .segs > div { min-width: 7%; display: flex; align-items: center; padding: 0 1.2vw; box-sizing: border-box; transition: flex-grow .6s ease;
-    background: linear-gradient(180deg, color-mix(in srgb, var(--c) 70%, #fff), var(--c) 55%, color-mix(in srgb, var(--c) 75%, #000)); }
-  #dgrid .segs > div + div { border-left: calc(.3vw * var(--dz)) solid rgba(255,255,255,.9); }
+    background: var(--fill, linear-gradient(180deg, color-mix(in srgb, var(--c) 70%, #fff), var(--c) 55%, color-mix(in srgb, var(--c) 75%, #000))); }
+  #dgrid .segs > div + div { border-left: calc(.3vw * var(--dz)) solid var(--sep, rgba(255,255,255,.9)); }
   #dgrid .segs .pt { font-weight: 900; font-style: italic; font-size: calc(2.8vw * var(--dz)); }
   #dgrid .gifts .gi { width: calc(5vw * var(--dz)); height: calc(5vw * var(--dz)); }
   /* cuadrícula de activación: tarjetas (en fila, 2 o 3 renglones, en columna) */
   #dgrid .cards { display: grid; grid-template-columns: repeat(var(--cols, 3), minmax(0, 1fr)); gap: calc(1.2vw * var(--dz)); }
   #dgrid .card { display: flex; align-items: center; gap: calc(1vw * var(--dz)); padding: calc(.8vw * var(--dz)) calc(1.2vw * var(--dz)); border-radius: calc(1.6vw * var(--dz));
-    background: linear-gradient(90deg, color-mix(in srgb, var(--c) 85%, transparent), color-mix(in srgb, var(--c) 30%, transparent)); box-shadow: 0 0 0 calc(.25vw * var(--dz)) rgba(255,255,255,.75); }
-  #dgrid .card .av { width: calc(6vw * var(--dz)); height: calc(6vw * var(--dz)); border: calc(.35vw * var(--dz)) solid #fff; }
+    background: var(--card, linear-gradient(90deg, color-mix(in srgb, var(--c) 85%, transparent), color-mix(in srgb, var(--c) 30%, transparent))); box-shadow: var(--cardb, 0 0 0 calc(.25vw * var(--dz)) rgba(255,255,255,.75));
+    border-radius: var(--crd, calc(1.6vw * var(--dz))); }
+  #dgrid .card .av { width: calc(6vw * var(--dz)); height: calc(6vw * var(--dz)); border: calc(.35vw * var(--dz)) solid var(--avb, #fff); box-shadow: var(--avg, none); }
   #dgrid .card .tx { display: flex; flex-direction: column; min-width: 0; flex: 1; line-height: 1.05; }
   #dgrid .card .nm { font-weight: 900; font-size: calc(2.4vw * var(--dz)); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-transform: uppercase; font-style: italic; }
   #dgrid .card .pt { font-weight: 900; font-size: calc(3vw * var(--dz)); }
@@ -192,6 +193,7 @@
     border: calc(.35vw * var(--dz)) solid rgba(255,255,255,.95); box-shadow: 0 .6vw 1.4vw rgba(0,0,0,.45);
     background: repeating-linear-gradient(-45deg, rgba(255,255,255,.14) 0 .5vw, transparent .5vw 1.3vw),
       linear-gradient(180deg, color-mix(in srgb, var(--c) 75%, #fff), var(--c) 55%, color-mix(in srgb, var(--c) 70%, #000)); }
+  #dgrid .tagpt { font-weight: 900; font-style: italic; }
   #dgrid .pl > .in { transform: skewX(12deg); display: flex; align-items: center; gap: calc(.8vw * var(--dz)); padding: calc(.6vw * var(--dz)) calc(1.2vw * var(--dz)); }
   #dgrid .pl .av { width: calc(5.8vw * var(--dz)); height: calc(5.8vw * var(--dz)); border: calc(.35vw * var(--dz)) solid #fff; margin-left: calc(-1.8vw * var(--dz)); }
   #dgrid .pl .tx { display: flex; flex-direction: column; min-width: 0; flex: 1; line-height: 1; }
@@ -207,7 +209,8 @@
   /* reloj pegado abajo de la cuadrícula / barra */
   .dz .dclkbox { display: flex; justify-content: center; margin-top: calc(.6vw * var(--dz)); }
   .dz .dclkbox .clk { font-weight: 900; font-style: italic; font-variant-numeric: tabular-nums; font-size: calc(3.6vw * var(--dz)); padding: calc(.1vw * var(--dz)) calc(1.6vw * var(--dz));
-    background: linear-gradient(180deg, #ffe45c, #f5b900); color: #111 !important; text-shadow: none !important; border-radius: calc(.6vw * var(--dz)); transform: skewX(-10deg); box-shadow: 0 .4vw 1vw rgba(0,0,0,.45); }
+    background: var(--cbg, linear-gradient(180deg, #ffe45c, #f5b900)); color: var(--cfc, #111) !important; text-shadow: var(--cts, none) !important; border-radius: var(--crad, calc(.6vw * var(--dz)));
+    transform: skewX(var(--csk, -10deg)); box-shadow: var(--cbd, 0 .4vw 1vw rgba(0,0,0,.45)); font-family: var(--dfont, var(--cfont, var(--tfont, inherit))); }
   .dz .rtag { display: inline-block; background: #111; color: #fff; font-weight: 900; font-style: italic; padding: 0 .5em; margin-right: .35em; border-radius: .2em; font-size: .62em; vertical-align: middle; transform: translateY(-.1em); }
   .dz .clk.low { color: #ff4d5e !important; } .dz .clk.zero { animation: dblink .7s steps(2, start) infinite; }
   /* total por bailarina («Puntos de hoy») */
@@ -215,11 +218,11 @@
   #dtotal .box { border-radius: calc(1.6vw * var(--dz)); padding: calc(1vw * var(--dz)) calc(1.2vw * var(--dz)); min-width: calc(36vw * var(--dz)); }
   #dtotal h1 { margin: 0 0 calc(.8vw * var(--dz)); font-size: calc(2.6vw * var(--dz)); font-weight: 900; text-transform: uppercase; letter-spacing: .06em; text-align: center; }
   #dtotal .r { display: flex; align-items: center; gap: calc(.8vw * var(--dz)); margin-top: calc(.7vw * var(--dz)); }
-  #dtotal .n { width: calc(2.6vw * var(--dz)); text-align: center; font-weight: 900; font-size: calc(2.2vw * var(--dz)); color: #ffd54a; }
-  #dtotal .av { width: calc(5vw * var(--dz)); height: calc(5vw * var(--dz)); border: calc(.3vw * var(--dz)) solid #fff; }
+  #dtotal .n { width: calc(2.6vw * var(--dz)); text-align: center; font-weight: 900; font-size: calc(2.2vw * var(--dz)); color: var(--rk, #ffd54a); }
+  #dtotal .av { width: calc(5vw * var(--dz)); height: calc(5vw * var(--dz)); border: calc(.3vw * var(--dz)) solid var(--avb, #fff); box-shadow: var(--avg, none); }
   #dtotal .b { flex: 1; display: flex; align-items: center; justify-content: space-between; gap: 1.6vw; height: calc(4.4vw * var(--dz)); padding: 0 calc(1.4vw * var(--dz));
-    border-radius: calc(1vw * var(--dz)); background: linear-gradient(90deg, rgba(10,10,30,.85) 0%, color-mix(in srgb, var(--c) 85%, #000) 100%);
-    box-shadow: inset 0 0 0 calc(.25vw * var(--dz)) color-mix(in srgb, var(--c) 80%, #fff); }
+    border-radius: var(--crd, calc(1vw * var(--dz))); background: var(--card, linear-gradient(90deg, rgba(10,10,30,.85) 0%, color-mix(in srgb, var(--c) 85%, #000) 100%));
+    box-shadow: var(--cardb, inset 0 0 0 calc(.25vw * var(--dz)) color-mix(in srgb, var(--c) 80%, #fff)); }
   #dtotal .nm { font-weight: 900; font-style: italic; font-size: calc(2.3vw * var(--dz)); text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   #dtotal .pt { font-weight: 900; font-size: calc(2.6vw * var(--dz)); white-space: nowrap; }
   #dtotal .pt small { font-size: .62em; opacity: .85; }
@@ -254,41 +257,44 @@
   #dbar .tops { display: flex; justify-content: space-between; align-items: center; }
   #dbar .who { display: flex; align-items: center; gap: 1vw; min-width: 0; }
   #dbar .who.r { flex-direction: row-reverse; }
-  #dbar .av { width: calc(6vw * var(--dz)); height: calc(6vw * var(--dz)); border: calc(.4vw * var(--dz)) solid var(--c); }
+  #dbar .av { width: calc(6vw * var(--dz)); height: calc(6vw * var(--dz)); border: calc(.4vw * var(--dz)) solid var(--avb, var(--c)); box-shadow: var(--avg, none); }
   #dbar .nm { font-weight: 900; font-style: italic; text-transform: uppercase; font-size: calc(2.8vw * var(--dz)); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 30vw; }
   #dbar .gi { width: calc(4.6vw * var(--dz)); height: calc(4.6vw * var(--dz)); }
   #dbar .mid { display: flex; flex-direction: column; align-items: center; }
   #dbar .bclk { margin-top: calc(.3vw * var(--dz)); font-weight: 900; font-style: italic; font-variant-numeric: tabular-nums; font-size: calc(3vw * var(--dz)); color: #111 !important; text-shadow: none !important;
-    background: linear-gradient(180deg, #ffe45c, #f5b900); padding: 0 calc(1.2vw * var(--dz)); border-radius: calc(.5vw * var(--dz)); transform: skewX(-10deg); box-shadow: 0 .3vw .8vw rgba(0,0,0,.4); }
+    background: var(--cbg, linear-gradient(180deg, #ffe45c, #f5b900)); padding: 0 calc(1.2vw * var(--dz)); border-radius: var(--crad, calc(.5vw * var(--dz))); transform: skewX(var(--csk, -10deg));
+    box-shadow: var(--cbd, 0 .3vw .8vw rgba(0,0,0,.4)); color: var(--cfc, #111) !important; text-shadow: var(--cts, none) !important; font-family: var(--dfont, var(--cfont, var(--tfont, inherit))); }
   #dbar .bclk.low { background: linear-gradient(180deg, #ff6b78, #e0283a); color: #fff !important; }
   #dbar .wrap { position: relative; }
   #dbar .stamp { position: absolute; left: 50%; top: 60%; transform: translate(-50%, -50%) rotate(-5deg); font-weight: 900; font-style: italic; font-size: calc(6.5vw * var(--dz)); white-space: nowrap;
     color: #ffd54a; -webkit-text-stroke: calc(.4vw * var(--dz)) #111; paint-order: stroke fill; text-shadow: calc(.5vw * var(--dz)) calc(.5vw * var(--dz)) 0 #111; animation: dstamp .5s cubic-bezier(.2,1.6,.4,1) both; }
-  #dbar .vs { font-weight: 900; font-style: italic; font-size: calc(4vw * var(--dz)); color: #ffd54a; text-shadow: 0 0 1.2vw rgba(255,170,0,.9), 0 .3vw .6vw #000; }
-  #dbar .bar { position: relative; display: flex; height: calc(4.8vw * var(--dz)); margin-top: calc(.8vw * var(--dz)); border-radius: 999px; overflow: hidden;
-    box-shadow: 0 0 0 calc(.35vw * var(--dz)) rgba(255,255,255,.85), 0 .6vw 1.6vw rgba(0,0,0,.45); }
+  #dbar .vs { font-weight: 900; font-style: italic; font-size: calc(4vw * var(--dz)); color: var(--vsc, #ffd54a); text-shadow: var(--vsh, 0 0 1.2vw rgba(255,170,0,.9), 0 .3vw .6vw #000); }
+  #dbar .bar { position: relative; display: flex; height: calc(4.8vw * var(--dz)); margin-top: calc(.8vw * var(--dz)); border-radius: var(--rad, 999px); overflow: hidden;
+    box-shadow: var(--frame, 0 0 0 calc(.35vw * var(--dz)) rgba(255,255,255,.85), 0 .6vw 1.6vw rgba(0,0,0,.45)); }
   #dbar .bar > div { display: flex; align-items: center; transition: flex-grow .6s ease; min-width: 8%; padding: 0 2vw; box-sizing: border-box;
-    background: linear-gradient(180deg, color-mix(in srgb, var(--c) 70%, #fff), var(--c) 55%, color-mix(in srgb, var(--c) 75%, #000)); }
+    background: var(--fill, linear-gradient(180deg, color-mix(in srgb, var(--c) 70%, #fff), var(--c) 55%, color-mix(in srgb, var(--c) 75%, #000))); }
+  #dbar .bar > div + div { border-left: calc(.3vw * var(--dz)) solid var(--sep, transparent); }
   #dbar .bar > div.r { justify-content: flex-end; }
   #dbar .bar .pt { font-weight: 900; font-style: italic; font-size: calc(3vw * var(--dz)); }
   #dbar .bolt { position: absolute; top: 50%; transform: translate(-50%, -50%); font-size: calc(5vw * var(--dz)); filter: drop-shadow(0 0 .8vw #ffcc00); transition: left .6s ease; }
   /* 🎤 turno sola */
   #dsolo { position: fixed; left: 0; right: 0; top: 0; padding: calc(1.5vw * var(--dz)) 3vw; }
   #dsolo .so { position: relative; display: flex; align-items: flex-start; gap: calc(1.2vw * var(--dz)); }
-  #dsolo .ph { flex: none; width: calc(17vw * var(--dz)); height: calc(19vw * var(--dz)); transform: skewX(-6deg); border: calc(.6vw * var(--dz)) solid #fff;
-    box-shadow: calc(.8vw * var(--dz)) calc(.8vw * var(--dz)) 0 #111; background: #222; overflow: hidden; }
-  #dsolo .ph .noph { display: flex; width: 100%; height: 100%; align-items: center; justify-content: center; transform: skewX(6deg); font-size: calc(9vw * var(--dz)); }
-  #dsolo .ph img { width: 100%; height: 100%; object-fit: cover; transform: skewX(6deg) scale(1.15); }
+  #dsolo .ph { flex: none; width: calc(17vw * var(--dz)); height: calc(19vw * var(--dz)); transform: skewX(var(--ssk, -6deg)); border: calc(.6vw * var(--dz)) solid var(--sbd, #fff);
+    box-shadow: var(--sph, calc(.8vw * var(--dz)) calc(.8vw * var(--dz)) 0 #111); background: #222; overflow: hidden; border-radius: var(--sprad, 0); }
+  #dsolo .ph .noph { display: flex; width: 100%; height: 100%; align-items: center; justify-content: center; transform: skewX(calc(-1 * var(--ssk, -6deg))); font-size: calc(9vw * var(--dz)); }
+  #dsolo .ph img { width: 100%; height: 100%; object-fit: cover; transform: skewX(calc(-1 * var(--ssk, -6deg))) scale(1.15); }
   #dsolo .mid { flex: 1; min-width: 0; display: flex; flex-direction: column; padding-top: calc(1.5vw * var(--dz)); }
-  #dsolo .bar { position: relative; height: calc(5vw * var(--dz)); transform: skewX(-14deg); background: #1c1c1c; border: calc(.4vw * var(--dz)) solid #fff;
-    box-shadow: calc(.6vw * var(--dz)) calc(.6vw * var(--dz)) 0 #111; overflow: hidden; }
+  #dsolo .bar { position: relative; height: calc(5vw * var(--dz)); transform: skewX(var(--sbsk, -14deg)); background: var(--trk, #1c1c1c); border: calc(.4vw * var(--dz)) solid var(--sbd, #fff);
+    box-shadow: var(--sbs, calc(.6vw * var(--dz)) calc(.6vw * var(--dz)) 0 #111); overflow: hidden; border-radius: var(--rad0, 0); }
   #dsolo .bar::after { content: ""; position: absolute; inset: 0; background: repeating-linear-gradient(90deg, transparent 0 calc(5vw * var(--dz)), rgba(255,255,255,.15) calc(5vw * var(--dz)) calc(5.25vw * var(--dz))); }
-  #dsolo .fill { height: 100%; width: 0; transition: width .6s ease; background: linear-gradient(180deg, color-mix(in srgb, var(--c) 70%, #fff), var(--c) 55%, color-mix(in srgb, var(--c) 70%, #000)); }
-  #dsolo .pg { margin: calc(.6vw * var(--dz)) 0 0 calc(1vw * var(--dz)); font-weight: 900; font-style: italic; font-size: calc(2.6vw * var(--dz)); color: var(--dcol, #fff); text-shadow: var(--dring); }
+  #dsolo .fill { height: 100%; width: 0; transition: width .6s ease; background: var(--fill, linear-gradient(180deg, color-mix(in srgb, var(--c) 70%, #fff), var(--c) 55%, color-mix(in srgb, var(--c) 70%, #000))); }
+  #dsolo .pg { margin: calc(.6vw * var(--dz)) 0 0 calc(1vw * var(--dz)); font-weight: 900; font-style: italic; font-size: calc(2.6vw * var(--dz)); color: var(--dcol, var(--pgc, #fff)); text-shadow: var(--dring); }
   #dsolo .big { font-weight: 900; font-style: italic; text-transform: uppercase; font-size: calc(7vw * var(--dz)); line-height: .95; margin-top: calc(-.6vw * var(--dz)); }
-  #dsolo .tbox { flex: none; margin-top: calc(1vw * var(--dz)); background: #111; border: calc(.4vw * var(--dz)) solid #fff; padding: calc(.4vw * var(--dz)) calc(1.4vw * var(--dz)); text-align: center; }
-  #dsolo .tbox small { display: block; color: #fff; font-weight: 800; font-style: italic; font-size: calc(1.5vw * var(--dz)); letter-spacing: .05em; }
-  #dsolo .tbox .clk { color: #fff !important; font-weight: 900; font-style: italic; font-variant-numeric: tabular-nums; font-size: calc(4.4vw * var(--dz)); }
+  #dsolo .tbox { flex: none; margin-top: calc(1vw * var(--dz)); background: var(--cbg, #111); border: calc(.4vw * var(--dz)) solid var(--sbd, #fff); padding: calc(.4vw * var(--dz)) calc(1.4vw * var(--dz)); text-align: center;
+    border-radius: var(--crad, 0); box-shadow: var(--cbd, none); transform: skewX(var(--csk, 0deg)); font-family: var(--dfont, var(--cfont, var(--tfont, inherit))); }
+  #dsolo .tbox small { display: block; color: var(--cfc, #fff); font-weight: 800; font-style: italic; font-size: calc(1.5vw * var(--dz)); letter-spacing: .05em; }
+  #dsolo .tbox .clk { color: var(--cfc, #fff) !important; text-shadow: var(--cts, var(--dring)) !important; font-weight: 900; font-style: italic; font-variant-numeric: tabular-nums; font-size: calc(4.4vw * var(--dz)); }
   #dsolo .tbox .clk.low { color: #ff4d5e !important; }
   #dsolo .stamp { position: absolute; left: 50%; top: 55%; transform: translate(-50%, -50%) rotate(-6deg); font-weight: 900; font-style: italic; font-size: calc(10vw * var(--dz));
     color: #fff; -webkit-text-stroke: calc(.5vw * var(--dz)) #111; paint-order: stroke fill; text-shadow: calc(.6vw * var(--dz)) calc(.6vw * var(--dz)) 0 #111; animation: dstamp .5s cubic-bezier(.2,1.6,.4,1) both; white-space: nowrap; }
@@ -311,6 +317,163 @@
   @keyframes dflash { 10% { background: rgba(255,255,255,.55); } 30% { background: rgba(255,255,255,.05); } 45% { background: rgba(255,255,255,.4); } 100% { background: rgba(255,255,255,0); } }
   #dvs .line { position: absolute; top: 0; bottom: 0; left: 50%; width: .5vw; transform: translateX(-50%);
     background: linear-gradient(180deg, transparent, rgba(160,230,255,.95), #fff, rgba(160,230,255,.95), transparent); box-shadow: 0 0 2vw rgba(120,210,255,.9); }
+
+
+  #dvs .half.fire { background: linear-gradient(0deg, rgba(255,80,0,.85), rgba(150,20,0,.55) 45%, rgba(40,0,0,.45)); }
+  #dvs .half.snow { background: linear-gradient(180deg, rgba(220,235,255,.55), rgba(170,195,230,.6)); }
+  #dvs .half.smoke { background: rgba(60,60,70,.55); }
+  #dvs .half.smoke .pf { position: absolute; width: 140%; height: 70%; left: -20%; border-radius: 50%; filter: blur(4vw); background: radial-gradient(closest-side, rgba(200,200,210,.85), transparent); animation: dsmoke 9s ease-in-out infinite alternate; }
+  #dvs .half.smoke .pf.a { top: -10%; } #dvs .half.smoke .pf.b { top: 30%; animation-duration: 12s; animation-delay: -4s; } #dvs .half.smoke .pf.c { top: 60%; animation-duration: 10s; animation-delay: -7s; }
+  @keyframes dsmoke { from { transform: translateX(-15%) scale(1); } to { transform: translateX(15%) scale(1.2); } }
+  #dvs .half.jail { background: repeating-linear-gradient(90deg, transparent 0 7vw, #2b2b2b 7vw 8.2vw, #8a8a8a 8.6vw, #2b2b2b 9.4vw, transparent 9.4vw 11vw), rgba(10,10,15,.55);
+    box-shadow: inset 0 3vh 0 #333, inset 0 -3vh 0 #333; }
+  #dvs .half.tv canvas { image-rendering: pixelated; opacity: .8; }
+  #dvs .half.cracked { background: rgba(20,25,35,.45); }
+  #dvs .half.cracked svg { position: absolute; inset: 0; width: 100%; height: 100%; filter: drop-shadow(0 0 .3vw rgba(0,0,0,.8)); }
+  #dvs .half.hearts { background: linear-gradient(180deg, rgba(60,0,30,.6), rgba(120,10,50,.5)); }
+  #dvs .line.fire { background: linear-gradient(180deg, transparent, #ffb000, #fff, #ffb000, transparent); box-shadow: 0 0 2vw #ff4d00; }
+  #dvs .line.hearts { background: linear-gradient(180deg, transparent, #ff6fa8, #fff, #ff6fa8, transparent); box-shadow: 0 0 2vw #ff3d8d; }
+  /* ===== 🎨 estilos del live de baile: cada fuente elige el suyo y su reloj se viste igual ===== */
+  /* 💡 Neón */
+  .th-neon { --tfont: "Bahnschrift", "Segoe UI", sans-serif; --dring: 0 0 .35em rgba(0,240,255,.9), 0 0 .1em #000; }
+  .th-neon, .th-neon * { --fill: linear-gradient(180deg, color-mix(in srgb, var(--c) 45%, #07071a), color-mix(in srgb, var(--c) 12%, #07071a));
+    --frame: 0 0 0 calc(.25vw * var(--dz)) #00f0ff, 0 0 calc(1.4vw * var(--dz)) #00f0ff, inset 0 0 calc(1vw * var(--dz)) rgba(0,240,255,.35); --rad: calc(.8vw * var(--dz)); --sep: #00f0ff;
+    --card: rgba(7,7,26,.82); --cardb: 0 0 0 calc(.22vw * var(--dz)) var(--c), 0 0 calc(1.3vw * var(--dz)) var(--c), inset 0 0 calc(1vw * var(--dz)) color-mix(in srgb, var(--c) 40%, transparent); --crd: calc(.8vw * var(--dz));
+    --avb: var(--c); --avg: 0 0 calc(1vw * var(--dz)) var(--c); --rk: #00f0ff;
+    --cbg: #07071a; --cfc: #00f0ff; --cts: 0 0 .3em #00f0ff; --cbd: 0 0 0 calc(.22vw * var(--dz)) #00f0ff, 0 0 calc(1.4vw * var(--dz)) #00f0ff; --crad: calc(.6vw * var(--dz)); --csk: 0deg;
+    --vsc: #ff3df0; --vsh: 0 0 .25em #ff3df0, 0 0 .6em #ff3df0; --trk: #07071a; --sbd: #00f0ff; --sbs: 0 0 calc(1.2vw * var(--dz)) #00f0ff; --sph: 0 0 calc(1.6vw * var(--dz)) var(--c); --ssk: 0deg; --sbsk: 0deg; --rad0: calc(.6vw * var(--dz)); --sprad: calc(1vw * var(--dz)); }
+  /* 🪟 Cristal */
+  .th-glass { --tfont: "Segoe UI", sans-serif; }
+  .th-glass, .th-glass * { --fill: linear-gradient(180deg, color-mix(in srgb, var(--c) 60%, rgba(255,255,255,.45)), color-mix(in srgb, var(--c) 40%, rgba(255,255,255,.08)));
+    --frame: inset 0 0 0 calc(.2vw * var(--dz)) rgba(255,255,255,.7), 0 calc(.6vw * var(--dz)) calc(2vw * var(--dz)) rgba(0,0,0,.25); --sep: rgba(255,255,255,.55);
+    --card: linear-gradient(135deg, rgba(255,255,255,.34), rgba(255,255,255,.1)); --cardb: inset 0 0 0 calc(.2vw * var(--dz)) rgba(255,255,255,.6), inset calc(.7vw * var(--dz)) 0 0 color-mix(in srgb, var(--c) 85%, transparent), 0 calc(.6vw * var(--dz)) calc(1.6vw * var(--dz)) rgba(0,0,0,.2);
+    --crd: calc(1.4vw * var(--dz)); --avb: rgba(255,255,255,.85); --rk: #fff;
+    --cbg: rgba(255,255,255,.28); --cfc: #fff; --cts: 0 .08em .25em rgba(0,0,0,.5); --cbd: inset 0 0 0 calc(.2vw * var(--dz)) rgba(255,255,255,.75), 0 calc(.4vw * var(--dz)) calc(1.2vw * var(--dz)) rgba(0,0,0,.2); --crad: 999px; --csk: 0deg;
+    --vsc: #fff; --vsh: 0 .1em .4em rgba(0,0,0,.5); --trk: rgba(255,255,255,.18); --sbd: rgba(255,255,255,.75); --sbs: 0 calc(.5vw * var(--dz)) calc(1.4vw * var(--dz)) rgba(0,0,0,.25); --sph: 0 calc(.6vw * var(--dz)) calc(1.6vw * var(--dz)) rgba(0,0,0,.3);
+    --ssk: 0deg; --sbsk: 0deg; --rad0: 999px; --sprad: calc(1.6vw * var(--dz)); }
+  .th-glass :is(.segs, .card, .b, .bar, .tbox, .bub, .pod .col) { -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); }
+  /* 👑 Dorado */
+  .th-gold { --tfont: Georgia, "Times New Roman", serif; --dring: 0 .08em .2em rgba(0,0,0,.9); }
+  .th-gold, .th-gold * { --fill: linear-gradient(180deg, rgba(255,255,255,.18), transparent 45%), linear-gradient(90deg, color-mix(in srgb, var(--c) 70%, #1a1305), #1a1305);
+    --frame: 0 0 0 calc(.3vw * var(--dz)) #d4af37, 0 0 0 calc(.55vw * var(--dz)) #1a1305, 0 0 calc(1.2vw * var(--dz)) rgba(212,175,55,.7); --rad: calc(.5vw * var(--dz)); --sep: #d4af37;
+    --card: linear-gradient(180deg, #2c2410, #0d0a04); --cardb: inset 0 0 0 calc(.22vw * var(--dz)) #d4af37, inset calc(.7vw * var(--dz)) 0 0 var(--c), 0 calc(.4vw * var(--dz)) calc(1vw * var(--dz)) rgba(0,0,0,.5); --crd: calc(.5vw * var(--dz));
+    --avb: #d4af37; --avg: 0 0 calc(.8vw * var(--dz)) rgba(212,175,55,.8); --rk: #f3d36b; --tc: #fbe9b0;
+    --cbg: linear-gradient(180deg, #fff3b0, #e0b83c 45%, #a07a16); --cfc: #1a1305; --cts: 0 .05em 0 rgba(255,255,255,.5); --cbd: 0 0 0 calc(.2vw * var(--dz)) #1a1305, 0 0 calc(1vw * var(--dz)) rgba(212,175,55,.8); --crad: calc(.4vw * var(--dz)); --csk: 0deg;
+    --vsc: #f3d36b; --vsh: 0 0 .3em rgba(212,175,55,.9), 0 .08em .15em #000; --trk: #120e05; --sbd: #d4af37; --sbs: 0 0 calc(1vw * var(--dz)) rgba(212,175,55,.6); --sph: 0 0 calc(1.2vw * var(--dz)) rgba(212,175,55,.7); --ssk: 0deg; --sbsk: 0deg; --rad0: calc(.4vw * var(--dz)); --pgc: #f3d36b; }
+  /* 🏀 Marcador deportivo */
+  .th-sport { --tfont: Bahnschrift, "Arial Narrow", "Segoe UI", sans-serif; --dring: 0 .06em 0 rgba(0,0,0,.6); }
+  .th-sport, .th-sport * { --fill: linear-gradient(180deg, rgba(255,255,255,.22) 0 42%, transparent 42%), var(--c);
+    --frame: 0 0 0 calc(.35vw * var(--dz)) #101217, 0 calc(.5vw * var(--dz)) calc(1.2vw * var(--dz)) rgba(0,0,0,.4); --rad: calc(.3vw * var(--dz)); --sep: #101217;
+    --card: linear-gradient(180deg, #232733, #12141a); --cardb: inset calc(.8vw * var(--dz)) 0 0 var(--c), 0 calc(.4vw * var(--dz)) calc(1vw * var(--dz)) rgba(0,0,0,.45); --crd: calc(.3vw * var(--dz));
+    --avb: #fff; --rk: #fff;
+    --cbg: #101217; --cfc: #ffe14d; --cts: none; --cbd: inset 0 calc(-.35vw * var(--dz)) 0 #e1192d, 0 calc(.3vw * var(--dz)) calc(.8vw * var(--dz)) rgba(0,0,0,.4); --crad: calc(.25vw * var(--dz)); --csk: 0deg;
+    --vsc: #fff; --vsh: 0 .06em 0 #e1192d, 0 .1em .3em rgba(0,0,0,.6); --trk: #101217; --sbd: #101217; --sbs: 0 calc(.4vw * var(--dz)) calc(1vw * var(--dz)) rgba(0,0,0,.4); --sph: inset 0 calc(-.5vw * var(--dz)) 0 var(--c), 0 calc(.4vw * var(--dz)) calc(1vw * var(--dz)) rgba(0,0,0,.4);
+    --ssk: 0deg; --sbsk: 0deg; --rad0: calc(.25vw * var(--dz)); }
+  .th-sport :is(.nm, .pt, .clk, h1, .vs) { font-style: normal !important; letter-spacing: .02em; }
+  /* ✨ Minimalista */
+  .th-minimal { --tfont: "Segoe UI", sans-serif; --dring: 0 .06em .25em rgba(0,0,0,.75); }
+  .th-minimal, .th-minimal * { --fill: color-mix(in srgb, var(--c) 85%, transparent); --frame: none; --rad: calc(.4vw * var(--dz)); --sep: transparent;
+    --card: linear-gradient(90deg, rgba(0,0,0,.35), transparent); --cardb: inset 0 calc(-.28vw * var(--dz)) 0 var(--c); --crd: 0; --avb: var(--c); --rk: rgba(255,255,255,.8);
+    --cbg: transparent; --cfc: #fff; --cts: 0 .06em .3em rgba(0,0,0,.8); --cbd: none; --crad: 0; --csk: 0deg;
+    --vsc: #fff; --vsh: 0 .06em .3em rgba(0,0,0,.8); --trk: rgba(255,255,255,.18); --sbd: transparent; --sbs: none; --sph: none; --ssk: 0deg; --sbsk: 0deg; --rad0: 999px; --sprad: 50%; }
+  .th-minimal :is(.nm, .pt, .clk, h1, .vs, .big) { font-style: normal !important; font-weight: 700 !important; }
+  #dgrid.th-minimal .segs { height: calc(2.6vw * var(--dz)); }
+  /* 💥 Cómic */
+  .th-comic { --tfont: Impact, "Arial Black", sans-serif; --dring: .05em .05em 0 #111, -.03em -.03em 0 #111, .03em -.03em 0 #111, -.03em .03em 0 #111, .09em .09em 0 #111; }
+  .th-comic, .th-comic * { --fill: radial-gradient(circle, rgba(0,0,0,.2) 22%, transparent 24%) 0 0 / calc(.9vw * var(--dz)) calc(.9vw * var(--dz)), var(--c);
+    --frame: 0 0 0 calc(.45vw * var(--dz)) #111, calc(.6vw * var(--dz)) calc(.6vw * var(--dz)) 0 calc(.45vw * var(--dz)) #111; --rad: calc(.6vw * var(--dz)); --sep: #111;
+    --card: radial-gradient(circle, rgba(0,0,0,.16) 22%, transparent 24%) 0 0 / calc(.9vw * var(--dz)) calc(.9vw * var(--dz)), var(--c); --cardb: 0 0 0 calc(.4vw * var(--dz)) #111, calc(.5vw * var(--dz)) calc(.5vw * var(--dz)) 0 calc(.4vw * var(--dz)) #111; --crd: calc(.6vw * var(--dz));
+    --avb: #111; --rk: #ffe600;
+    --cbg: #ffe600; --cfc: #111; --cts: none; --cbd: 0 0 0 calc(.35vw * var(--dz)) #111, calc(.45vw * var(--dz)) calc(.45vw * var(--dz)) 0 calc(.35vw * var(--dz)) #111; --crad: calc(.4vw * var(--dz)); --csk: -6deg;
+    --vsc: #ffe600; --vsh: .05em .05em 0 #111, -.03em -.03em 0 #111, .03em -.03em 0 #111, -.03em .03em 0 #111, .1em .1em 0 #e1192d; --trk: #fff; --sbd: #111; --sbs: calc(.6vw * var(--dz)) calc(.6vw * var(--dz)) 0 #111; --sph: calc(.8vw * var(--dz)) calc(.8vw * var(--dz)) 0 #111; }
+  .th-comic :is(.nm, .pt, h1, .big) { font-style: normal !important; letter-spacing: .02em; }
+  /* 👾 Retro arcade */
+  .th-retro { --tfont: "Courier New", Consolas, monospace; --dring: .08em .08em 0 #000; }
+  .th-retro, .th-retro * { --fill: repeating-linear-gradient(0deg, rgba(0,0,0,.28) 0 2px, transparent 2px 4px), var(--c);
+    --frame: 0 0 0 calc(.35vw * var(--dz)) #fff, 0 0 0 calc(.7vw * var(--dz)) #111; --rad: 0; --sep: #111;
+    --card: repeating-linear-gradient(0deg, rgba(255,255,255,.05) 0 2px, transparent 2px 4px), #0e0e12; --cardb: 0 0 0 calc(.3vw * var(--dz)) var(--c), calc(.5vw * var(--dz)) calc(.5vw * var(--dz)) 0 #000; --crd: 0;
+    --avb: var(--c); --rk: #39ff14;
+    --cbg: #0e0e12; --cfc: #39ff14; --cts: 0 0 .3em rgba(57,255,20,.8); --cbd: 0 0 0 calc(.3vw * var(--dz)) #39ff14, calc(.4vw * var(--dz)) calc(.4vw * var(--dz)) 0 #000; --crad: 0; --csk: 0deg;
+    --vsc: #ff3d3d; --vsh: .08em .08em 0 #000, 0 0 .3em #ff3d3d; --trk: #0e0e12; --sbd: #39ff14; --sbs: calc(.5vw * var(--dz)) calc(.5vw * var(--dz)) 0 #000; --sph: calc(.6vw * var(--dz)) calc(.6vw * var(--dz)) 0 #000; --ssk: 0deg; --sbsk: 0deg; --pgc: #39ff14; }
+  .th-retro :is(.nm, .pt, .clk, h1, .vs, .big) { font-style: normal !important; text-transform: uppercase; letter-spacing: .04em; }
+  /* 🍬 Pastel */
+  .th-pastel { --tfont: "Trebuchet MS", "Segoe UI", sans-serif; }
+  .th-pastel, .th-pastel * { --fill: linear-gradient(180deg, color-mix(in srgb, var(--c) 32%, #fff), color-mix(in srgb, var(--c) 58%, #fff));
+    --frame: 0 0 0 calc(.4vw * var(--dz)) #fff, 0 calc(.5vw * var(--dz)) calc(1.4vw * var(--dz)) rgba(120,60,120,.25); --rad: 999px; --sep: #fff;
+    --card: linear-gradient(135deg, color-mix(in srgb, var(--c) 28%, #fff), #fff 90%); --cardb: 0 0 0 calc(.35vw * var(--dz)) #fff, 0 calc(.5vw * var(--dz)) calc(1.2vw * var(--dz)) rgba(120,60,120,.25); --crd: calc(2.4vw * var(--dz));
+    --avb: #fff; --avg: 0 0 0 calc(.3vw * var(--dz)) color-mix(in srgb, var(--c) 50%, #fff); --rk: #ff6fa8;
+    --cbg: #fff; --cfc: #ff5d9e; --cts: none; --cbd: 0 0 0 calc(.32vw * var(--dz)) #ffc2dc, 0 calc(.4vw * var(--dz)) calc(1vw * var(--dz)) rgba(120,60,120,.2); --crad: 999px; --csk: 0deg;
+    --vsc: #ff6fa8; --vsh: 0 0 0 #fff, .05em .05em 0 #fff, -.05em -.05em 0 #fff, .05em -.05em 0 #fff, -.05em .05em 0 #fff; --trk: #fff; --sbd: #fff; --sbs: 0 calc(.5vw * var(--dz)) calc(1.2vw * var(--dz)) rgba(120,60,120,.25); --sph: 0 calc(.5vw * var(--dz)) calc(1.2vw * var(--dz)) rgba(120,60,120,.3);
+    --ssk: 0deg; --sbsk: 0deg; --rad0: 999px; --sprad: calc(2.4vw * var(--dz)); }
+  .th-pastel :is(.segs, .card, .b, #dbar .bar, .bub .pt, .pod .col) :is(.nm, .pt) { --tc: #5b3a63; text-shadow: none !important; }
+  .th-pastel :is(.nm, .pt, h1, .big) { font-style: normal !important; }
+  /* 🔥 Fuego */
+  .th-fire { --tfont: Impact, "Arial Black", sans-serif; --dring: 0 0 .3em rgba(255,90,0,.95), 0 .06em .1em #000; }
+  .th-fire, .th-fire * { --fill: linear-gradient(180deg, rgba(255,226,110,.6), transparent 45%, rgba(140,10,0,.55)), color-mix(in srgb, var(--c) 82%, #ff5a00);
+    --frame: 0 0 0 calc(.3vw * var(--dz)) #ffb000, 0 0 calc(1.6vw * var(--dz)) #ff4d00, 0 0 calc(3vw * var(--dz)) rgba(255,60,0,.55); --rad: calc(1vw * var(--dz)); --sep: #ffb000;
+    --card: linear-gradient(180deg, #3d0b00, #120300); --cardb: 0 0 0 calc(.25vw * var(--dz)) #ff7a00, 0 0 calc(1.3vw * var(--dz)) #ff3d00; --crd: calc(1vw * var(--dz));
+    --avb: #ffb000; --avg: 0 0 calc(1.2vw * var(--dz)) #ff4d00; --rk: #ffb000;
+    --cbg: linear-gradient(180deg, #ffd000, #ff5a00 60%, #c21500); --cfc: #fff; --cts: 0 .06em .12em rgba(0,0,0,.7); --cbd: 0 0 calc(1.4vw * var(--dz)) #ff4d00; --crad: calc(.5vw * var(--dz)); --csk: -10deg;
+    --vsc: #ffd23c; --vsh: 0 0 .25em #ff4d00, 0 0 .6em #ff2a00; --trk: #2a0700; --sbd: #ff8a00; --sbs: 0 0 calc(1.4vw * var(--dz)) #ff4d00; --sph: 0 0 calc(1.8vw * var(--dz)) #ff4d00; }
+  .th-fire :is(.segs, #dbar .bar, .card, .b, .bar) { animation: dfire 1.6s ease-in-out infinite; }
+  @keyframes dfire { 50% { filter: brightness(1.15) saturate(1.2); } }
+
+  /* 🫧 Cuadrícula: burbujas */
+  #dgrid .bubs { display: flex; justify-content: center; gap: calc(1.6vw * var(--dz)); padding-top: calc(2.4vw * var(--dz)); }
+  #dgrid .bub { flex: 1 1 0; min-width: 0; max-width: calc(20vw * var(--dz)); display: flex; flex-direction: column; align-items: center; position: relative; }
+  #dgrid .bub .av { width: calc(12vw * var(--dz)); height: calc(12vw * var(--dz)); font-size: calc(6vw * var(--dz)) !important; border: calc(.6vw * var(--dz)) solid var(--avb, var(--c));
+    box-shadow: var(--avg, 0 0 0 calc(.3vw * var(--dz)) #fff, 0 calc(.6vw * var(--dz)) calc(1.4vw * var(--dz)) rgba(0,0,0,.45)); }
+  #dgrid .bub .crown { font-size: calc(4vw * var(--dz)); }
+  #dgrid .bub .gi { position: absolute; top: calc(8.4vw * var(--dz)); right: 8%; width: calc(4.6vw * var(--dz)); height: calc(4.6vw * var(--dz)); }
+  #dgrid .bub .nm { margin-top: calc(.5vw * var(--dz)); font-weight: 900; font-style: italic; text-transform: uppercase; font-size: calc(2.2vw * var(--dz)); max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  #dgrid .bub .pt { margin-top: calc(.3vw * var(--dz)); font-weight: 900; font-style: italic; font-size: calc(2.6vw * var(--dz)); padding: 0 calc(1.2vw * var(--dz)); border-radius: 999px;
+    background: var(--fill, linear-gradient(180deg, color-mix(in srgb, var(--c) 70%, #fff), var(--c) 55%, color-mix(in srgb, var(--c) 75%, #000))); box-shadow: var(--frame, 0 0 0 calc(.25vw * var(--dz)) #fff); }
+  /* 🏆 Cuadrícula: podio (columnas que crecen) */
+  #dgrid .pod { display: flex; align-items: flex-end; gap: calc(1.2vw * var(--dz)); height: calc(30vw * var(--dz)); padding: calc(1vw * var(--dz)) calc(1vw * var(--dz)) 0; }
+  #dgrid .pod > div { flex: 1 1 0; min-width: 0; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; }
+  #dgrid .pod .pt { font-weight: 900; font-style: italic; font-size: calc(2.6vw * var(--dz)); margin-bottom: calc(.3vw * var(--dz)); }
+  #dgrid .pod .col { width: 100%; min-height: calc(3vw * var(--dz)); transition: height .6s ease; border-radius: var(--rad, calc(1vw * var(--dz))) var(--rad, calc(1vw * var(--dz))) 0 0;
+    background: var(--fill, linear-gradient(90deg, color-mix(in srgb, var(--c) 70%, #fff), var(--c) 50%, color-mix(in srgb, var(--c) 70%, #000))); box-shadow: var(--frame, 0 0 0 calc(.3vw * var(--dz)) rgba(255,255,255,.85)); position: relative; }
+  #dgrid .pod .col .gi { position: absolute; left: 50%; top: calc(.6vw * var(--dz)); transform: translateX(-50%); width: calc(4.4vw * var(--dz)); height: calc(4.4vw * var(--dz)); }
+  #dgrid .pod .base { display: flex; flex-direction: column; align-items: center; margin-top: calc(-3vw * var(--dz)); position: relative; z-index: 1; width: 100%; }
+  #dgrid .pod .av { width: calc(6vw * var(--dz)); height: calc(6vw * var(--dz)); border: calc(.4vw * var(--dz)) solid var(--avb, #fff); box-shadow: var(--avg, none); }
+  #dgrid .pod .nm { font-weight: 900; font-style: italic; text-transform: uppercase; font-size: calc(1.9vw * var(--dz)); max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  /* 🏅 Total: medallas para el tema dorado */
+  #dtotal .n.md { font-size: calc(3vw * var(--dz)); }
+  .th-neon#dtotal h1, .th-glass#dtotal h1, .th-gold#dtotal h1, .th-sport#dtotal h1, .th-comic#dtotal h1, .th-retro#dtotal h1, .th-pastel#dtotal h1, .th-fire#dtotal h1 {
+    display: table; margin: 0 auto calc(.8vw * var(--dz)); padding: calc(.25vw * var(--dz)) calc(1.8vw * var(--dz)); background: var(--cbg); color: var(--cfc) !important; text-shadow: var(--cts) !important;
+    border-radius: var(--crad); box-shadow: var(--cbd); transform: skewX(var(--csk)); }
+  .th-minimal#dtotal h1 { border-bottom: calc(.2vw * var(--dz)) solid rgba(255,255,255,.7); padding-bottom: calc(.3vw * var(--dz)); }
+  .th-sport#dtotal .n { background: #101217; border-radius: calc(.25vw * var(--dz)); height: calc(4.4vw * var(--dz)); display: grid; place-items: center; width: calc(3.6vw * var(--dz)); }
+  .th-comic#dtotal .n { -webkit-text-stroke: calc(.15vw * var(--dz)) #111; paint-order: stroke fill; }
+  .th-pastel#dtotal .b :is(.nm, .pt) { --tc: #5b3a63; text-shadow: none !important; }
+  .th-pastel#dtotal .tr { color: #e2559a; }
+
+  /* ⚔ Barra Vs.: pelea (dos barras de vida desde el centro) */
+  #dbar .fgt { display: grid; grid-template-columns: auto 1fr auto 1fr auto; align-items: center; gap: calc(.8vw * var(--dz)); }
+  #dbar .fgt .av { width: calc(7vw * var(--dz)); height: calc(7vw * var(--dz)); }
+  #dbar .fgt .side { display: flex; flex-direction: column; gap: calc(.3vw * var(--dz)); min-width: 0; }
+  #dbar .fgt .side.r { align-items: flex-end; }
+  #dbar .fgt .hp { width: 100%; height: calc(3.6vw * var(--dz)); background: rgba(0,0,0,.55); transform: skewX(-20deg); box-shadow: var(--frame, 0 0 0 calc(.3vw * var(--dz)) #fff); display: flex; overflow: hidden; border-radius: 0; }
+  #dbar .fgt .side.l .hp { justify-content: flex-end; }
+  #dbar .fgt .hp > i { display: block; height: 100%; transition: width .6s ease; background: var(--fill, linear-gradient(180deg, color-mix(in srgb, var(--c) 60%, #fff), var(--c) 50%, color-mix(in srgb, var(--c) 70%, #000))); }
+  #dbar .fgt .side .row { display: flex; align-items: center; gap: calc(.6vw * var(--dz)); min-width: 0; }
+  #dbar .fgt .side.r .row { flex-direction: row-reverse; }
+  #dbar .fgt .nm { max-width: 26vw; font-size: calc(2.4vw * var(--dz)); }
+  #dbar .fgt .pt { font-weight: 900; font-style: italic; font-size: calc(2.6vw * var(--dz)); }
+  #dbar .fgt .mid .vs { font-size: calc(5vw * var(--dz)); }
+
+  /* 🎤 Turno sola: anillo (foto redonda con su avance alrededor) */
+  #dsolo .rg { position: relative; display: flex; align-items: center; gap: calc(2vw * var(--dz)); }
+  #dsolo .rg .ring { flex: none; width: calc(22vw * var(--dz)); height: calc(22vw * var(--dz)); border-radius: 50%; display: grid; place-items: center;
+    background: conic-gradient(var(--c) calc(var(--p) * 1%), rgba(255,255,255,.22) 0); box-shadow: 0 0 calc(2vw * var(--dz)) color-mix(in srgb, var(--c) 70%, transparent); transition: background .6s; }
+  #dsolo .rg .ring > .in { width: 84%; height: 84%; border-radius: 50%; overflow: hidden; background: #222; display: grid; place-items: center; box-shadow: 0 0 0 calc(.4vw * var(--dz)) #fff; }
+  #dsolo .rg .ring img { width: 100%; height: 100%; object-fit: cover; }
+  #dsolo .rg .ring .noph { font-size: calc(10vw * var(--dz)); }
+  #dsolo .rg .txt { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+  #dsolo .rg .pc { font-weight: 900; font-style: italic; font-size: calc(5vw * var(--dz)); color: var(--dcol, #fff); text-shadow: var(--dring); line-height: 1; }
+  #dsolo .rg .tbox { align-self: flex-start; border-radius: 999px; }
 </style>
 </head>
 <body>
@@ -656,11 +819,14 @@
     if (st.font) r.setProperty('--dfont', `"${st.font}", "Segoe UI", sans-serif`); else r.removeProperty('--dfont');
     if (st.color) r.setProperty('--dcol', st.color); else r.removeProperty('--dcol');
     const ring = c => { const o = []; for (let g = 0; g < 360; g += 30) o.push(`${(Math.cos(g * Math.PI / 180) * 0.07).toFixed(3)}em ${(Math.sin(g * Math.PI / 180) * 0.07).toFixed(3)}em 0 ${c}`); return o.join(',') + ',0 .1em .3em rgba(0,0,0,.6)'; };
-    r.setProperty('--dring', st.outline ? ring(st.outline) : '0 .15em .35em rgba(0,0,0,.8)');
+    if (st.outline) r.setProperty('--dring', ring(st.outline)); else r.removeProperty('--dring');  // sin orilla: la sombra del estilo elegido
     box.classList.add('ring');
     const bg = Math.max(0, Math.min(100, st.bg || 0)) / 100, wrap = box.querySelector('.wrap, .box, .clk');
     if (wrap) wrap.style.background = bg ? `rgba(10,10,20,${bg})` : '';
   }
+  // 🎨 cada fuente lleva su estilo (y su reloj se viste igual)
+  const DN_THEMES = ['neon', 'glass', 'gold', 'sport', 'minimal', 'comic', 'retro', 'pastel', 'fire'];
+  function dnTheme(box, th) { box.classList.remove(...DN_THEMES.map(x => 'th-' + x)); if (DN_THEMES.includes(th)) box.classList.add('th-' + th); }
   const dnLeader = list => { const top = Math.max(0, ...list.map(d => d.points)); return top > 0 ? (list.find(d => d.points === top) || {}).id : ''; };
   const dnAvC = (d, lead) => d.id === lead ? `<span class="crwrap">${dnAv(d)}<span class="crown">👑</span></span>` : dnAv(d);
   const dnClockHtml = () => { const c = DN.clock || {}; return `<div class="dclkbox"><span class="clk dclk">${c.rounds && c.round ? `<span class="rtag">R${c.round}</span>` : ''}<span class="tm"></span></span></div>`; };
@@ -698,23 +864,35 @@
     if (!n) { box.innerHTML = ''; return; }
     const lead = dnLeader(list), clk = dnClockOn() ? dnClockHtml() : '';
     const wins = d => d.wins ? `<span class="win">🏆 ${d.wins}</span>` : '';
-    if (DN.layout === 'plates') {
+    const lay = DN.layout || 'bar', th = lay.startsWith('t-') ? lay.slice(2) : '';
+    // los estilos de tema usan la barra (neón, fuego, deportivo, minimalista) o tarjetas (cristal, dorado, cómic, retro, pastel)
+    const struct = th ? (['neon', 'fire', 'sport', 'minimal'].includes(th) ? 'bar' : 'cards') : lay;
+    dnTheme(box, th);
+    const tw = d => d.wins ? ` <small style="color:#ffd54a">🏆${d.wins}</small>` : '';
+    if (struct === 'bubbles') {
+      box.innerHTML = `<div class="wrap"><div class="bubs">${list.map(d => `<div class="bub" style="--c:${d.color}">${dnAvC(d, lead)}${dnGift(d.gift_url, d.circle)}<span class="nm">${esc(d.name)}${tw(d)}</span><span class="pt">${dnFmt(d.points)}</span></div>`).join('')}</div>${clk}</div>`;
+    } else if (struct === 'podium') {
+      const top = Math.max(1, ...list.map(d => d.points));
+      box.innerHTML = `<div class="wrap"><div class="pod">${list.map(d => `<div style="--c:${d.color}"><span class="pt">${dnFmt(d.points)}</span><div class="col" style="height:${Math.round(18 + 82 * d.points / top)}%">${dnGift(d.gift_url, d.circle)}</div>
+        <div class="base">${dnAvC(d, lead)}<span class="nm">${esc(d.name)}${tw(d)}</span></div></div>`).join('')}</div>${clk}</div>`;
+    } else if (struct === 'plates') {
       box.innerHTML = `<div class="wrap"><div class="plates">${list.map(d => `<div class="pl" style="--c:${d.color}"><div class="in">${dnAvC(d, lead)}<span class="tx"><span class="nm">${esc(d.name)}</span><span class="pt">${dnFmt(d.points)}</span></span>${dnGift(d.gift_url, d.circle)}</div>${wins(d)}</div>`).join('')}</div>${clk}</div>`;
-    } else if (DN.layout === 'bar') {
+    } else if (struct === 'bar') {
       const sum = list.reduce((a, d) => a + d.points, 0);
       box.innerHTML = `<div class="wrap"><div class="tops">${list.map(d => `<div style="--c:${d.color}">${dnAvC(d, lead)}<span class="nm">${esc(d.name)}${d.wins ? ` <small style="color:#ffd54a">🏆${d.wins}</small>` : ''}</span></div>`).join('')}</div>
         <div class="segs">${list.map(d => `<div style="--c:${d.color};flex-grow:${sum ? Math.max(d.points / sum, 0.001) : 1}"><span class="pt">${dnFmt(d.points)}</span></div>`).join('')}</div>
         <div class="gifts">${list.map(d => `<div>${dnGift(d.gift_url, d.circle)}</div>`).join('')}</div>${clk}</div>`;
     } else {
-      const cols = DN.layout === 'row' ? n : DN.layout === 'rows2' ? Math.ceil(n / 2) : DN.layout === 'rows3' ? Math.ceil(n / 3) : 1;
+      const cols = struct === 'cards' ? (n <= 3 ? n : Math.ceil(n / 2)) : lay === 'row' ? n : lay === 'rows2' ? Math.ceil(n / 2) : lay === 'rows3' ? Math.ceil(n / 3) : 1;
       box.innerHTML = `<div class="wrap"><div class="cards" style="--cols:${cols}">${list.map(d => `<div class="card" style="--c:${d.color}">${dnAvC(d, lead)}<span class="tx"><span class="nm">${esc(d.name)}${d.wins ? ` <small style="color:#ffd54a">🏆${d.wins}</small>` : ''}</span><span class="pt">${dnFmt(d.points)}</span></span>${dnGift(d.gift_url, d.circle)}</div>`).join('')}</div>${clk}</div>`;
     }
     dnStyle(box, 'grid');
   }
   function drawDTotal() {
     const box = $('#dtotal'), list = (DN.total || []).map(dnBy).filter(Boolean).sort((a, b) => b.points - a.points);
-    box.classList.toggle('dyn', DN.total_style === 'dynasty');
-    box.innerHTML = `<div class="box">${DN.total_title ? `<h1>${esc(DN.total_title)}</h1>` : ''}${list.map((d, i) => `<div class="r" style="--c:${d.color}"><span class="n">${i + 1}</span>${dnAv(d)}<div class="b"><span class="nm">${esc(d.name)}</span><span class="pt">${d.wins || DN.total_style === 'dynasty' ? `<span class="tr">🏆 ${d.wins || 0}</span>` : ''}${dnFmt(d.points)}${d.goal ? `<small> / ${dnFmt(d.goal)}</small>` : ''}</span></div></div>`).join('')}</div>`;
+    box.classList.toggle('dyn', DN.total_style === 'dynasty'); dnTheme(box, DN.total_style);
+    const medal = i => DN.total_style === 'gold' && i < 3 ? ['🥇', '🥈', '🥉'][i] : '';
+    box.innerHTML = `<div class="box">${DN.total_title ? `<h1>${esc(DN.total_title)}</h1>` : ''}${list.map((d, i) => `<div class="r" style="--c:${d.color}">${medal(i) ? `<span class="n md">${medal(i)}</span>` : `<span class="n">${i + 1}</span>`}${dnAv(d)}<div class="b"><span class="nm">${esc(d.name)}</span><span class="pt">${d.wins || DN.total_style === 'dynasty' ? `<span class="tr">🏆 ${d.wins || 0}</span>` : ''}${dnFmt(d.points)}${d.goal ? `<small> / ${dnFmt(d.goal)}</small>` : ''}</span></div></div>`).join('')}</div>`;
     dnStyle(box, 'total');
   }
   // ⏱ el reloj del juego de activación vive en la cuadrícula: solo se ve mientras corre (o en pausa a medio juego) y al llegar a 0 parpadea unos segundos
@@ -730,7 +908,16 @@
   function drawDSolo() {
     const box = $('#dsolo'), so = DN.solo || {}, d = dnBy(so.id);
     if (!d) { box.innerHTML = ''; return; }
-    const pct = so.goal ? Math.min(100, so.pts / so.goal * 100) : 0;
+    const pct = so.goal ? Math.min(100, so.pts / so.goal * 100) : 0, L = (cfg && cfg.lang) || 'es';
+    const tword = L === 'en' ? 'TIME' : L === 'pt' ? 'TEMPO' : 'TIEMPO';
+    const stampS = so.show_result && so.result ? `<div class="stamp ${so.result}">${so.result === 'win' ? (L === 'en' ? 'WON!' : L === 'pt' ? 'GANHOU!' : '¡GANÓ!') : (L === 'en' ? 'LOST!' : L === 'pt' ? 'PERDEU!' : '¡PERDIÓ!')}</div>` : '';
+    dnTheme(box, DN.solo_style);
+    if (DN.solo_style === 'ring') {  // ⭕ foto redonda con su avance alrededor
+      box.innerHTML = `<div class="rg" style="--c:${d.color}"><div class="ring" style="--p:${pct.toFixed(1)}"><div class="in">${d.photo ? `<img src="${esc(d.photo)}" alt="">` : `<span class="noph">💃</span>`}</div></div>
+        <div class="txt"><span class="nm big">${esc(d.name)}</span><span class="pc">${Math.floor(pct)}%</span><span class="pg">${dnFmt(so.pts)} / ${dnFmt(so.goal)}</span></div>
+        <div class="tbox"><small>${tword}</small><span class="clk dsclk"></span></div>${stampS}</div>`;
+      dnStyle(box, 'solo'); return;
+    }
     box.innerHTML = `<div class="so" style="--c:${d.color}"><div class="ph">${d.photo ? `<img src="${esc(d.photo)}" alt="">` : `<span class="noph">💃</span>`}</div>
       <div class="mid"><div class="bar"><div class="fill" style="width:${pct}%"></div></div><span class="pg">${dnFmt(so.pts)} / ${dnFmt(so.goal)}</span><span class="nm big">${esc(d.name)}</span></div>
       <div class="tbox"><small>${esc((cfg && cfg.lang) === 'en' ? 'TIME' : (cfg && cfg.lang) === 'pt' ? 'TEMPO' : 'TIEMPO')}</small><span class="clk dsclk"></span></div>
@@ -749,10 +936,18 @@
     const box = $('#dbar'), a = dnBy(ended ? res.a : DN.left), b = dnBy(ended ? res.b : DN.right);
     if (!a || !b) { box.innerHTML = ''; return; }
     const sum = a.bpoints + b.bpoints, pa = sum ? a.bpoints / sum : 0.5;
-    box.innerHTML = `<div class="wrap"><div class="tops"><div class="who" style="--c:${a.color}">${dnAv(a)}<span class="nm">${esc(a.name)}</span>${dnGift(a.battle_gift_url, a.circle)}</div><span class="mid"><span class="vs">VS</span>${DN.battle && DN.battle_end_ms ? '<span class="bclk"></span>' : ''}</span>
+    dnTheme(box, DN.bar_style);
+    const stamp = ended ? `<div class="stamp">${(() => { const w = dnBy(res.winner); const L = (cfg && cfg.lang) || 'es'; return w ? (L === 'en' ? `${esc(w.name)} WINS!` : L === 'pt' ? `${esc(w.name)} GANHOU!` : `¡GANÓ ${esc(w.name)}!`) : (L === 'en' ? 'TIE!' : L === 'pt' ? 'EMPATE!' : '¡EMPATE!'); })()}</div>` : '';
+    const mid = `<span class="mid"><span class="vs">VS</span>${DN.battle && DN.battle_end_ms ? '<span class="bclk"></span>' : ''}</span>`;
+    if (DN.bar_style === 'fighter') {  // 🥊 como juego de peleas: cada una con su barra de vida desde el centro
+      const side = (d, p, cls) => `<div class="side ${cls}" style="--c:${d.color}"><div class="row"><span class="nm">${esc(d.name)}</span>${dnGift(d.battle_gift_url, d.circle)}<span class="pt">${dnFmt(d.bpoints)}</span></div><div class="hp"><i style="width:${Math.max(3, p * 100)}%"></i></div></div>`;
+      box.innerHTML = `<div class="wrap"><div class="fgt"><span style="--c:${a.color}">${dnAv(a)}</span>${side(a, pa, 'l')}${mid}${side(b, 1 - pa, 'r')}<span style="--c:${b.color}">${dnAv(b)}</span></div>${stamp}</div>`;
+      dnStyle(box, 'bar'); return;
+    }
+    box.innerHTML = `<div class="wrap"><div class="tops"><div class="who" style="--c:${a.color}">${dnAv(a)}<span class="nm">${esc(a.name)}</span>${dnGift(a.battle_gift_url, a.circle)}</div>${mid}
       <div class="who r" style="--c:${b.color}">${dnAv(b)}<span class="nm">${esc(b.name)}</span>${dnGift(b.battle_gift_url, b.circle)}</div></div>
       <div class="bar"><div style="--c:${a.color};flex-grow:${Math.max(pa, 0.001)}"><span class="pt">${dnFmt(a.bpoints)}</span></div><div class="r" style="--c:${b.color};flex-grow:${Math.max(1 - pa, 0.001)}"><span class="pt">${dnFmt(b.bpoints)}</span></div>
-      <span class="bolt" style="left:${Math.min(92, Math.max(8, pa * 100))}%">⚡</span></div>${ended ? `<div class="stamp">${(() => { const w = dnBy(res.winner); const L = (cfg && cfg.lang) || 'es'; return w ? (L === 'en' ? `${esc(w.name)} WINS!` : L === 'pt' ? `${esc(w.name)} GANHOU!` : `¡GANÓ ${esc(w.name)}!`) : (L === 'en' ? 'TIE!' : L === 'pt' ? 'EMPATE!' : '¡EMPATE!'); })()}</div>` : ''}${(DN.clock || {}).attach && (DN.show || {}).clock ? dnClockHtml() : ''}</div>`;
+      <span class="bolt" style="left:${Math.min(92, Math.max(8, pa * 100))}%">⚡</span></div>${stamp}</div>`;
     dnStyle(box, 'bar');
   }
   function drawDVs(visible) {
@@ -765,8 +960,15 @@
     const cls = side === 'left' ? 'l' : 'r';
     const ice = v.effect === 'ice' ? `<svg viewBox="0 0 100 100" preserveAspectRatio="none"><g fill="none" stroke="rgba(255,255,255,.85)" stroke-width=".35">
       <path d="M50 45 L20 10 M50 45 L85 15 M50 45 L95 55 M50 45 L70 95 M50 45 L15 80 M50 45 L5 40"/><path d="M35 27 L28 35 M68 30 L78 25 M72 50 L80 62 M60 70 L52 82 M30 62 L22 58 M25 42 L18 30"/></g></svg>` : '';
-    box.innerHTML = `<div class="half ${cls} ${v.effect || 'rain'}" style="opacity:${(v.opacity || 75) / 100}">${ice}${v.effect === 'rain' ? '<canvas></canvas><div class="flash"></div>' : ''}</div><div class="line"></div>`;
-    if (v.effect === 'rain') rainStop = startRain(box.querySelector('canvas'), box.querySelector('.flash'));
+    const fx = v.effect || 'rain', canv = ['rain', 'fire', 'snow', 'tv', 'hearts'].includes(fx);
+    const crack = fx === 'cracked' ? `<svg viewBox="0 0 100 100" preserveAspectRatio="none"><g fill="none" stroke="rgba(255,255,255,.9)" stroke-width=".45" stroke-linejoin="round">
+      <path d="M58 38 L40 8 L35 0 M58 38 L92 18 L100 12 M58 38 L100 46 M58 38 L76 72 L84 100 M58 38 L46 66 L30 100 M58 38 L22 52 L0 58 M58 38 L28 24 L0 20"/>
+      <path d="M48 22 L52 30 L45 31 M74 28 L80 36 M80 44 L88 56 M66 56 L72 60 L64 64 M50 54 L40 58 M36 45 L30 36 M40 30 L33 28" stroke-width=".3"/>
+      <circle cx="58" cy="38" r="3.2" stroke-width=".6"/></g></svg>` : '';
+    const smoke = fx === 'smoke' ? '<i class="pf a"></i><i class="pf b"></i><i class="pf c"></i>' : '';
+    box.innerHTML = `<div class="half ${cls} ${fx}" style="opacity:${(v.opacity || 75) / 100}">${ice}${crack}${smoke}${canv ? '<canvas></canvas><div class="flash"></div>' : ''}</div><div class="line ${fx}"></div>`;
+    if (fx === 'rain') rainStop = startRain(box.querySelector('canvas'), box.querySelector('.flash'));
+    else if (canv) rainStop = startFx(box.querySelector('canvas'), fx);
   }
   function startRain(cv, flash) {
     const g = cv.getContext('2d'); let drops = [], alive = true, last = performance.now();
@@ -782,6 +984,52 @@
     requestAnimationFrame(step);
     const bolt = setInterval(() => { if (Math.random() < 0.35) { flash.classList.remove('on'); void flash.offsetWidth; flash.classList.add('on'); } }, 4000);
     return () => { alive = false; clearInterval(bolt); };
+  }
+  // ✨ partículas de la pantalla Vs.: brasas, nieve, estática de tele o corazones rotos
+  function startFx(cv, fx) {
+    const g = cv.getContext('2d'); let ps = [], alive = true, last = performance.now();
+    const W = () => cv.width, H = () => cv.height;
+    const make = () => fx === 'fire' ? {x: Math.random() * W(), y: H() + Math.random() * H() * .3, v: 80 + Math.random() * 160, r: 1.5 + Math.random() * 3.5, w: Math.random() * 6.28, life: 1}
+      : fx === 'snow' ? {x: Math.random() * W(), y: Math.random() * H(), v: 30 + Math.random() * 70, r: 1.5 + Math.random() * 3.5, w: Math.random() * 6.28}
+      : {x: Math.random() * W(), y: -40 - Math.random() * H(), v: 60 + Math.random() * 90, r: 22 + Math.random() * 26, w: Math.random() * 6.28, rot: (Math.random() - .5) * .8};
+    const fit = () => {
+      if (fx === 'tv') { cv.width = Math.max(80, Math.round(cv.clientWidth / 4)); cv.height = Math.max(80, Math.round(cv.clientHeight / 4)); return; }
+      cv.width = cv.clientWidth; cv.height = cv.clientHeight;
+      const n = fx === 'hearts' ? 14 : Math.round(W() * H() / (fx === 'fire' ? 2600 : 2200));
+      ps = Array.from({length: n}, make); if (fx === 'fire') ps.forEach(p => p.y = Math.random() * H());
+    };
+    fit();
+    const step = now => {
+      if (!alive) return;
+      const dt = Math.min(0.05, (now - last) / 1000); last = now;
+      if (fx === 'tv') {
+        const img = g.createImageData(W(), H()), d = img.data;
+        for (let i = 0; i < d.length; i += 4) { const v = Math.random() * 255 | 0; d[i] = d[i + 1] = d[i + 2] = v; d[i + 3] = 255; }
+        const band = (now / 8) % H() | 0;  // la franja que baja, como tele vieja
+        for (let y = band; y < Math.min(H(), band + 6); y++) for (let x = 0; x < W(); x++) { const k = (y * W() + x) * 4; d[k] = d[k + 1] = d[k + 2] = 235; }
+        g.putImageData(img, 0, 0); requestAnimationFrame(step); return;
+      }
+      g.clearRect(0, 0, W(), H());
+      for (const p of ps) {
+        p.w += dt * 2;
+        if (fx === 'fire') {
+          p.y -= p.v * dt; p.x += Math.sin(p.w) * 18 * dt; p.life = Math.max(0, p.y / H());
+          if (p.y < -10) Object.assign(p, make());
+          const gr = g.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r * 3);
+          gr.addColorStop(0, `rgba(255,${180 + (p.life * 60 | 0)},80,${.9 * p.life + .1})`); gr.addColorStop(1, 'rgba(255,60,0,0)');
+          g.fillStyle = gr; g.beginPath(); g.arc(p.x, p.y, p.r * 3, 0, 6.28); g.fill();
+        } else if (fx === 'snow') {
+          p.y += p.v * dt; p.x += Math.sin(p.w) * 20 * dt; if (p.y > H() + 5) { p.y = -5; p.x = Math.random() * W(); }
+          g.fillStyle = 'rgba(255,255,255,.9)'; g.beginPath(); g.arc(p.x, p.y, p.r, 0, 6.28); g.fill();
+        } else {
+          p.y += p.v * dt; p.x += Math.sin(p.w) * 25 * dt; if (p.y > H() + 60) Object.assign(p, make(), {y: -50});
+          g.save(); g.translate(p.x, p.y); g.rotate(p.rot + Math.sin(p.w) * .2); g.font = `${p.r}px "Segoe UI Emoji", "Apple Color Emoji", sans-serif`; g.textAlign = 'center'; g.fillText('💔', 0, 0); g.restore();
+        }
+      }
+      requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+    return () => { alive = false; };
   }
   function setDance(d) { if (!d) return; DN = d; if (d.now_ms) dnSkew = d.now_ms - Date.now(); drawDance(); }
 
