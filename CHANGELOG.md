@@ -1,5 +1,12 @@
 # Cambios de EC-Tok
 
+## 4.4.2
+- ❓ **Si hay una batalla o un turno sola a medias y arrancas otra cosa** (el juego de activación, una batalla o un turno), EC-Tok te pregunta qué hacer con lo que está en curso, y te dice quién va ganando:
+  - **✅ SÍ, contar el triunfo**: se termina y gana quien va adelante (en el turno sola, gana si ya llegó a su meta).
+  - **✖ NO, cancelarlo**: se cancela sin contar sus puntos ni victoria (también se quitan de los puntos del live si se habían sumado).
+  - **↩ Cancelar**: no pasa nada, lo que está en curso sigue.
+- También con las teclas Ctrl+Alt: la pregunta sale en la ventana de EC-Tok y nada cambia hasta que contestes.
+
 ## 4.4.1
 - ⏱ **Un solo reloj a la vez.** Al empezar uno de los tres (juego de activación, batalla Vs. o turno sola), los otros dos se **detienen y se ocultan** solos. Si había una batalla o un turno a medias, se termina (y cuenta quién ganó) sin poner el letrero encima de lo nuevo.
 - Reloj detenido = no se ve. Si lo pausas tú a mano, se queda con su tiempo; nunca se reanuda solo (lo vuelves a empezar con ▶).
