@@ -1,5 +1,8 @@
 # Cambios de EC-Tok
 
+## 4.0.2
+- 💃 Live de Baile: cada bailarina tiene, debajo de su @, el campo **✏ Nombre en el live** (por ejemplo @chicagogo → «Hecate»). El @ solo sirve para traer su foto; en el live sale el nombre que escribas. Si lo dejas vacío, usa su nombre de TikTok.
+
 ## 4.0.1
 - 💃 Live de Baile: las fuentes se acomodan en **tarjetas** (2 por renglón): arriba el nombre y si se ve, luego la **dirección completa** con 📋 Copiar, sus 2 teclas con su nombre y los botones. Ya se lee toda la URL.
 

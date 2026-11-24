@@ -659,4 +659,7 @@ T = {
 'Elige exactamente 2 bailarinas para la batalla: una a la izquierda y otra a la derecha.': ('Choose exactly 2 dancers for the battle: one on the left and one on the right.', 'Escolha exatamente 2 dançarinas para a batalha: uma à esquerda e outra à direita.'),
 'Esa imagen no es compatible (PNG, WebP, JPG o GIF, menos de 20 MB).': ("That image isn't supported (PNG, WebP, JPG or GIF, under 20 MB).", 'Essa imagem não é compatível (PNG, WebP, JPG ou GIF, menos de 20 MB).'),
 'Esa imagen no es compatible (PNG, WebP, JPG o GIF, menos de 30 MB).': ("That image isn't supported (PNG, WebP, JPG or GIF, under 30 MB).", 'Essa imagem não é compatível (PNG, WebP, JPG ou GIF, menos de 30 MB).'),
+'Su @ de TikTok: de aquí sale su foto': ('Her TikTok @: her photo comes from here', 'O @ do TikTok dela: a foto vem daqui'),
+'Como sale en el live (si lo dejas vacío, usa su nombre de TikTok)': ('How she shows in the LIVE (leave it empty to use her TikTok name)', 'Como aparece na live (se deixar vazio, usa o nome do TikTok)'),
+'Nombre en el live': ('Name in the LIVE', 'Nome na live'),
 }

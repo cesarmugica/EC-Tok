@@ -30,7 +30,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, unquote, urlsplit
 
-APP_VERSION = "4.0.1"
+APP_VERSION = "4.0.2"
 
 try:  # lo genera windows/build.ps1
     from ectok_build import BUILD_DATE  # type: ignore[import-not-found]
@@ -194,7 +194,7 @@ def _dancer_default(i: int) -> dict:
     colors = ["#FF3B8D", "#2EA8FF", "#FFB020", "#9B5CFF", "#FF4A3D", "#21D07A"]
     return {"id": f"d{i + 1}", "on": True, "user": "", "label": "", "gift": "", "battle_gift": "", "goal": 0,
             "color": colors[i % len(colors)], "circle": True, "photo": "", "side": "left" if i % 2 == 0 else "right",
-            "fight": False}
+            "fight": False, "label_auto": False}
 
 
 def _dance_style_default(bg: int = 0) -> dict:
@@ -1712,7 +1712,7 @@ def fetch_dancer_profile(dancer_id: str) -> None:
         x["photo"] = target.name
         if nick and not x.get("label"):
             with contextlib.suppress(ValueError):
-                x["label"] = json.loads(f'"{nick.group(1)}"')[:30]
+                x["label"], x["label_auto"] = json.loads(f'"{nick.group(1)}"')[:30], True
         save_config(CONFIG)
         log(f"Live de baile: foto de @{user} lista")
     except Exception as exc:  # noqa: BLE001
@@ -1749,7 +1749,9 @@ def clean_dance(new: dict, cur: dict) -> dict:
                  "color": str(x.get("color")).upper() if HEX.fullmatch(str(x.get("color") or "")) else base["color"],
                  "circle": x.get("circle") is not False, "photo": base.get("photo", ""),
                  "side": x.get("side") if x.get("side") in ("left", "right") else base.get("side", "left"),
-                 "fight": bool(x.get("fight"))}
+                 "fight": bool(x.get("fight")), "label_auto": bool(x.get("label_auto"))}
+            if user != base.get("user") and base.get("label_auto") and d["label"] == base.get("label"):
+                d["label"], d["label_auto"] = "", False  # otro @: el nombre que trajo de TikTok ya no es el suyo
             if user != base.get("user") and (base.get("photo") or "").startswith("tt-"):
                 d["photo"] = ""  # otro @: su foto se vuelve a traer
             dancers.append(d)
