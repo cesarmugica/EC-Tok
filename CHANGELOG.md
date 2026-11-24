@@ -1,5 +1,10 @@
 # Cambios de EC-Tok
 
+## 4.4.3
+- 🏆 **«¡GANÓ …!» se queda en pantalla** (con la barra Vs.) hasta que empiece otra cosa: el juego de activación, otra batalla o un turno sola. Antes se quitaba solo a los 7 segundos. Igual el «¡GANÓ! / ¡PERDIÓ!» del turno sola.
+- Para quitarlo antes: «↺ A cero» de la barra Vs. o «👁 Mostrar / ocultar» de la cuadrícula (regresa la cuadrícula).
+- En el entorno de prueba el resultado se ve 7 segundos y sigue el ciclo.
+
 ## 4.4.2
 - ❓ **Si hay una batalla o un turno sola a medias y arrancas otra cosa** (el juego de activación, una batalla o un turno), EC-Tok te pregunta qué hacer con lo que está en curso, y te dice quién va ganando:
   - **✅ SÍ, contar el triunfo**: se termina y gana quien va adelante (en el turno sola, gana si ya llegó a su meta).

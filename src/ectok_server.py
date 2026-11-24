@@ -30,7 +30,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, unquote, urlsplit
 
-APP_VERSION = "4.4.2"
+APP_VERSION = "4.4.3"
 
 try:  # lo genera windows/build.ps1
     from ectok_build import BUILD_DATE  # type: ignore[import-not-found]
@@ -1545,9 +1545,14 @@ class DanceScript:
         self.i = (self.i + 1) % len(self.order)
         self.phase = self.order[self.i]
         now = time.time()
+        self.res_at = 0.0
         d = CONFIG["dance"]
         if self.phase == "grid":
             self.until = now + 25
+            with DANCE_LOCK:
+                _results_clear_locked()
+                DANCE["show"]["grid"] = True
+            dance_emit()
             if self.o.get("clock") and not DANCE["clock"]["running"]:
                 dance_action("clock_run", resolve="win")  # cada ronda de baile con su reloj (la batalla y el turno lo detienen)
         elif self.phase == "battle":
@@ -1577,10 +1582,8 @@ class DanceScript:
     def step(self) -> int:
         """Manda los regalos que tocan; regresa cuántos mandó."""
         now = time.time()
-        if self.phase == "battle" and not DANCE["battle"] and now < self.until and DANCE.get("bres", {}).get("until", 0) < now:
-            self.until = now  # la batalla ya terminó sola
-        if self.phase == "solo" and not DANCE["solo"]["active"] and DANCE["solo"]["until"] < now:
-            self.until = min(self.until, now)
+        if self.phase in ("battle", "solo") and not self.res_at and not (DANCE["battle"] if self.phase == "battle" else DANCE["solo"]["active"]):
+            self.res_at, self.until = now, now + 7  # ya terminó: en la prueba el «¡GANÓ …!» se ve 7 s y sigue lo demás
         if now >= self.until:
             if self.phase == "battle" and DANCE["battle"]:
                 dance_action("bar_show")  # termina la batalla y sale quién ganó
@@ -1850,7 +1853,10 @@ def dance_action(action: str, arg: str = "", resolve: str = "") -> str:
         if starting and ongoing and ongoing != starting and resolve not in ("win", "cancel"):
             return f"ASK:{ongoing}:{starting}"
         DANCE["_resolve"] = resolve or "win"
-        if action in ("grid_show", "total_show", "clock_show", "logo_show", "vs_show"):
+        if action == "grid_show" and (DANCE["bres"].get("until", 0) > now or DANCE["solo"]["until"] > now):
+            _results_clear_locked()  # estaba el «¡GANÓ …!»: se quita y regresa la cuadrícula
+            s["grid"] = True
+        elif action in ("grid_show", "total_show", "clock_show", "logo_show", "vs_show"):
             key = action[:-5]
             s[key] = not s[key]
         elif action in ("grid_ref", "total_ref"):  # «Actualizar»: aplicar quién está (las casillas) al live
@@ -1893,6 +1899,8 @@ def dance_action(action: str, arg: str = "", resolve: str = "") -> str:
                     threading.Thread(target=_battle_watch, args=(DANCE["bend"],), daemon=True).start()
         elif action == "bar_ref":
             DANCE["bpoints"] = {}
+            if not DANCE["battle"]:
+                DANCE["bres"]["until"] = 0.0  # sin batalla: también quita el letrero del resultado
         elif action == "solo_set":  # 🎤 elegir quién pasa sola
             if DANCE["solo"]["active"]:
                 return "Termina el turno antes de cambiar de bailarina."
@@ -1934,6 +1942,14 @@ def dance_action(action: str, arg: str = "", resolve: str = "") -> str:
     dance_save()
     dance_emit()
     return ""
+RESULT_HOLD = 365 * 86400.0  # «¡GANÓ …!» se queda en pantalla hasta que empiece otra cosa (o lo quites)
+
+
+def _results_clear_locked() -> None:
+    DANCE["bres"]["until"] = 0.0
+    DANCE["solo"]["until"] = 0.0
+
+
 def _clock_stop_locked() -> None:
     """⏱ detener el reloj del juego de activación (detenido = a cero y no se ve; no se reanuda solo)."""
     c = DANCE["clock"]
@@ -1981,7 +1997,7 @@ def _battle_finish_locked() -> None:
     win = "" if pa == pb else (a if pa > pb else b)
     if win:
         DANCE["wins"][win] = DANCE["wins"].get(win, 0) + 1
-    DANCE["bres"] = {"winner": win, "until": time.time() + 7, "a": a, "b": b}
+    DANCE["bres"] = {"winner": win, "until": time.time() + RESULT_HOLD, "a": a, "b": b}  # se queda hasta el siguiente evento
     DANCE["battle"], DANCE["show"]["bar"], DANCE["side"], DANCE["bend"] = False, False, "", 0.0
     t = threading.Timer(7.3, dance_emit)  # se quita el letrero del resultado
     t.daemon = True
@@ -2006,7 +2022,7 @@ def _solo_finish_locked() -> None:
     if not so["active"]:
         return
     win = so["pts"] >= so["goal"] > 0
-    so.update(active=False, result="win" if win else "lose", until=time.time() + 7)
+    so.update(active=False, result="win" if win else "lose", until=time.time() + RESULT_HOLD)  # se queda hasta el siguiente evento
     if win and CONFIG["dance"]["solo"]["count_win"]:  # cuenta como batalla ganada (🏆)
         DANCE["wins"][so["id"]] = DANCE["wins"].get(so["id"], 0) + 1
 

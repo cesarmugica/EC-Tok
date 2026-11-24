@@ -780,4 +780,5 @@ T = {
 '✅ SÍ, contar el triunfo': ('✅ YES, count the win', '✅ SIM, contar a vitória'),
 '✖ NO, cancelarlo sin puntos ni victoria': ('✖ NO, cancel it without points or win', '✖ NÃO, cancelar sem pontos nem vitória'),
 '↩ Cancelar (sigue lo que está en curso)': ('↩ Cancel (keep what is in progress)', '↩ Cancelar (continua o que está em andamento)'),
+'🏆 Al terminar, «¡GANÓ …!» se queda en pantalla hasta que empiece otra cosa (juego de activación, otra batalla o un turno sola). Para quitarlo antes: «↺ A cero» o «👁 Mostrar / ocultar» de la cuadrícula.': ('🏆 When it ends, “… WINS!” stays on screen until something else starts (activation game, another battle or a solo turn). To remove it sooner: “↺ Reset” or the grid’s “👁 Show / hide”.', '🏆 Ao terminar, «GANHOU …!» fica na tela até começar outra coisa (jogo de ativação, outra batalha ou um turno solo). Para tirar antes: «↺ Zerar» ou «👁 Mostrar / ocultar» da grade.'),
 }
