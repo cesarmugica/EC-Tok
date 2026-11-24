@@ -596,7 +596,7 @@ T = {
 '⚔ En batalla': ('⚔ In battle', '⚔ Em batalha'),
 '— Sin batalla': ('— No battle', '— Sem batalha'),
 'Cerrar': ('Close', 'Fechar'),
-'Al llegar a su meta, quitarla sola de la barra de activación y de la lista': ('When she reaches her goal, remove her from the activation bar and the list automatically', 'Ao chegar à meta, tirá-la sozinha da barra de ativação e da lista'),
+'Al llegar a su meta, quitarla automáticamente de la barra de activación y de la lista': ('When she reaches her goal, remove her from the activation bar and the list automatically', 'Ao chegar à meta, tirá-la automaticamente da barra de ativação e da lista'),
 'Arreglo de la barra de activación': ('Grid layout', 'Arranjo da barra de ativação'),
 'Barra (como en los lives de baile)': ('Bar (like dance LIVEs)', 'Barra (como nas lives de dança)'),
 'Batalla 1vs1': ('1vs1 battle', 'Batalha 1vs1'),

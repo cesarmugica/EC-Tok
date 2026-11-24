@@ -1,5 +1,8 @@
 # Cambios de EC-Tok
 
+## 4.4.7
+- ✏ «Al llegar a su meta, quitarla **automáticamente** de la barra de activación y de la lista».
+
 ## 4.4.6
 - ✏ Nombres nuevos en el Live de Baile: **Cuadrícula de activación → Barra de Activación**, **Barra Vs. → Barra 1vs1**, **Batalla Vs. → Batalla 1vs1**, **Pantalla Vs. → Bloqueo Visual 1vs1** y **Turno sola → Baile individual** (también en las teclas, los avisos, el entorno de prueba y en inglés y portugués).
 - Las direcciones de las fuentes no cambian: lo que ya tienes en LIVE Studio sigue funcionando.
