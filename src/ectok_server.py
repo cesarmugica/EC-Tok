@@ -30,7 +30,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, unquote, urlsplit
 
-APP_VERSION = "4.1.1"
+APP_VERSION = "4.2.0"
 
 try:  # lo genera windows/build.ps1
     from ectok_build import BUILD_DATE  # type: ignore[import-not-found]
@@ -194,7 +194,7 @@ def _dancer_default(i: int) -> dict:
     colors = ["#FF3B8D", "#2EA8FF", "#FFB020", "#9B5CFF", "#FF4A3D", "#21D07A"]
     return {"id": f"d{i + 1}", "on": True, "user": "", "label": "", "gift": "", "battle_gift": "", "goal": 0,
             "color": colors[i % len(colors)], "circle": True, "photo": "", "side": "left" if i % 2 == 0 else "right",
-            "fight": False, "label_auto": False}
+            "fight": False, "label_auto": False, "solo_goal": 0}
 
 
 def _dance_style_default(bg: int = 0) -> dict:
@@ -202,19 +202,22 @@ def _dance_style_default(bg: int = 0) -> dict:
 
 
 DANCE_KEYS = ("grid_show", "grid_ref", "total_show", "total_ref", "clock_run", "clock_show", "logo_show", "logo_ref",
-              "vs_show", "vs_ref", "vs_alt", "bar_show", "bar_ref", "round_next")
+              "vs_show", "vs_ref", "vs_alt", "bar_show", "bar_ref", "round_next", "solo_run", "solo_next")
 
 
 def dance_default() -> dict:
     return {"on": False, "layout": "bar", "show_total": True, "show_vs": True, "auto_remove": False, "battle_add": True,
             "total_title": "Puntos de hoy", "dancers": [_dancer_default(i) for i in range(6)],
+            # 🎤 turno sola: pasa una bailarina y TODO lo que se done en su turno le cuenta a ella
+            "solo": {"seconds": 60, "goal_mode": "same", "goal": 1000, "add_live": True, "count_win": True},
             "total_style": "classic", "clock": {"seconds": 180, "attach": False, "rounds": False}, "logo": {"file": "", "size": 60, "opacity": 100, "float": True},
             "vs": {"effect": "rain", "opacity": 75, "auto": True},
             "styles": {"grid": _dance_style_default(0), "total": _dance_style_default(55), "clock": _dance_style_default(45),
-                       "bar": _dance_style_default(0)},
+                       "bar": _dance_style_default(0), "solo": _dance_style_default(0)},
             # teclas Ctrl+Alt+… ya puestas (letras, para no chocar con las de las animaciones: números y F1–F12)
             "keys": {"grid_show": "G", "grid_ref": "H", "total_show": "Y", "total_ref": "U", "clock_run": "R", "clock_show": "T",
-                     "logo_show": "L", "logo_ref": "K", "vs_show": "V", "vs_ref": "B", "vs_alt": "C", "bar_show": "N", "bar_ref": "M", "round_next": "J"}}
+                     "logo_show": "L", "logo_ref": "K", "vs_show": "V", "vs_ref": "B", "vs_alt": "C", "bar_show": "N", "bar_ref": "M", "round_next": "J",
+                     "solo_run": "P", "solo_next": "O"}}
 
 
 def dance_fix_config(cfg: dict) -> None:
@@ -1468,7 +1471,8 @@ DANCE_FONTS = ("", "Impact", "Arial Black", "Bahnschrift", "Segoe UI Black", "Tr
 DANCE_EFFECTS = ("rain", "glass", "ice", "curtain")
 DANCE_LAYOUTS = ("bar", "plates", "row", "rows2", "rows3", "col")
 def _dance_state_default() -> dict:
-    return {"points": {}, "bpoints": {}, "wins": {}, "round": 0, "battle": False, "roster": {"grid": None, "total": None},
+    return {"points": {}, "bpoints": {}, "wins": {}, "round": 0, "battle": False,
+            "solo": {"active": False, "id": "", "pts": 0, "goal": 0, "end": 0.0, "result": "", "until": 0.0}, "roster": {"grid": None, "total": None},
             "show": {"grid": True, "total": True, "clock": False, "logo": True, "vs": False, "bar": False},
             "clock": {"left": float(CONFIG["dance"]["clock"]["seconds"]), "end": 0.0, "running": False},
             "side": "", "logo_v": 0}
@@ -1488,6 +1492,8 @@ def _dance_load() -> dict:
                     r = saved["roster"].get(k)
                     state["roster"][k] = [str(x) for x in r] if isinstance(r, list) else None
             state["battle"] = bool(saved.get("battle"))
+            solo = saved.get("solo") if isinstance(saved.get("solo"), dict) else {}
+            state["solo"]["id"] = str(solo.get("id") or "")  # al abrir EC-Tok ningún turno queda corriendo
             state["side"] = saved.get("side") if saved.get("side") in ("left", "right") else ""
             clock = saved.get("clock") or {}
             if isinstance(clock.get("left"), (int, float)):
@@ -1577,6 +1583,9 @@ def dance_payload() -> dict:
                                             "end_ms": int(clock["end"] * 1000), "attach": bool(d["clock"].get("attach")),
                                             "rounds": bool(d["clock"].get("rounds")), "round": DANCE["round"]},
             "total_style": d.get("total_style", "classic"),
+            "solo": {**{k: v for k, v in DANCE["solo"].items() if k not in ("end", "until")}, "end_ms": int(DANCE["solo"]["end"] * 1000),
+                     "until_ms": int(DANCE["solo"]["until"] * 1000), "seconds": d["solo"]["seconds"],
+                     "show_result": DANCE["solo"]["until"] > time.time()},
             "logo": {**d["logo"], "url": f"/baile/logo/{_q(logo.name)}?v={int(logo.stat().st_mtime)}-{DANCE['logo_v']}" if logo else ""},
             "vs": d["vs"], "styles": d["styles"],
             "total_title": {"en": "Today's points", "pt": "Pontos de hoje"}.get(CONFIG["language"], d["total_title"]) if d["total_title"] == "Puntos de hoy" else d["total_title"], "show_total": d["show_total"],
@@ -1595,6 +1604,21 @@ def dance_gift(ev: dict) -> None:
     left, right = _fighters()
     fighters = {x["id"] for x in (left, right) if x} if DANCE["battle"] else set()
     changed, reached = False, []
+    solo = DANCE["solo"]
+    if solo["active"]:  # 🎤 turno sola: cualquier regalo le cuenta a ella
+        x = next((y for y in d["dancers"] if y["id"] == solo["id"]), None)
+        if x:
+            with DANCE_LOCK:
+                solo["pts"] += total
+                if d["solo"]["add_live"]:  # también a sus puntos del live (meta diaria)
+                    before = DANCE["points"].get(x["id"], 0)
+                    DANCE["points"][x["id"]] = before + total
+                    goal = int(x.get("goal") or 0)
+                    if goal and before < goal <= before + total:
+                        BUS.emit(new_event("system", text=f"🎉 {x.get('label') or x.get('user') or x['id']}: {msg_goal(x)}"))
+            dance_save()
+            dance_emit()
+        return
     with DANCE_LOCK:
         for x in _present():
             act = x.get("gift") or ""
@@ -1630,7 +1654,7 @@ def dance_gift(ev: dict) -> None:
 def msg_goal(x: dict) -> str:
     goal = f"{int(x.get('goal') or 0):,}"
     return {"en": f"reached her goal ({goal})", "pt": f"chegou à meta ({goal})"}.get(CONFIG["language"], f"llegó a su meta ({goal})")
-def dance_action(action: str) -> str:
+def dance_action(action: str, arg: str = "") -> str:
     """Las teclas y botones del live de baile. Regresa el error, o «» si salió."""
     d = CONFIG["dance"]
     if not d["on"]:
@@ -1674,22 +1698,80 @@ def dance_action(action: str) -> str:
                 DANCE["battle"], s["bar"], DANCE["side"] = False, False, ""
             else:
                 left, right = _fighters()
+                if DANCE["solo"]["active"]:
+                    return "Primero termina el turno sola."
                 if not (left and right):
                     return "Elige exactamente 2 bailarinas para la batalla: una a la izquierda y otra a la derecha."
                 DANCE["battle"], s["bar"], DANCE["bpoints"], DANCE["side"] = True, True, {}, ""  # la barra Vs. siempre empieza en 0
         elif action == "bar_ref":
             DANCE["bpoints"] = {}
+        elif action == "solo_set":  # 🎤 elegir quién pasa sola
+            if DANCE["solo"]["active"]:
+                return "Termina el turno antes de cambiar de bailarina."
+            if any(x["id"] == arg for x in d["dancers"]):
+                DANCE["solo"]["id"], DANCE["solo"]["result"] = arg, ""
+        elif action == "solo_next":  # 🎤 la siguiente bailarina presente para el turno sola
+            pres = [x["id"] for x in _present()]
+            if not pres:
+                return "Primero marca a las bailarinas que están presentes."
+            if DANCE["solo"]["active"]:
+                return "Termina el turno antes de cambiar de bailarina."
+            cur = DANCE["solo"]["id"]
+            DANCE["solo"]["id"] = pres[(pres.index(cur) + 1) % len(pres)] if cur in pres else pres[0]
+            DANCE["solo"]["result"] = ""
+        elif action == "solo_run":  # 🎤 empezar / terminar el turno sola
+            if DANCE["solo"]["active"]:
+                _solo_finish_locked()
+                t = threading.Timer(7.3, dance_emit)  # se quita el letrero de ganó / perdió
+                t.daemon = True
+                t.start()
+            else:
+                if DANCE["battle"]:
+                    return "Primero termina la batalla."
+                x = next((y for y in _present() if y["id"] == DANCE["solo"]["id"]), None)
+                if not x:
+                    return "Elige a la bailarina que va a pasar sola (tiene que estar presente)."
+                so = d["solo"]
+                goal = int(x.get("solo_goal") or 0) if so["goal_mode"] == "each" else 0
+                DANCE["solo"].update(active=True, pts=0, goal=goal or int(so["goal"]), end=now + so["seconds"], result="", until=0.0)
+                threading.Thread(target=_solo_watch, args=(DANCE["solo"]["end"],), daemon=True).start()
         elif action == "round_next":  # la ronda (R1, R2…) que sale junto al reloj
             DANCE["round"] += 1
         elif action == "round_reset":
             DANCE["round"] = 0
         elif action == "reset_points":
             DANCE["points"], DANCE["bpoints"], DANCE["wins"], DANCE["round"] = {}, {}, {}, 0
+            DANCE["solo"].update(pts=0, result="", until=0.0)
         else:
             return "No encontré ese botón."
     dance_save()
     dance_emit()
     return ""
+def _solo_finish_locked() -> None:
+    """Se acabó el turno: ¿llegó a la meta? (con DANCE_LOCK tomado)"""
+    so = DANCE["solo"]
+    if not so["active"]:
+        return
+    win = so["pts"] >= so["goal"] > 0
+    so.update(active=False, result="win" if win else "lose", until=time.time() + 7)
+    if win and CONFIG["dance"]["solo"]["count_win"]:  # cuenta como batalla ganada (🏆)
+        DANCE["wins"][so["id"]] = DANCE["wins"].get(so["id"], 0) + 1
+
+
+def _solo_watch(end: float) -> None:
+    while time.time() < end:
+        time.sleep(0.2)
+        if not DANCE["solo"]["active"] or DANCE["solo"]["end"] != end:
+            return  # lo terminaron antes o empezó otro
+    with DANCE_LOCK:
+        if DANCE["solo"]["active"] and DANCE["solo"]["end"] == end:
+            _solo_finish_locked()
+    dance_save()
+    dance_emit()
+    time.sleep(7.2)
+    dance_emit()  # se quita el letrero de ganó / perdió
+
+
 def fetch_dancer_profile(dancer_id: str) -> None:
     """La foto de perfil (y el nombre) de la bailarina, de su página pública de TikTok. Se guarda en la PC."""
     import urllib.request
@@ -1762,7 +1844,8 @@ def clean_dance(new: dict, cur: dict) -> dict:
                  "color": str(x.get("color")).upper() if HEX.fullmatch(str(x.get("color") or "")) else base["color"],
                  "circle": x.get("circle") is not False, "photo": base.get("photo", ""),
                  "side": x.get("side") if x.get("side") in ("left", "right") else base.get("side", "left"),
-                 "fight": bool(x.get("fight")), "label_auto": bool(x.get("label_auto"))}
+                 "fight": bool(x.get("fight")), "label_auto": bool(x.get("label_auto")),
+                 "solo_goal": int(_num(x.get("solo_goal"), 0, 0, 100_000_000))}
             if user != base.get("user") and base.get("label_auto") and d["label"] == base.get("label"):
                 d["label"], d["label_auto"] = "", False  # otro @: el nombre que trajo de TikTok ya no es el suyo
             if user != base.get("user") and (base.get("photo") or "").startswith("tt-"):
@@ -1777,6 +1860,16 @@ def clean_dance(new: dict, cur: dict) -> dict:
         for k in ("attach", "rounds"):
             if isinstance(clock.get(k), bool):
                 out["clock"][k] = clock[k]
+    solo = new.get("solo")
+    if isinstance(solo, dict):
+        so = out["solo"]
+        so["seconds"] = int(_num(solo.get("seconds"), so["seconds"], 5, 3600))
+        so["goal"] = int(_num(solo.get("goal"), so["goal"], 1, 100_000_000))
+        if solo.get("goal_mode") in ("same", "each"):
+            so["goal_mode"] = solo["goal_mode"]
+        for k in ("add_live", "count_win"):
+            if isinstance(solo.get(k), bool):
+                so[k] = solo[k]
     if new.get("total_style") in ("classic", "dynasty"):
         out["total_style"] = new["total_style"]
     logo = new.get("logo")
@@ -2490,7 +2583,7 @@ class Handler(BaseHTTPRequestHandler):
             BUS.emit(new_event("config", overlay=overlay_payload()))
             self.send_json({"ok": True, "config": CONFIG})
         elif path == "/api/dance/action":  # 💃 botones del live de baile (lo mismo que sus teclas)
-            err = dance_action(str(data.get("action") or ""))
+            err = dance_action(str(data.get("action") or ""), str(data.get("id") or ""))
             self.send_json({"ok": not err, "error": err, "dance": dance_payload()}, 200 if not err else 400)
         elif path == "/api/dance/test":  # 🧪 mandar de prueba el regalo de una bailarina (pasa por el mismo camino que uno real)
             x = next((d for d in CONFIG["dance"]["dancers"] if d["id"] == data.get("id")), None)

@@ -265,6 +265,27 @@
   #dbar .bar > div.r { justify-content: flex-end; }
   #dbar .bar .pt { font-weight: 900; font-style: italic; font-size: calc(3vw * var(--dz)); }
   #dbar .bolt { position: absolute; top: 50%; transform: translate(-50%, -50%); font-size: calc(5vw * var(--dz)); filter: drop-shadow(0 0 .8vw #ffcc00); transition: left .6s ease; }
+  /* 🎤 turno sola */
+  #dsolo { position: fixed; left: 0; right: 0; top: 0; padding: calc(1.5vw * var(--dz)) 3vw; }
+  #dsolo .so { position: relative; display: flex; align-items: flex-start; gap: calc(1.2vw * var(--dz)); }
+  #dsolo .ph { flex: none; width: calc(17vw * var(--dz)); height: calc(19vw * var(--dz)); transform: skewX(-6deg); border: calc(.6vw * var(--dz)) solid #fff;
+    box-shadow: calc(.8vw * var(--dz)) calc(.8vw * var(--dz)) 0 #111; background: #222; overflow: hidden; }
+  #dsolo .ph img { width: 100%; height: 100%; object-fit: cover; transform: skewX(6deg) scale(1.15); }
+  #dsolo .mid { flex: 1; min-width: 0; display: flex; flex-direction: column; padding-top: calc(1.5vw * var(--dz)); }
+  #dsolo .bar { position: relative; height: calc(5vw * var(--dz)); transform: skewX(-14deg); background: #1c1c1c; border: calc(.4vw * var(--dz)) solid #fff;
+    box-shadow: calc(.6vw * var(--dz)) calc(.6vw * var(--dz)) 0 #111; overflow: hidden; }
+  #dsolo .bar::after { content: ""; position: absolute; inset: 0; background: repeating-linear-gradient(90deg, transparent 0 calc(5vw * var(--dz)), rgba(255,255,255,.15) calc(5vw * var(--dz)) calc(5.25vw * var(--dz))); }
+  #dsolo .fill { height: 100%; width: 0; transition: width .6s ease; background: linear-gradient(180deg, color-mix(in srgb, var(--c) 70%, #fff), var(--c) 55%, color-mix(in srgb, var(--c) 70%, #000)); }
+  #dsolo .pg { margin: calc(.6vw * var(--dz)) 0 0 calc(1vw * var(--dz)); font-weight: 900; font-style: italic; font-size: calc(2.6vw * var(--dz)); color: var(--dcol, #fff); text-shadow: var(--dring); }
+  #dsolo .big { font-weight: 900; font-style: italic; text-transform: uppercase; font-size: calc(7vw * var(--dz)); line-height: .95; margin-top: calc(-.6vw * var(--dz)); }
+  #dsolo .tbox { flex: none; margin-top: calc(1vw * var(--dz)); background: #111; border: calc(.4vw * var(--dz)) solid #fff; padding: calc(.4vw * var(--dz)) calc(1.4vw * var(--dz)); text-align: center; }
+  #dsolo .tbox small { display: block; color: #fff; font-weight: 800; font-style: italic; font-size: calc(1.5vw * var(--dz)); letter-spacing: .05em; }
+  #dsolo .tbox .clk { color: #fff !important; font-weight: 900; font-style: italic; font-variant-numeric: tabular-nums; font-size: calc(4.4vw * var(--dz)); }
+  #dsolo .tbox .clk.low { color: #ff4d5e !important; }
+  #dsolo .stamp { position: absolute; left: 50%; top: 55%; transform: translate(-50%, -50%) rotate(-6deg); font-weight: 900; font-style: italic; font-size: calc(10vw * var(--dz));
+    color: #fff; -webkit-text-stroke: calc(.5vw * var(--dz)) #111; paint-order: stroke fill; text-shadow: calc(.6vw * var(--dz)) calc(.6vw * var(--dz)) 0 #111; animation: dstamp .5s cubic-bezier(.2,1.6,.4,1) both; white-space: nowrap; }
+  #dsolo .stamp.win { color: #ffd54a; }
+  @keyframes dstamp { from { transform: translate(-50%, -50%) rotate(-6deg) scale(2.4); opacity: 0; } }
   /* pantalla Vs.: la mitad de la que va perdiendo, cubierta */
   #dvs { position: fixed; inset: 0; pointer-events: none; }
   #dvs .half { position: absolute; top: 0; bottom: 0; width: 50%; overflow: hidden; transition: opacity .6s ease; }
@@ -299,6 +320,7 @@
 <div id="dbar" class="dz" hidden></div>
 <div id="dtotal" class="dz" hidden></div>
 <div id="dclock" class="dz" hidden></div>
+<div id="dsolo" class="dz" hidden></div>
 <script>
   const params = new URLSearchParams(location.search);
   const which = (params.get('w') || 'alerts').split(',');
@@ -635,14 +657,19 @@
   const dnAvC = (d, lead) => d.id === lead ? `<span class="crwrap">${dnAv(d)}<span class="crown">👑</span></span>` : dnAv(d);
   const dnClockHtml = () => { const c = DN.clock || {}; return `<div class="dclkbox"><span class="clk dclk">${c.rounds && c.round ? `<span class="rtag">R${c.round}</span>` : ''}<span class="tm"></span></span></div>`; };
   function dnTickClocks() {
+    document.querySelectorAll('.dsclk').forEach(el => {
+      const so = DN.solo || {}, left = so.active ? Math.max(0, (so.end_ms - (Date.now() + dnSkew)) / 1000) : 0, sec = Math.ceil(left - 0.001);
+      el.textContent = `${String(Math.floor(sec / 60)).padStart(2, '0')}:${String(sec % 60).padStart(2, '0')}`; el.classList.toggle('low', so.active && sec <= 10);
+    });
     const left = dnClockLeft(), sec = Math.ceil(left - 0.001), txt = `${Math.floor(sec / 60)}:${String(sec % 60).padStart(2, '0')}`;
     document.querySelectorAll('.dclk').forEach(el => { const tm = el.querySelector('.tm') || el; tm.textContent = txt; el.classList.toggle('low', sec > 0 && sec <= 10); el.classList.toggle('zero', sec <= 0); });
   }
   function drawDance() {
     if (!DN) return;
     const on = !!DN.on, s = DN.show || {};
-    const vis = {dgrid: on && s.grid && !DN.battle, dtotal: on && DN.show_total && s.total, dclock: on && s.clock && !(DN.clock || {}).attach, dlogo: on && s.logo && !!(DN.logo || {}).url,
-      dbar: on && DN.show_vs && DN.battle && s.bar, dvs: on && DN.show_vs && s.vs && !!DN.side};
+    const so = DN.solo || {}, soloOn = !!(so.active || so.show_result);
+    const vis = {dsolo: on && soloOn, dgrid: on && s.grid && !DN.battle && !soloOn, dtotal: on && DN.show_total && s.total, dclock: on && s.clock && !(DN.clock || {}).attach, dlogo: on && s.logo && !!(DN.logo || {}).url,
+      dbar: on && DN.show_vs && DN.battle && s.bar && !soloOn, dvs: on && DN.show_vs && s.vs && !!DN.side};
     for (const k of Object.keys(vis)) $('#' + k).hidden = !(which.includes(k) && vis[k]);
     if (which.includes('dgrid') && vis.dgrid) drawDGrid();
     if (which.includes('dtotal') && vis.dtotal) drawDTotal();
@@ -650,8 +677,9 @@
     if (which.includes('dlogo') && vis.dlogo) drawDLogo();
     if (which.includes('dbar') && vis.dbar) drawDBar();
     if (which.includes('dvs')) drawDVs(vis.dvs);
+    if (which.includes('dsolo') && vis.dsolo) drawDSolo();
     clearInterval(dnClockTimer);
-    if (document.querySelector('.dclk')) { dnTickClocks(); dnClockTimer = setInterval(dnTickClocks, 200); }
+    if (document.querySelector('.dclk, .dsclk')) { dnTickClocks(); dnClockTimer = setInterval(dnTickClocks, 200); }
   }
   function drawDGrid() {
     const box = $('#dgrid'), list = (DN.grid || []).map(dnBy).filter(Boolean), n = list.length;
@@ -684,6 +712,16 @@
     const c = DN.clock || {};
     box.innerHTML = `<div class="clk dclk">${c.rounds && c.round ? `<span class="rtag">R${c.round}</span>` : ''}<span class="tm"></span></div>`;
     dnStyle(box, 'clock');
+  }
+  function drawDSolo() {
+    const box = $('#dsolo'), so = DN.solo || {}, d = dnBy(so.id);
+    if (!d) { box.innerHTML = ''; return; }
+    const pct = so.goal ? Math.min(100, so.pts / so.goal * 100) : 0;
+    box.innerHTML = `<div class="so" style="--c:${d.color}"><div class="ph">${d.photo ? `<img src="${esc(d.photo)}" alt="">` : ''}</div>
+      <div class="mid"><div class="bar"><div class="fill" style="width:${pct}%"></div></div><span class="pg">${dnFmt(so.pts)} / ${dnFmt(so.goal)}</span><span class="nm big">${esc(d.name)}</span></div>
+      <div class="tbox"><small>${esc((cfg && cfg.lang) === 'en' ? 'TIME' : (cfg && cfg.lang) === 'pt' ? 'TEMPO' : 'TIEMPO')}</small><span class="clk dsclk"></span></div>
+      ${so.show_result && so.result ? `<div class="stamp ${so.result}">${so.result === 'win' ? ((cfg && cfg.lang) === 'en' ? 'WON!' : (cfg && cfg.lang) === 'pt' ? 'GANHOU!' : '¡GANÓ!') : ((cfg && cfg.lang) === 'en' ? 'LOST!' : (cfg && cfg.lang) === 'pt' ? 'PERDEU!' : '¡PERDIÓ!')}</div>` : ''}</div>`;
+    dnStyle(box, 'solo');
   }
   function drawDLogo() {
     const box = $('#dlogo'), l = DN.logo || {};

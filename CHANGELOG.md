@@ -1,5 +1,12 @@
 # Cambios de EC-Tok
 
+## 4.2.0 — 🎤 Turno sola
+- Nueva modalidad del live de baile: **pasa una bailarina sola** y **todo lo que se done en su turno le cuenta a ella** (sin regalo de activación).
+- Nueva fuente **🎤 Turno sola**: su foto, barra de progreso, «puntos / meta», su nombre grande y el recuadro **TIEMPO**. Al acabarse el tiempo sale **«¡GANÓ!»** o **«¡PERDIÓ!»** unos segundos. Mientras dura, la cuadrícula y la barra Vs. se esconden.
+- Eliges quién pasa, el tiempo del turno y la meta: **la misma para todas** o **una para cada bailarina**.
+- Opciones: **sumar lo del turno a sus puntos del live (meta diaria)** y **ganar el turno cuenta como batalla ganada (🏆)**.
+- Teclas ya puestas: Ctrl+Alt+P empezar / terminar turno, Ctrl+Alt+O siguiente bailarina.
+
 ## 4.1.1
 - 💃 Live de Baile: los nombres de las bailarinas ya no se cortan (la última letra en cursiva y la sombra se recortaban en la cuadrícula y en la lista de puntos).
 - Estilo «Dynasty»: sin la orilla clara alrededor de cada renglón.
