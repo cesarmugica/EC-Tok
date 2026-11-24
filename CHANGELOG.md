@@ -1,5 +1,9 @@
 # Cambios de EC-Tok
 
+## 4.4.6
+- ✏ Nombres nuevos en el Live de Baile: **Cuadrícula de activación → Barra de Activación**, **Barra Vs. → Barra 1vs1**, **Batalla Vs. → Batalla 1vs1**, **Pantalla Vs. → Bloqueo Visual 1vs1** y **Turno sola → Baile individual** (también en las teclas, los avisos, el entorno de prueba y en inglés y portugués).
+- Las direcciones de las fuentes no cambian: lo que ya tienes en LIVE Studio sigue funcionando.
+
 ## 4.4.5
 - ⏱ **Todos los relojes** (juego de activación, batalla Vs. y turno sola) se quedan **parpadeando en 0:00 unos segundos** al terminar y luego se quitan, para que no desaparezcan de golpe. La barra se queda.
 - Nueva opción arriba del Live de Baile: **«⏱ Reloj en 0:00 visible»**: de 1 a 5 segundos (3 de fábrica).
