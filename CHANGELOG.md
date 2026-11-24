@@ -1,5 +1,22 @@
 # Cambios de EC-Tok
 
+## 4.0.0 — 💃 Live de Baile
+- Nueva casilla **💃 Live de Baile** en 🔴 En vivo. Solo si está prendida aparece todo lo del live de baile.
+- **Bailarinas (hasta 6):** casilla = está presente en el live, su **@usuario** (EC-Tok trae su foto de TikTok; también puedes subir una) y **➕** para su **regalo de activación**, **regalo para batallas**, **meta**, **color**, nombre en pantalla y si el regalo va transparente o en círculo negro.
+- Los regalos siempre llegan a tu live como siempre: EC-Tok solo **cuenta por dentro** los puntos de cada bailarina cuando mandan exactamente su regalo. Otros regalos no le suman a nadie.
+- **Fuentes nuevas** para LIVE Studio, cada una con su dirección, ➕ para cómo se ve (fondo, tamaño, tipo de letra, color y orilla) y **2 teclas Ctrl+Alt** ya puestas:
+  - 🟪 **Cuadrícula de activación**: barra como en los lives de baile o tarjetas (1, 2 o 3 renglones, o columna).
+  - 💎 **Diamantes por bailarina** («Puntos de hoy»), con su meta.
+  - ⏱ **Reloj** de cuenta regresiva (iniciar / pausar y mostrar / ocultar).
+  - 🏷 **Logotipo** del live (tamaño, opacidad y flotando suavecito).
+  - 🌧 **Pantalla Vs.**: lluvia, cristal opaco, hielo o cortina sobre la mitad de la que va perdiendo (automático) o cambiando de lado con su tecla.
+  - ⚔ **Barra Vs.**: batalla 1 contra 1 que siempre empieza en 0; mientras dura se esconde la cuadrícula.
+- Desmarcas a una bailarina y con **🔄 Actualizar** (o su tecla) sale de la cuadrícula y de la lista; sus puntos no se pierden. Opción para **quitarla sola al llegar a su meta**.
+- Opción **«Sumar los regalos de las batallas a los puntos del live de baile»**.
+- **🖨 Imprimir teclas de acceso rápido** (en 🔴 En vivo, en 🎬 Animaciones y en el live de baile): una hojita con todas tus teclas.
+- Las teclas ahora también pueden ser **letras** (Ctrl+Alt+A…Z), además de números y F1–F12.
+- 🧪 Entorno de prueba: botones para mandar de prueba el regalo de cada bailarina.
+
 ## 3.0.0 — 🔈 Audio de EC-Tok
 - En **⚙ Ajustes › 🔈 Audio de EC-Tok** eliges la **salida** por donde suena EC-Tok: sonidos de las reglas, 🎛 consola de sonidos y 🗣 la voz que lee el chat. Sin tocar la configuración de sonido de Windows.
 - La voz, con una salida elegida, se genera en tu PC con las voces de Windows para poder sacarla por esa salida. Si algo falla, sigue con la voz de siempre por la salida predeterminada y te avisa.

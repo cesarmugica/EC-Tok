@@ -152,6 +152,97 @@
   /* imagen dentro de un círculo oscuro semitransparente (opcional) */
   #actions.circle .side img, #actions.circle .side .ph { padding: calc(var(--au) * .14); border-radius: 50%; background: rgba(0,0,0,.5); box-sizing: border-box; width: calc(var(--au) * 1.45); height: calc(var(--au) * 1.45); }
   #actions.circle .st img, #actions.circle .st .ph { padding: calc(var(--au) * .26); border-radius: 50%; background: rgba(0,0,0,.5); box-sizing: border-box; }
+
+  /* ---------- 💃 live de baile ---------- */
+  .dz { --dz: 1; font-family: var(--dfont, inherit); }
+  .dz .nm, .dz .pt, .dz h1, .dz .clk { color: var(--dcol, #fff); }
+  .dz.ring .nm, .dz.ring .pt, .dz.ring h1, .dz.ring .clk { text-shadow: var(--dring); }
+  .dz .av { border-radius: 50%; object-fit: cover; background: rgba(255,255,255,.18); display: grid; place-items: center; flex: none; overflow: hidden; }
+  .dz .gi { object-fit: contain; flex: none; }
+  .dz .gi.circle { border-radius: 50%; background: rgba(0,0,0,.6); box-sizing: border-box; padding: calc(.55vw * var(--dz)); }
+  /* cuadrícula de activación: barra (como los lives de baile) */
+  #dgrid { position: fixed; left: 0; right: 0; top: 0; padding: calc(1.2vw * var(--dz)) 2.5vw; }
+  #dgrid .wrap { border-radius: calc(2vw * var(--dz)); padding: calc(1vw * var(--dz)) calc(1.4vw * var(--dz)); }
+  #dgrid .tops, #dgrid .gifts { display: flex; }
+  #dgrid .tops > div, #dgrid .gifts > div { flex: 1 1 0; min-width: 0; display: flex; align-items: center; justify-content: center; gap: .6vw; }
+  #dgrid .tops > div { flex-direction: column; gap: .2vw; }
+  #dgrid .tops .av { width: calc(5.4vw * var(--dz)); height: calc(5.4vw * var(--dz)); border: calc(.4vw * var(--dz)) solid var(--c); }
+  #dgrid .tops .nm { font-weight: 900; font-size: calc(2.2vw * var(--dz)); max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-transform: uppercase; font-style: italic; }
+  #dgrid .segs { display: flex; height: calc(4.6vw * var(--dz)); margin: calc(.7vw * var(--dz)) 0; border-radius: 999px; overflow: hidden;
+    box-shadow: 0 0 0 calc(.35vw * var(--dz)) rgba(255,255,255,.85), 0 .6vw 1.6vw rgba(0,0,0,.45); }
+  #dgrid .segs > div { min-width: 7%; display: flex; align-items: center; padding: 0 1.2vw; box-sizing: border-box; transition: flex-grow .6s ease;
+    background: linear-gradient(180deg, color-mix(in srgb, var(--c) 70%, #fff), var(--c) 55%, color-mix(in srgb, var(--c) 75%, #000)); }
+  #dgrid .segs > div + div { border-left: calc(.3vw * var(--dz)) solid rgba(255,255,255,.9); }
+  #dgrid .segs .pt { font-weight: 900; font-style: italic; font-size: calc(2.8vw * var(--dz)); }
+  #dgrid .gifts .gi { width: calc(5vw * var(--dz)); height: calc(5vw * var(--dz)); }
+  /* cuadrícula de activación: tarjetas (en fila, 2 o 3 renglones, en columna) */
+  #dgrid .cards { display: grid; grid-template-columns: repeat(var(--cols, 3), minmax(0, 1fr)); gap: calc(1.2vw * var(--dz)); }
+  #dgrid .card { display: flex; align-items: center; gap: calc(1vw * var(--dz)); padding: calc(.8vw * var(--dz)) calc(1.2vw * var(--dz)); border-radius: calc(1.6vw * var(--dz));
+    background: linear-gradient(90deg, color-mix(in srgb, var(--c) 85%, transparent), color-mix(in srgb, var(--c) 30%, transparent)); box-shadow: 0 0 0 calc(.25vw * var(--dz)) rgba(255,255,255,.75); }
+  #dgrid .card .av { width: calc(6vw * var(--dz)); height: calc(6vw * var(--dz)); border: calc(.35vw * var(--dz)) solid #fff; }
+  #dgrid .card .tx { display: flex; flex-direction: column; min-width: 0; flex: 1; line-height: 1.05; }
+  #dgrid .card .nm { font-weight: 900; font-size: calc(2.4vw * var(--dz)); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-transform: uppercase; font-style: italic; }
+  #dgrid .card .pt { font-weight: 900; font-size: calc(3vw * var(--dz)); }
+  #dgrid .card .gi { width: calc(5.4vw * var(--dz)); height: calc(5.4vw * var(--dz)); }
+  /* total por bailarina («Puntos de hoy») */
+  #dtotal { margin: 12px; display: inline-block; }
+  #dtotal .box { border-radius: calc(1.6vw * var(--dz)); padding: calc(1vw * var(--dz)) calc(1.2vw * var(--dz)); min-width: calc(36vw * var(--dz)); }
+  #dtotal h1 { margin: 0 0 calc(.8vw * var(--dz)); font-size: calc(2.6vw * var(--dz)); font-weight: 900; text-transform: uppercase; letter-spacing: .06em; text-align: center; }
+  #dtotal .r { display: flex; align-items: center; gap: calc(.8vw * var(--dz)); margin-top: calc(.7vw * var(--dz)); }
+  #dtotal .n { width: calc(2.6vw * var(--dz)); text-align: center; font-weight: 900; font-size: calc(2.2vw * var(--dz)); color: #ffd54a; }
+  #dtotal .av { width: calc(5vw * var(--dz)); height: calc(5vw * var(--dz)); border: calc(.3vw * var(--dz)) solid #fff; }
+  #dtotal .b { flex: 1; display: flex; align-items: center; justify-content: space-between; gap: 1.6vw; height: calc(4.4vw * var(--dz)); padding: 0 calc(1.4vw * var(--dz));
+    border-radius: calc(1vw * var(--dz)); background: linear-gradient(90deg, rgba(10,10,30,.85) 0%, color-mix(in srgb, var(--c) 85%, #000) 100%);
+    box-shadow: inset 0 0 0 calc(.25vw * var(--dz)) color-mix(in srgb, var(--c) 80%, #fff); }
+  #dtotal .nm { font-weight: 900; font-style: italic; font-size: calc(2.3vw * var(--dz)); text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  #dtotal .pt { font-weight: 900; font-size: calc(2.6vw * var(--dz)); white-space: nowrap; }
+  #dtotal .pt small { font-size: .62em; opacity: .85; }
+  /* reloj */
+  #dclock { position: fixed; inset: 0; display: grid; place-items: center; }
+  #dclock .clk { font-weight: 900; font-variant-numeric: tabular-nums; font-size: calc(min(17vw, 52vh) * var(--dz)); padding: calc(.6vw * var(--dz)) calc(3vw * var(--dz)); border-radius: 999px; letter-spacing: .02em; }
+  #dclock .clk.low { color: #ff4d5e !important; animation: dpulse 1s ease-in-out infinite; }
+  #dclock .clk.zero { animation: dblink .7s steps(2, start) infinite; }
+  @keyframes dpulse { 50% { transform: scale(1.08); } }
+  @keyframes dblink { to { visibility: hidden; } }
+  /* logotipo */
+  #dlogo { position: fixed; inset: 0; display: grid; place-items: center; }
+  #dlogo img { max-height: 96vh; object-fit: contain; }
+  #dlogo img.float { animation: dfloat 4s ease-in-out infinite; }
+  @keyframes dfloat { 50% { transform: translateY(-2.5%) scale(1.02); } }
+  /* barra Vs. (batalla 1 contra 1) */
+  #dbar { position: fixed; left: 0; right: 0; top: 0; padding: calc(1.2vw * var(--dz)) 3vw; }
+  #dbar .wrap { border-radius: calc(2vw * var(--dz)); padding: calc(1vw * var(--dz)) calc(1.4vw * var(--dz)); }
+  #dbar .tops { display: flex; justify-content: space-between; align-items: center; }
+  #dbar .who { display: flex; align-items: center; gap: 1vw; min-width: 0; }
+  #dbar .who.r { flex-direction: row-reverse; }
+  #dbar .av { width: calc(6vw * var(--dz)); height: calc(6vw * var(--dz)); border: calc(.4vw * var(--dz)) solid var(--c); }
+  #dbar .nm { font-weight: 900; font-style: italic; text-transform: uppercase; font-size: calc(2.8vw * var(--dz)); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 30vw; }
+  #dbar .gi { width: calc(4.6vw * var(--dz)); height: calc(4.6vw * var(--dz)); }
+  #dbar .vs { font-weight: 900; font-style: italic; font-size: calc(4vw * var(--dz)); color: #ffd54a; text-shadow: 0 0 1.2vw rgba(255,170,0,.9), 0 .3vw .6vw #000; }
+  #dbar .bar { position: relative; display: flex; height: calc(4.8vw * var(--dz)); margin-top: calc(.8vw * var(--dz)); border-radius: 999px; overflow: hidden;
+    box-shadow: 0 0 0 calc(.35vw * var(--dz)) rgba(255,255,255,.85), 0 .6vw 1.6vw rgba(0,0,0,.45); }
+  #dbar .bar > div { display: flex; align-items: center; transition: flex-grow .6s ease; min-width: 8%; padding: 0 2vw; box-sizing: border-box;
+    background: linear-gradient(180deg, color-mix(in srgb, var(--c) 70%, #fff), var(--c) 55%, color-mix(in srgb, var(--c) 75%, #000)); }
+  #dbar .bar > div.r { justify-content: flex-end; }
+  #dbar .bar .pt { font-weight: 900; font-style: italic; font-size: calc(3vw * var(--dz)); }
+  #dbar .bolt { position: absolute; top: 50%; transform: translate(-50%, -50%); font-size: calc(5vw * var(--dz)); filter: drop-shadow(0 0 .8vw #ffcc00); transition: left .6s ease; }
+  /* pantalla Vs.: la mitad de la que va perdiendo, cubierta */
+  #dvs { position: fixed; inset: 0; pointer-events: none; }
+  #dvs .half { position: absolute; top: 0; bottom: 0; width: 50%; overflow: hidden; transition: opacity .6s ease; }
+  #dvs .half.l { left: 0; } #dvs .half.r { right: 0; }
+  #dvs .half.glass { background: linear-gradient(160deg, rgba(235,242,255,.78), rgba(200,215,240,.62) 45%, rgba(240,245,255,.75)),
+    repeating-radial-gradient(circle at 30% 20%, rgba(255,255,255,.25) 0 2px, transparent 2px 7px); }
+  #dvs .half.ice { background: linear-gradient(180deg, rgba(210,245,255,.8), rgba(140,210,240,.7) 60%, rgba(230,250,255,.85)); }
+  #dvs .half.ice svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+  #dvs .half.curtain { background: repeating-linear-gradient(90deg, #5a0010 0 3vw, #8d0a20 3vw 5vw, #b3132e 5vw 6vw, #6a0014 6vw 8vw);
+    box-shadow: inset 0 -12vh 10vh rgba(0,0,0,.45), inset 0 6vh 6vh rgba(0,0,0,.5); }
+  #dvs .half.rain { background: linear-gradient(180deg, rgba(40,55,80,.72), rgba(70,90,120,.6)); }
+  #dvs .half canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+  #dvs .flash { position: absolute; inset: 0; background: rgba(255,255,255,.0); }
+  #dvs .flash.on { animation: dflash .5s ease; }
+  @keyframes dflash { 10% { background: rgba(255,255,255,.55); } 30% { background: rgba(255,255,255,.05); } 45% { background: rgba(255,255,255,.4); } 100% { background: rgba(255,255,255,0); } }
+  #dvs .line { position: absolute; top: 0; bottom: 0; left: 50%; width: .5vw; transform: translateX(-50%);
+    background: linear-gradient(180deg, transparent, rgba(160,230,255,.95), #fff, rgba(160,230,255,.95), transparent); box-shadow: 0 0 2vw rgba(120,210,255,.9); }
 </style>
 </head>
 <body>
@@ -163,6 +254,12 @@
 <div id="top" hidden></div>
 <div id="likers" hidden></div>
 <div id="actions" hidden></div>
+<div id="dvs" hidden></div>
+<div id="dlogo" class="dz" hidden></div>
+<div id="dgrid" class="dz" hidden></div>
+<div id="dbar" class="dz" hidden></div>
+<div id="dtotal" class="dz" hidden></div>
+<div id="dclock" class="dz" hidden></div>
 <script>
   const params = new URLSearchParams(location.search);
   const which = (params.get('w') || 'alerts').split(',');
@@ -478,6 +575,116 @@
     if (sp.seconds || !sp.video) spTimer = setTimeout(stopSpecial, (sp.seconds || 8) * 1000);
   }
 
+  // ---------- 💃 live de baile ----------
+  let DN = null, dnSkew = 0, dnClockTimer = null, rainStop = null;
+  const dnBy = id => (DN.dancers || []).find(d => d.id === id);
+  const dnFmt = n => (+n || 0).toLocaleString(LOC);
+  const dnAv = d => d.photo ? `<img class="av" src="${esc(d.photo)}" alt="">` : `<span class="av" style="font-size:2.6vw">💃</span>`;
+  const dnGift = (url, circle) => url ? `<img class="gi${circle ? ' circle' : ''}" src="${esc(url)}" alt="" referrerpolicy="no-referrer" onerror="this.style.visibility='hidden'">` : '';
+  function dnStyle(box, key) {
+    const st = (DN.styles || {})[key] || {}, r = box.style;
+    r.setProperty('--dz', (st.size || 100) / 100);
+    if (st.font) r.setProperty('--dfont', `"${st.font}", "Segoe UI", sans-serif`); else r.removeProperty('--dfont');
+    if (st.color) r.setProperty('--dcol', st.color); else r.removeProperty('--dcol');
+    const ring = c => { const o = []; for (let g = 0; g < 360; g += 30) o.push(`${(Math.cos(g * Math.PI / 180) * 0.07).toFixed(3)}em ${(Math.sin(g * Math.PI / 180) * 0.07).toFixed(3)}em 0 ${c}`); return o.join(',') + ',0 .1em .3em rgba(0,0,0,.6)'; };
+    r.setProperty('--dring', st.outline ? ring(st.outline) : '0 .15em .35em rgba(0,0,0,.8)');
+    box.classList.add('ring');
+    const bg = Math.max(0, Math.min(100, st.bg || 0)) / 100, wrap = box.querySelector('.wrap, .box, .clk');
+    if (wrap) wrap.style.background = bg ? `rgba(10,10,20,${bg})` : '';
+  }
+  function drawDance() {
+    if (!DN) return;
+    const on = !!DN.on, s = DN.show || {};
+    const vis = {dgrid: on && s.grid && !DN.battle, dtotal: on && DN.show_total && s.total, dclock: on && s.clock, dlogo: on && s.logo && !!(DN.logo || {}).url,
+      dbar: on && DN.show_vs && DN.battle && s.bar, dvs: on && DN.show_vs && s.vs && !!DN.side};
+    for (const k of Object.keys(vis)) $('#' + k).hidden = !(which.includes(k) && vis[k]);
+    if (which.includes('dgrid') && vis.dgrid) drawDGrid();
+    if (which.includes('dtotal') && vis.dtotal) drawDTotal();
+    if (which.includes('dclock')) drawDClock();
+    if (which.includes('dlogo') && vis.dlogo) drawDLogo();
+    if (which.includes('dbar') && vis.dbar) drawDBar();
+    if (which.includes('dvs')) drawDVs(vis.dvs);
+  }
+  function drawDGrid() {
+    const box = $('#dgrid'), list = (DN.grid || []).map(dnBy).filter(Boolean), n = list.length;
+    if (!n) { box.innerHTML = ''; return; }
+    if (DN.layout === 'bar') {
+      const sum = list.reduce((a, d) => a + d.points, 0);
+      box.innerHTML = `<div class="wrap"><div class="tops">${list.map(d => `<div style="--c:${d.color}">${dnAv(d)}<span class="nm">${esc(d.name)}</span></div>`).join('')}</div>
+        <div class="segs">${list.map(d => `<div style="--c:${d.color};flex-grow:${sum ? Math.max(d.points / sum, 0.001) : 1}"><span class="pt">${dnFmt(d.points)}</span></div>`).join('')}</div>
+        <div class="gifts">${list.map(d => `<div>${dnGift(d.gift_url, d.circle)}</div>`).join('')}</div></div>`;
+    } else {
+      const cols = DN.layout === 'row' ? n : DN.layout === 'rows2' ? Math.ceil(n / 2) : DN.layout === 'rows3' ? Math.ceil(n / 3) : 1;
+      box.innerHTML = `<div class="wrap"><div class="cards" style="--cols:${cols}">${list.map(d => `<div class="card" style="--c:${d.color}">${dnAv(d)}<span class="tx"><span class="nm">${esc(d.name)}</span><span class="pt">${dnFmt(d.points)}</span></span>${dnGift(d.gift_url, d.circle)}</div>`).join('')}</div></div>`;
+    }
+    dnStyle(box, 'grid');
+  }
+  function drawDTotal() {
+    const box = $('#dtotal'), list = (DN.total || []).map(dnBy).filter(Boolean).sort((a, b) => b.points - a.points);
+    box.innerHTML = `<div class="box">${DN.total_title ? `<h1>${esc(DN.total_title)}</h1>` : ''}${list.map((d, i) => `<div class="r" style="--c:${d.color}"><span class="n">${i + 1}</span>${dnAv(d)}<div class="b"><span class="nm">${esc(d.name)}</span><span class="pt">${dnFmt(d.points)}${d.goal ? `<small> / ${dnFmt(d.goal)}</small>` : ''}</span></div></div>`).join('')}</div>`;
+    dnStyle(box, 'total');
+  }
+  function dnClockLeft() { const c = DN.clock || {}; return c.running ? Math.max(0, (c.end_ms - (Date.now() + dnSkew)) / 1000) : Math.max(0, c.left || 0); }
+  function drawDClock() {
+    clearInterval(dnClockTimer);
+    if ($('#dclock').hidden) return;
+    const box = $('#dclock');
+    if (!box.querySelector('.clk')) box.innerHTML = '<div class="clk"></div>';
+    dnStyle(box, 'clock');
+    const tick = () => {
+      const left = dnClockLeft(), sec = Math.ceil(left - 0.001), m = Math.floor(sec / 60), el = box.querySelector('.clk');
+      el.textContent = `${m}:${String(sec % 60).padStart(2, '0')}`;
+      el.classList.toggle('low', sec > 0 && sec <= 10); el.classList.toggle('zero', sec <= 0);
+    };
+    tick(); dnClockTimer = setInterval(tick, 200);
+  }
+  function drawDLogo() {
+    const box = $('#dlogo'), l = DN.logo || {};
+    const old = box.querySelector('img');
+    if (!old || old.getAttribute('src') !== l.url) box.innerHTML = `<img src="${esc(l.url)}" alt="">`;
+    const img = box.querySelector('img');
+    img.style.width = (l.size || 60) + 'vw'; img.style.opacity = (l.opacity || 100) / 100; img.classList.toggle('float', l.float !== false);
+  }
+  function drawDBar() {
+    const box = $('#dbar'), a = dnBy(DN.left), b = dnBy(DN.right);
+    if (!a || !b) { box.innerHTML = ''; return; }
+    const sum = a.bpoints + b.bpoints, pa = sum ? a.bpoints / sum : 0.5;
+    box.innerHTML = `<div class="wrap"><div class="tops"><div class="who" style="--c:${a.color}">${dnAv(a)}<span class="nm">${esc(a.name)}</span>${dnGift(a.battle_gift_url, a.circle)}</div><span class="vs">VS</span>
+      <div class="who r" style="--c:${b.color}">${dnAv(b)}<span class="nm">${esc(b.name)}</span>${dnGift(b.battle_gift_url, b.circle)}</div></div>
+      <div class="bar"><div style="--c:${a.color};flex-grow:${Math.max(pa, 0.001)}"><span class="pt">${dnFmt(a.bpoints)}</span></div><div class="r" style="--c:${b.color};flex-grow:${Math.max(1 - pa, 0.001)}"><span class="pt">${dnFmt(b.bpoints)}</span></div>
+      <span class="bolt" style="left:${Math.min(92, Math.max(8, pa * 100))}%">⚡</span></div></div>`;
+    dnStyle(box, 'bar');
+  }
+  function drawDVs(visible) {
+    const box = $('#dvs'), v = DN.vs || {}, side = DN.side;
+    if (!visible) { if (rainStop) { rainStop(); rainStop = null; } box.innerHTML = ''; box.dataset.k = ''; return; }
+    const key = `${side}|${v.effect}|${v.opacity}`;
+    if (box.dataset.k === key) return;
+    box.dataset.k = key;
+    if (rainStop) { rainStop(); rainStop = null; }
+    const cls = side === 'left' ? 'l' : 'r';
+    const ice = v.effect === 'ice' ? `<svg viewBox="0 0 100 100" preserveAspectRatio="none"><g fill="none" stroke="rgba(255,255,255,.85)" stroke-width=".35">
+      <path d="M50 45 L20 10 M50 45 L85 15 M50 45 L95 55 M50 45 L70 95 M50 45 L15 80 M50 45 L5 40"/><path d="M35 27 L28 35 M68 30 L78 25 M72 50 L80 62 M60 70 L52 82 M30 62 L22 58 M25 42 L18 30"/></g></svg>` : '';
+    box.innerHTML = `<div class="half ${cls} ${v.effect || 'rain'}" style="opacity:${(v.opacity || 75) / 100}">${ice}${v.effect === 'rain' ? '<canvas></canvas><div class="flash"></div>' : ''}</div><div class="line"></div>`;
+    if (v.effect === 'rain') rainStop = startRain(box.querySelector('canvas'), box.querySelector('.flash'));
+  }
+  function startRain(cv, flash) {
+    const g = cv.getContext('2d'); let drops = [], alive = true, last = performance.now();
+    const fit = () => { cv.width = cv.clientWidth; cv.height = cv.clientHeight; drops = Array.from({length: Math.round(cv.width * cv.height / 1500)}, () => ({x: Math.random() * cv.width, y: Math.random() * cv.height, v: 900 + Math.random() * 700, l: 14 + Math.random() * 22})); };
+    fit();
+    const step = now => {
+      if (!alive) return;
+      const dt = Math.min(0.05, (now - last) / 1000); last = now;
+      g.clearRect(0, 0, cv.width, cv.height); g.strokeStyle = 'rgba(225,238,255,.7)'; g.lineWidth = 1.6; g.beginPath();
+      for (const d of drops) { d.y += d.v * dt; d.x -= d.v * dt * 0.12; if (d.y > cv.height) { d.y = -d.l; d.x = Math.random() * cv.width * 1.15; } g.moveTo(d.x, d.y); g.lineTo(d.x + d.l * 0.12, d.y - d.l); }
+      g.stroke(); requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+    const bolt = setInterval(() => { if (Math.random() < 0.35) { flash.classList.remove('on'); void flash.offsetWidth; flash.classList.add('on'); } }, 4000);
+    return () => { alive = false; clearInterval(bolt); };
+  }
+  function setDance(d) { if (!d) return; DN = d; if (d.now_ms) dnSkew = d.now_ms - Date.now(); drawDance(); }
+
   const isPreview = params.has('preview');
   let runningVersion = '';
   function onEvent(ev) {
@@ -495,8 +702,9 @@
     if (ev.type === 'special_stop') { if (which.includes('special')) stopSpecial(); return; }
     if (ev.type === 'anim') { if (which.includes('anim')) playAnim(ev); return; }
     if (ev.type === 'brb') { showBrb(ev.brb); return; }
+    if (ev.type === 'dance') { setDance(ev.dance); return; }
     if (ev.stats) stats = ev.stats;
-    if (ev.type === 'config') { cfg = ev.overlay; stats = ev.overlay.stats; applyStyle(); drawActions(); showBrb(cfg.brb); }
+    if (ev.type === 'config') { cfg = ev.overlay; stats = ev.overlay.stats; applyStyle(); drawActions(); showBrb(cfg.brb); setDance(cfg.dance); }
     if (ev.type === 'stats_reset') { load(); return; }
     if (which.includes('alerts')) {
       const conf = wantAlert(ev); if (conf) { queue.push({ev, conf}); next(); }
@@ -515,7 +723,7 @@
     showBrb(data.brb);
     $('#goal').hidden = !which.includes('goal'); $('#top').hidden = !which.includes('top'); $('#likers').hidden = !which.includes('likes'); $('#alerts').hidden = !which.includes('alerts');
     $('#actions').hidden = !which.includes('actions');
-    drawGoals(); drawTop(); drawActions();
+    drawGoals(); drawTop(); drawActions(); setDance(data.dance);
   }
   // UNA sola conexión de eventos para todas las fuentes de EC-Tok abiertas en el mismo programa (LIVE Studio/OBS),
   // con un «trabajador compartido» (overlay-worker.js). El navegador solo abre 6 conexiones a la vez con la misma

@@ -17,6 +17,7 @@ import json
 import mimetypes
 import os
 import queue
+import random
 import re
 import shutil
 import subprocess
@@ -29,7 +30,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, unquote, urlsplit
 
-APP_VERSION = "3.0.0"
+APP_VERSION = "4.0.0"
 
 try:  # lo genera windows/build.ps1
     from ectok_build import BUILD_DATE  # type: ignore[import-not-found]
@@ -44,7 +45,7 @@ LOCAL_HOSTS = {"127.0.0.1", "localhost", "[::1]", "::1"}
 # «localhost» ni «127.0.0.1» (TikTok LIVE Studio). Solo sirven los overlays.
 OVERLAY_HOSTS = {"ectok.localhost", "localtest.me", "ectok.localtest.me", "127.0.0.1.nip.io"}
 OVERLAY_PATHS = ("/overlay", "/overlay.html", "/overlay-worker.js", "/api/overlay", "/api/stream")
-OVERLAY_PREFIXES = ("/img/", "/anim/", "/sound/", "/metas/", "/mis-metas/")
+OVERLAY_PREFIXES = ("/img/", "/anim/", "/sound/", "/metas/", "/mis-metas/", "/baile/")
 IS_WINDOWS = os.name == "nt"
 
 
@@ -189,6 +190,49 @@ DEFAULT_CONFIG: dict = {
 }
 
 
+def _dancer_default(i: int) -> dict:
+    colors = ["#FF3B8D", "#2EA8FF", "#FFB020", "#9B5CFF", "#FF4A3D", "#21D07A"]
+    return {"id": f"d{i + 1}", "on": True, "user": "", "label": "", "gift": "", "battle_gift": "", "goal": 0,
+            "color": colors[i % len(colors)], "circle": True, "photo": "", "side": "left" if i % 2 == 0 else "right",
+            "fight": False}
+
+
+def _dance_style_default(bg: int = 0) -> dict:
+    return {"bg": bg, "size": 100, "font": "", "color": "", "outline": ""}
+
+
+DANCE_KEYS = ("grid_show", "grid_ref", "total_show", "total_ref", "clock_run", "clock_show", "logo_show", "logo_ref",
+              "vs_show", "vs_ref", "vs_alt", "bar_show", "bar_ref")
+
+
+def dance_default() -> dict:
+    return {"on": False, "layout": "bar", "show_total": True, "show_vs": True, "auto_remove": False, "battle_add": True,
+            "total_title": "Puntos de hoy", "dancers": [_dancer_default(i) for i in range(6)],
+            "clock": {"seconds": 180}, "logo": {"file": "", "size": 60, "opacity": 100, "float": True},
+            "vs": {"effect": "rain", "opacity": 75, "auto": True},
+            "styles": {"grid": _dance_style_default(0), "total": _dance_style_default(55), "clock": _dance_style_default(45),
+                       "bar": _dance_style_default(0)},
+            # teclas Ctrl+Alt+… ya puestas (letras, para no chocar con las de las animaciones: números y F1–F12)
+            "keys": {"grid_show": "G", "grid_ref": "H", "total_show": "Y", "total_ref": "U", "clock_run": "R", "clock_show": "T",
+                     "logo_show": "L", "logo_ref": "K", "vs_show": "V", "vs_ref": "B", "vs_alt": "C", "bar_show": "N", "bar_ref": "M"}}
+
+
+def dance_fix_config(cfg: dict) -> None:
+    """Que el live de baile siempre tenga sus 6 lugares completos."""
+    base = dance_default()
+    d = cfg.get("dance") if isinstance(cfg.get("dance"), dict) else base
+    dancers = [x for x in d.get("dancers", []) if isinstance(x, dict)][:6]
+    fixed = []
+    for i in range(6):
+        x = dancers[i] if i < len(dancers) else {}
+        fixed.append({**_dancer_default(i), **{k: v for k, v in x.items() if k in _dancer_default(i)}})
+    d["dancers"] = fixed
+    cfg["dance"] = d
+
+
+DEFAULT_CONFIG["dance"] = dance_default()
+
+
 def _merge(base: dict, saved: dict) -> dict:
     out = {}
     for key, value in base.items():
@@ -201,7 +245,7 @@ def _merge(base: dict, saved: dict) -> dict:
     return out
 
 
-HOTKEY_KEYS = [*"1234567890", *(f"F{n}" for n in range(1, 13))]  # se usan con Ctrl+Alt
+HOTKEY_KEYS = [*"1234567890", *(f"F{n}" for n in range(1, 13)), *"ABCDEFGHIJKLMNOPRSTUVWXYZ"]  # se usan con Ctrl+Alt (4.0: también letras)
 
 
 def _scene_files() -> set:
@@ -287,8 +331,10 @@ def load_config() -> dict:
                 _split_quick(cfg, saved)
             _keys_for_all(cfg, saved)
             _seed_console(cfg, saved)
+            dance_fix_config(cfg)
             return cfg
     cfg = _merge(DEFAULT_CONFIG, {})
+    dance_fix_config(cfg)
     _keys_for_all(cfg, {})
     _seed_console(cfg, {})
     return cfg
@@ -600,6 +646,9 @@ def clean_config(data: dict) -> dict:
         au["out_label"] = _text(audio.get("out_label"), au["out_label"], 200)
         if audio.get("anim_sound") in ("source", "app"):
             au["anim_sound"] = audio["anim_sound"]
+    if isinstance(data.get("dance"), dict):
+        cfg["dance"] = clean_dance(data["dance"], cfg["dance"])
+    dance_fix_keys(cfg)
     actions = data.get("actions")
     if isinstance(actions, dict):
         a = cfg["actions"]
@@ -989,6 +1038,8 @@ def fire_button(kind: str, item_id: str, preview: bool = False) -> str:
     if kind == "brb":  # la tecla de «Ya regresamos» lo pone y lo quita
         set_brb(not BRB["on"])
         return ""
+    if kind == "dance":  # 💃 live de baile
+        return dance_action(item_id)
     item = next((q for q in a.get(kind, []) if q.get("id") == item_id), None) if kind in ("custom", "quick", "special") else None
     if not item:
         return "No encontré ese botón."
@@ -1029,7 +1080,7 @@ class Hotkeys:
 
     @staticmethod
     def vk(key: str) -> int:
-        return 0x6F + int(key[1:]) if key.startswith("F") else ord(key)
+        return 0x6F + int(key[1:]) if key.startswith("F") and len(key) > 1 else ord(key)
 
     def start(self) -> None:
         if IS_WINDOWS:
@@ -1075,12 +1126,26 @@ class Hotkeys:
                 if key not in HOTKEY_KEYS:
                     continue
                 vk = self.vk(key)
-                typed = self._typed_char(user32, vk) if not key.startswith("F") else ""
+                typed = self._typed_char(user32, vk) if not (key.startswith("F") and len(key) > 1) else ""
                 if typed:  # registrarla te dejaría sin poder escribir ese carácter
                     self.problems[key] = typed
                     continue
                 if user32.RegisterHotKey(None, hid, self.MOD, vk):
                     self.ids[hid] = (kind, item["id"])
+                    hid += 1
+                else:
+                    self.problems[key] = "ocupada"
+        if CONFIG["dance"]["on"]:  # 💃 live de baile: sus teclas solo cuando está prendido
+            for action, key in CONFIG["dance"]["keys"].items():
+                if key not in HOTKEY_KEYS:
+                    continue
+                vk = self.vk(key)
+                typed = self._typed_char(user32, vk) if not (key.startswith("F") and len(key) > 1) else ""
+                if typed:
+                    self.problems[key] = typed
+                    continue
+                if user32.RegisterHotKey(None, hid, self.MOD, vk):
+                    self.ids[hid] = ("dance", action)
                     hid += 1
                 else:
                     self.problems[key] = "ocupada"
@@ -1242,6 +1307,9 @@ def alert_anims(ev: dict) -> list[dict]:
 
 def live_emit(event: dict) -> None:
     BUS.emit(event)
+    if event.get("type") == "gift":
+        with contextlib.suppress(Exception):
+            dance_gift(event)  # 💃 live de baile: el regalo de activación de cada bailarina
     if event.get("type") in ("gift", "follow", "share", "like", "subscribe", "superfan", "envelope", "battle", "booster"):
         for anim in anims_for(event) + alert_anims(event):
             if event.get("sim"):
@@ -1387,6 +1455,353 @@ class Simulator:
 
 SIM = Simulator()
 
+# ---------------------------------------------------------------------------
+# 💃 Live de baile: cada bailarina con su regalo de activación (los regalos llegan al live del anfitrión; aquí solo se
+# cuentan por dentro para ver quién va ganando), su meta, el reloj, el logotipo y las batallas 1 vs 1
+# ---------------------------------------------------------------------------
+DANCE_DIR = HOME / "baile"
+DANCE_PHOTOS = DANCE_DIR / "fotos"
+DANCE_FILE = HOME / "baile.json"
+DANCE_LOCK = threading.Lock()
+DANCE_IMG_EXTS = {".png", ".jpg", ".jpeg", ".webp", ".gif"}
+DANCE_FONTS = ("", "Impact", "Arial Black", "Bahnschrift", "Segoe UI Black", "Trebuchet MS", "Georgia", "Comic Sans MS", "Segoe Script")
+DANCE_EFFECTS = ("rain", "glass", "ice", "curtain")
+DANCE_LAYOUTS = ("bar", "row", "rows2", "rows3", "col")
+def _dance_state_default() -> dict:
+    return {"points": {}, "bpoints": {}, "battle": False, "roster": {"grid": None, "total": None},
+            "show": {"grid": True, "total": True, "clock": False, "logo": True, "vs": False, "bar": False},
+            "clock": {"left": float(CONFIG["dance"]["clock"]["seconds"]), "end": 0.0, "running": False},
+            "side": "", "logo_v": 0}
+def _dance_load() -> dict:
+    state = _dance_state_default()
+    with contextlib.suppress(OSError, ValueError, TypeError):
+        saved = json.loads(DANCE_FILE.read_text(encoding="utf-8"))
+        if isinstance(saved, dict):
+            for key in ("points", "bpoints"):
+                if isinstance(saved.get(key), dict):
+                    state[key] = {str(k): int(v) for k, v in saved[key].items() if isinstance(v, (int, float))}
+            if isinstance(saved.get("show"), dict):
+                state["show"].update({k: bool(v) for k, v in saved["show"].items() if k in state["show"]})
+            if isinstance(saved.get("roster"), dict):
+                for k in ("grid", "total"):
+                    r = saved["roster"].get(k)
+                    state["roster"][k] = [str(x) for x in r] if isinstance(r, list) else None
+            state["battle"] = bool(saved.get("battle"))
+            state["side"] = saved.get("side") if saved.get("side") in ("left", "right") else ""
+            clock = saved.get("clock") or {}
+            if isinstance(clock.get("left"), (int, float)):
+                state["clock"]["left"] = max(0.0, float(clock["left"]))  # al abrir EC-Tok el reloj queda en pausa
+    return state
+DANCE = _dance_load()
+_DANCE_SAVE = {"timer": None}
+def _dance_save_now() -> None:
+    with DANCE_LOCK:
+        data = json.loads(json.dumps(DANCE))
+    c = data["clock"]
+    if c["running"]:
+        c["left"], c["running"], c["end"] = max(0.0, c["end"] - time.time()), False, 0.0
+    with contextlib.suppress(OSError):
+        DANCE_FILE.write_text(json.dumps(data, ensure_ascii=False), encoding="utf-8")
+def dance_save() -> None:
+    """Guardar los puntos (sin escribir el disco a cada regalo: junta los cambios de 2 segundos)."""
+    t = _DANCE_SAVE["timer"]
+    if t:
+        t.cancel()
+    t = threading.Timer(2.0, _dance_save_now)
+    t.daemon = True
+    _DANCE_SAVE["timer"] = t
+    t.start()
+def dance_photo_path(name: str) -> Path | None:
+    name = Path(str(name or "")).name
+    path = DANCE_PHOTOS / name if name else None
+    return path if path and path.is_file() and path.suffix.lower() in DANCE_IMG_EXTS else None
+def dance_logo_path(name: str) -> Path | None:
+    name = Path(str(name or "")).name
+    path = DANCE_DIR / name if name else None
+    return path if path and path.is_file() and path.suffix.lower() in DANCE_IMG_EXTS else None
+def _q(name: str) -> str:
+    return name.replace("%", "%25").replace(" ", "%20").replace("#", "%23").replace("?", "%3F")
+def _gift_url(name: str) -> str:
+    if not name:
+        return ""
+    if name in GIFT_CATALOG:
+        return GIFT_CATALOG[name].get("image", "")
+    hit = next((g for n, g in GIFT_CATALOG.items() if same_gift(n, name)), None)
+    return hit.get("image", "") if hit else ""
+def _gift_coins(name: str) -> int:
+    if not name:
+        return 0
+    hit = GIFT_CATALOG.get(name) or next((g for n, g in GIFT_CATALOG.items() if same_gift(n, name)), None)
+    return int(hit.get("diamonds", 0)) if hit else 0
+def _present() -> list[dict]:
+    return [d for d in CONFIG["dance"]["dancers"] if d.get("on") and (d.get("user") or d.get("label"))]
+def _fighters() -> tuple[dict | None, dict | None]:
+    """Las 2 de la batalla: una a la izquierda y otra a la derecha."""
+    fight = [d for d in _present() if d.get("fight")]
+    left = next((d for d in fight if d.get("side") == "left"), None)
+    right = next((d for d in fight if d.get("side") == "right"), None)
+    return left, right
+def dance_side() -> str:
+    """De qué lado va el «cristal» (la que va perdiendo)."""
+    v = CONFIG["dance"]["vs"]
+    if v.get("auto") and DANCE["battle"]:
+        left, right = _fighters()
+        if left and right:
+            a, b = DANCE["bpoints"].get(left["id"], 0), DANCE["bpoints"].get(right["id"], 0)
+            return "" if a == b else ("left" if a < b else "right")
+    return DANCE["side"]
+def dance_payload() -> dict:
+    d = CONFIG["dance"]
+    with DANCE_LOCK:
+        pts, bpts = dict(DANCE["points"]), dict(DANCE["bpoints"])
+        show, roster, clock = dict(DANCE["show"]), {k: v for k, v in DANCE["roster"].items()}, dict(DANCE["clock"])
+    present = [x["id"] for x in _present()]
+    dancers = []
+    for x in d["dancers"]:
+        photo = dance_photo_path(x.get("photo"))
+        dancers.append({"id": x["id"], "on": bool(x.get("on")), "user": x.get("user", ""),
+                        "name": x.get("label") or x.get("user") or "", "color": x.get("color", "#FF3B8D"),
+                        "circle": bool(x.get("circle")), "goal": int(x.get("goal") or 0), "gift": x.get("gift", ""),
+                        "gift_url": _gift_url(x.get("gift", "")), "battle_gift": x.get("battle_gift") or x.get("gift", ""),
+                        "battle_gift_url": _gift_url(x.get("battle_gift") or x.get("gift", "")),
+                        "photo": f"/baile/foto/{_q(photo.name)}?v={int(photo.stat().st_mtime)}" if photo else "",
+                        "points": pts.get(x["id"], 0), "bpoints": bpts.get(x["id"], 0)})
+    left, right = _fighters()
+    logo = dance_logo_path(d["logo"].get("file"))
+    return {"on": bool(d["on"]), "layout": d["layout"], "dancers": dancers,
+            "grid": [i for i in (roster["grid"] if roster["grid"] is not None else present)],
+            "total": [i for i in (roster["total"] if roster["total"] is not None else present)],
+            "show": show, "battle": bool(DANCE["battle"]), "left": left["id"] if left else "", "right": right["id"] if right else "",
+            "side": dance_side(), "clock": {"total": d["clock"]["seconds"], "left": clock["left"], "running": clock["running"],
+                                            "end_ms": int(clock["end"] * 1000)},
+            "logo": {**d["logo"], "url": f"/baile/logo/{_q(logo.name)}?v={int(logo.stat().st_mtime)}-{DANCE['logo_v']}" if logo else ""},
+            "vs": d["vs"], "styles": d["styles"],
+            "total_title": {"en": "Today's points", "pt": "Pontos de hoje"}.get(CONFIG["language"], d["total_title"]) if d["total_title"] == "Puntos de hoy" else d["total_title"], "show_total": d["show_total"],
+            "show_vs": d["show_vs"], "now_ms": int(time.time() * 1000)}
+def dance_emit() -> None:
+    BUS.emit(new_event("dance", dance=dance_payload()))
+def dance_gift(ev: dict) -> None:
+    """Un regalo: le suma a la bailarina que tiene ese regalo de activación (y en batalla, a la barra Vs.)."""
+    d = CONFIG["dance"]
+    if not d["on"] or ev.get("type") != "gift":
+        return
+    g = ev.get("gift") or {}
+    name, total = str(g.get("name") or ""), int(g.get("total") or 0)
+    if not name or total <= 0:
+        return
+    left, right = _fighters()
+    fighters = {x["id"] for x in (left, right) if x} if DANCE["battle"] else set()
+    changed, reached = False, []
+    with DANCE_LOCK:
+        for x in _present():
+            act = x.get("gift") or ""
+            bgift = x.get("battle_gift") or act
+            if x["id"] in fighters and bgift and same_gift(name, bgift):
+                DANCE["bpoints"][x["id"]] = DANCE["bpoints"].get(x["id"], 0) + total
+                changed = True
+                if d["battle_add"]:  # «Sumar los regalos de las batallas a los puntos del live de baile»
+                    DANCE["points"][x["id"]] = DANCE["points"].get(x["id"], 0) + total
+                continue
+            if act and same_gift(name, act):
+                before = DANCE["points"].get(x["id"], 0)
+                DANCE["points"][x["id"]] = before + total
+                changed = True
+                goal = int(x.get("goal") or 0)
+                if goal and before < goal <= before + total:
+                    reached.append(x)
+    if not changed:
+        return
+    for x in reached:
+        who = x.get("label") or x.get("user") or x["id"]
+        BUS.emit(new_event("system", text=f"🎉 {who}: {msg_goal(x)}"))
+        if d["auto_remove"] and x["id"] not in fighters:  # se va a descansar: sale de la cuadrícula y de la lista
+            x["on"] = False
+            with DANCE_LOCK:
+                for k in ("grid", "total"):
+                    if DANCE["roster"][k] is not None:
+                        DANCE["roster"][k] = [i for i in DANCE["roster"][k] if i != x["id"]]
+            save_config(CONFIG)
+            BUS.emit(new_event("config", overlay=overlay_payload()))
+    dance_save()
+    dance_emit()
+def msg_goal(x: dict) -> str:
+    goal = f"{int(x.get('goal') or 0):,}"
+    return {"en": f"reached her goal ({goal})", "pt": f"chegou à meta ({goal})"}.get(CONFIG["language"], f"llegó a su meta ({goal})")
+def dance_action(action: str) -> str:
+    """Las teclas y botones del live de baile. Regresa el error, o «» si salió."""
+    d = CONFIG["dance"]
+    if not d["on"]:
+        return "Primero prende «Live de Baile» en 🔴 En vivo."
+    now = time.time()
+    with DANCE_LOCK:
+        s, c = DANCE["show"], DANCE["clock"]
+        if action in ("grid_show", "total_show", "clock_show", "logo_show", "vs_show"):
+            key = action[:-5]
+            s[key] = not s[key]
+        elif action in ("grid_ref", "total_ref"):  # «Actualizar»: aplicar quién está (las casillas) al live
+            DANCE["roster"][action[:-4]] = [x["id"] for x in _present()]
+        elif action == "clock_run":  # empezar / pausar (si ya llegó a 0, empieza otra vez)
+            if c["running"]:
+                c["left"], c["running"], c["end"] = max(0.0, c["end"] - now), False, 0.0
+            else:
+                if c["left"] <= 0.05:
+                    c["left"] = float(d["clock"]["seconds"])
+                c["end"], c["running"] = now + c["left"], True
+                s["clock"] = True
+        elif action == "clock_reset":
+            c["left"], c["running"], c["end"] = float(d["clock"]["seconds"]), False, 0.0
+        elif action == "logo_ref":
+            DANCE["logo_v"] += 1
+        elif action == "vs_ref":
+            DANCE["side"] = ""
+        elif action == "vs_alt":  # cambiar el cristal al otro lado
+            DANCE["side"] = "right" if dance_side() == "left" else "left"
+            if d["vs"].get("auto"):
+                d["vs"]["auto"] = False  # a mano: el automático se apaga (se vuelve a prender con su casilla)
+                save_config(CONFIG)
+            s["vs"] = True
+        elif action == "bar_show":  # empezar / terminar la batalla
+            if DANCE["battle"]:
+                DANCE["battle"], s["bar"], DANCE["side"] = False, False, ""
+            else:
+                left, right = _fighters()
+                if not (left and right):
+                    return "Elige exactamente 2 bailarinas para la batalla: una a la izquierda y otra a la derecha."
+                DANCE["battle"], s["bar"], DANCE["bpoints"], DANCE["side"] = True, True, {}, ""  # la barra Vs. siempre empieza en 0
+        elif action == "bar_ref":
+            DANCE["bpoints"] = {}
+        elif action == "reset_points":
+            DANCE["points"], DANCE["bpoints"] = {}, {}
+        else:
+            return "No encontré ese botón."
+    dance_save()
+    dance_emit()
+    return ""
+def fetch_dancer_profile(dancer_id: str) -> None:
+    """La foto de perfil (y el nombre) de la bailarina, de su página pública de TikTok. Se guarda en la PC."""
+    import urllib.request
+
+    x = next((d for d in CONFIG["dance"]["dancers"] if d["id"] == dancer_id), None)
+    user = (x or {}).get("user", "").strip().lstrip("@")
+    if not x or not re.fullmatch(r"[\w.]{2,30}", user):
+        return
+    ua = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) "
+          "Chrome/124.0 Safari/537.36")
+    try:
+        req = urllib.request.Request(f"https://www.tiktok.com/@{user}", headers={"User-Agent": ua, "Accept-Language": "es-MX,es;q=0.9,en;q=0.8"})
+        with urllib.request.urlopen(req, timeout=20) as resp:  # noqa: S310
+            page = resp.read(3_000_000).decode("utf-8", "replace")
+        m = re.search(r'"avatarLarger":"([^"]+)"', page) or re.search(r'"avatarMedium":"([^"]+)"', page) or re.search(r'"avatarThumb":"([^"]+)"', page)
+        if not m:
+            raise ValueError("sin foto")
+        url = json.loads(f'"{m.group(1)}"')
+        nick = re.search(r'"uniqueId":"' + re.escape(user) + r'","nickname":"([^"]*)"', page, re.I) or re.search(r'"nickname":"([^"]*)"', page)
+        req = urllib.request.Request(url, headers={"User-Agent": ua, "Referer": "https://www.tiktok.com/"})
+        with urllib.request.urlopen(req, timeout=20) as resp:  # noqa: S310
+            data = resp.read(8_000_000)
+        ext = ".png" if data[:4] == b"\x89PNG" else ".webp" if data[8:12] == b"WEBP" else ".gif" if data[:3] == b"GIF" else ".jpg"
+        DANCE_PHOTOS.mkdir(parents=True, exist_ok=True)
+        safe = re.sub(r"[^\w.-]", "_", user)[:40]
+        for old in DANCE_PHOTOS.glob(f"tt-{safe}.*"):
+            with contextlib.suppress(OSError):
+                old.unlink()
+        target = DANCE_PHOTOS / f"tt-{safe}{ext}"
+        target.write_bytes(data)
+        if x.get("user", "").strip().lstrip("@") != user:
+            return  # mientras tanto le cambiaron el @
+        x["photo"] = target.name
+        if nick and not x.get("label"):
+            with contextlib.suppress(ValueError):
+                x["label"] = json.loads(f'"{nick.group(1)}"')[:30]
+        save_config(CONFIG)
+        log(f"Live de baile: foto de @{user} lista")
+    except Exception as exc:  # noqa: BLE001
+        log(f"Live de baile: no se pudo traer la foto de @{user} ({exc})")
+        BUS.emit(new_event("dance_msg", dancer=dancer_id, error=True,
+                           text={"en": f"I couldn't get @{user}'s photo from TikTok. You can upload one with 📷.",
+                                 "pt": f"Não consegui trazer a foto de @{user} do TikTok. Você pode enviar uma com 📷."}.get(
+                                     CONFIG["language"], f"No pude traer la foto de @{user} desde TikTok. Puedes subir una con 📷.")))
+    BUS.emit(new_event("config", overlay=overlay_payload()))
+    dance_emit()
+def clean_dance(new: dict, cur: dict) -> dict:
+    """Validar lo que manda la ventana del live de baile. La foto la pone EC-Tok (no la ventana)."""
+    out = json.loads(json.dumps(cur))
+    for key in ("on", "show_total", "show_vs", "auto_remove", "battle_add"):
+        if isinstance(new.get(key), bool):
+            out[key] = new[key]
+    if new.get("layout") in DANCE_LAYOUTS:
+        out["layout"] = new["layout"]
+    out["total_title"] = _text(new.get("total_title"), out["total_title"], 40)
+    old = {d["id"]: d for d in cur["dancers"]}
+    if isinstance(new.get("dancers"), list):
+        dancers = []
+        for i, x in enumerate(new["dancers"][:6]):
+            if not isinstance(x, dict):
+                continue
+            base = old.get(str(x.get("id"))) or _dancer_default(i)
+            user = re.sub(r"[^\w.]", "", _text(x.get("user"), "", 40).strip().lstrip("@"))[:30]
+            d = {"id": base["id"], "on": x.get("on") is not False, "user": user,
+                 # sin nombre escrito: el que trajo EC-Tok de TikTok (mientras sea el mismo @)
+                 "label": _text(x.get("label"), "", 30).strip() or (base.get("label", "") if user == base.get("user") else ""),
+                 "gift": _text(x.get("gift"), "", 60).strip(),
+                 "battle_gift": _text(x.get("battle_gift"), "", 60).strip(),
+                 "goal": int(_num(x.get("goal"), 0, 0, 100_000_000)),
+                 "color": str(x.get("color")).upper() if HEX.fullmatch(str(x.get("color") or "")) else base["color"],
+                 "circle": x.get("circle") is not False, "photo": base.get("photo", ""),
+                 "side": x.get("side") if x.get("side") in ("left", "right") else base.get("side", "left"),
+                 "fight": bool(x.get("fight"))}
+            if user != base.get("user") and (base.get("photo") or "").startswith("tt-"):
+                d["photo"] = ""  # otro @: su foto se vuelve a traer
+            dancers.append(d)
+        while len(dancers) < 6:
+            dancers.append(_dancer_default(len(dancers)))
+        out["dancers"] = dancers
+    clock = new.get("clock")
+    if isinstance(clock, dict):
+        out["clock"]["seconds"] = int(_num(clock.get("seconds"), out["clock"]["seconds"], 5, 6 * 3600))
+    logo = new.get("logo")
+    if isinstance(logo, dict):
+        out["logo"]["size"] = int(_num(logo.get("size"), out["logo"]["size"], 10, 100))
+        out["logo"]["opacity"] = int(_num(logo.get("opacity"), out["logo"]["opacity"], 10, 100))
+        if isinstance(logo.get("float"), bool):
+            out["logo"]["float"] = logo["float"]
+    vs = new.get("vs")
+    if isinstance(vs, dict):
+        if vs.get("effect") in DANCE_EFFECTS:
+            out["vs"]["effect"] = vs["effect"]
+        out["vs"]["opacity"] = int(_num(vs.get("opacity"), out["vs"]["opacity"], 10, 100))
+        if isinstance(vs.get("auto"), bool):
+            out["vs"]["auto"] = vs["auto"]
+    styles = new.get("styles")
+    if isinstance(styles, dict):
+        for k, st in out["styles"].items():
+            x = styles.get(k)
+            if isinstance(x, dict):
+                st["bg"] = int(_num(x.get("bg"), st["bg"], 0, 100))
+                st["size"] = int(_num(x.get("size"), st["size"], 40, 250))
+                st["font"] = x.get("font") if x.get("font") in DANCE_FONTS else st["font"]
+                for c in ("color", "outline"):
+                    if c in x:
+                        v = str(x.get(c) or "")
+                        st[c] = v.upper() if HEX.fullmatch(v) else ""
+    keys = new.get("keys")
+    if isinstance(keys, dict):
+        for k in DANCE_KEYS:
+            if k in keys:
+                v = str(keys.get(k) or "")
+                out["keys"][k] = v if v in HOTKEY_KEYS else ""
+    return out
+def dance_fix_keys(cfg: dict) -> None:
+    """Una tecla, un solo botón: las del live de baile no pueden repetir las de las animaciones."""
+    a = cfg["anims"]
+    used = {i.get("key") for i in [*a.get("custom", []), *a.get("quick", []), *a.get("special", []), a.get("brb") or {}] if i.get("key")}
+    for k in DANCE_KEYS:
+        v = cfg["dance"]["keys"].get(k, "")
+        if v and (v in used or v not in HOTKEY_KEYS):
+            cfg["dance"]["keys"][k] = ""
+        elif v:
+            used.add(v)
+
 ectok_live.LANG["value"] = CONFIG["language"]
 
 
@@ -1399,7 +1814,7 @@ def overlay_payload() -> dict:
     """Lo que necesitan los overlays: estilos, alertas, metas y el estado del live."""
     return {"style": CONFIG["style"], "alerts": CONFIG["alerts"], "goals": CONFIG["goals"], "top": CONFIG["top"], "likers": CONFIG["likers"],
             "actions": overlay_actions(), "stats": LIVE.stats.public(CONFIG["top"]["count"]), "brb": brb_payload(),
-            "audio": CONFIG["audio"], "lang": CONFIG["language"], "version": APP_VERSION}
+            "audio": CONFIG["audio"], "lang": CONFIG["language"], "version": APP_VERSION, "dance": dance_payload()}
 
 
 def aliases_payload() -> list[list[str]]:
@@ -1894,6 +2309,15 @@ class Handler(BaseHTTPRequestHandler):
                 self.send_error(404)
         elif path == "/api/actions/images":
             self.send_json({"ok": True, **action_images()})
+        elif path.startswith(("/baile/foto/", "/baile/logo/")):  # 💃 fotos de las bailarinas y el logotipo
+            name = unquote(path.rsplit("/", 1)[-1])
+            target = dance_photo_path(name) if path.startswith("/baile/foto/") else dance_logo_path(name)
+            if target:
+                self._send_bytes(target, mimetypes.guess_type(target.name)[0] or "image/png")
+            else:
+                self.send_error(404)
+        elif path == "/api/dance":
+            self.send_json({"ok": True, "dance": dance_payload(), "gifts": action_images()["tiktok"]})
         elif path.startswith("/anim/"):
             target = anim_path(unquote(path[len("/anim/"):]))
             if target:
@@ -2034,11 +2458,75 @@ class Handler(BaseHTTPRequestHandler):
             return
         path = urlsplit(self.path).path
         if path == "/api/settings":
+            old_users = {d["id"]: d.get("user") for d in CONFIG["dance"]["dancers"]}
             CONFIG = clean_config(data)
             save_config(CONFIG)
+            for d in CONFIG["dance"]["dancers"]:  # 💃 @ nuevo: traer su foto de perfil
+                if d.get("user") and (d["user"] != old_users.get(d["id"]) or not d.get("photo")) and not d.get("photo"):
+                    threading.Thread(target=fetch_dancer_profile, args=(d["id"],), daemon=True).start()
+            dance_emit()
             HOTKEYS.refresh()
             ectok_live.LANG["value"] = CONFIG["language"]
             BUS.emit(new_event("config", overlay=overlay_payload()))
+            self.send_json({"ok": True, "config": CONFIG})
+        elif path == "/api/dance/action":  # 💃 botones del live de baile (lo mismo que sus teclas)
+            err = dance_action(str(data.get("action") or ""))
+            self.send_json({"ok": not err, "error": err, "dance": dance_payload()}, 200 if not err else 400)
+        elif path == "/api/dance/test":  # 🧪 mandar de prueba el regalo de una bailarina (pasa por el mismo camino que uno real)
+            x = next((d for d in CONFIG["dance"]["dancers"] if d["id"] == data.get("id")), None)
+            name = (x.get("battle_gift") or x.get("gift")) if x and data.get("battle") else (x or {}).get("gift")
+            if not name:
+                self.send_json({"ok": False, "error": "Esa bailarina todavía no tiene regalo."}, 400)
+                return
+            each = _gift_coins(name) or 1
+            fan = random.choice(ectok_live.TEST_USERS)
+            LIVE.push(new_event("gift", user={"id": fan.replace(" ", "_").lower(), "name": fan, "avatar": ""}, test=True,
+                                gift={"name": name, "count": 1, "diamonds": each, "total": each, "image": _gift_url(name)}))
+            self.send_json({"ok": True})
+        elif path == "/api/dance/photo":  # 💃 la foto de una bailarina: subirla tú o volver a traerla de TikTok
+            x = next((d for d in CONFIG["dance"]["dancers"] if d["id"] == data.get("id")), None)
+            if not x:
+                self.send_json({"ok": False, "error": "Solicitud inválida."}, 400)
+                return
+            if data.get("tiktok"):
+                x["photo"] = ""
+                threading.Thread(target=fetch_dancer_profile, args=(x["id"],), daemon=True).start()
+                self.send_json({"ok": True, "config": CONFIG})
+                return
+            files = _pick_file({"en": "Choose her photo", "pt": "Escolha a foto dela"}.get(CONFIG["language"], "Elige su foto"),
+                               {"en": "Images", "pt": "Imagens"}.get(CONFIG["language"], "Imágenes"), DANCE_IMG_EXTS, Path.home() / "Pictures")
+            if files:
+                src = Path(files[0])
+                if src.suffix.lower() not in DANCE_IMG_EXTS or src.stat().st_size > 20 * 1024 * 1024:
+                    self.send_json({"ok": False, "error": "Esa imagen no es compatible (PNG, WebP, JPG o GIF, menos de 20 MB)."}, 400)
+                    return
+                DANCE_PHOTOS.mkdir(parents=True, exist_ok=True)
+                target = DANCE_PHOTOS / f"{x['id']}-{int(time.time())}{src.suffix.lower()}"
+                shutil.copy2(src, target)
+                x["photo"] = target.name
+                save_config(CONFIG)
+                BUS.emit(new_event("config", overlay=overlay_payload()))
+                dance_emit()
+            self.send_json({"ok": True, "config": CONFIG})
+        elif path == "/api/dance/logo":  # 💃 el logotipo del live (se copia a la carpeta de EC-Tok)
+            files = _pick_file({"en": "Choose your logo", "pt": "Escolha seu logotipo"}.get(CONFIG["language"], "Elige tu logotipo"),
+                               {"en": "Images", "pt": "Imagens"}.get(CONFIG["language"], "Imágenes"), DANCE_IMG_EXTS, Path.home() / "Pictures")
+            if files:
+                src = Path(files[0])
+                if src.suffix.lower() not in DANCE_IMG_EXTS or src.stat().st_size > 30 * 1024 * 1024:
+                    self.send_json({"ok": False, "error": "Esa imagen no es compatible (PNG, WebP, JPG o GIF, menos de 30 MB)."}, 400)
+                    return
+                DANCE_DIR.mkdir(parents=True, exist_ok=True)
+                old = dance_logo_path(CONFIG["dance"]["logo"].get("file"))
+                target = DANCE_DIR / f"logo-{int(time.time())}{src.suffix.lower()}"
+                shutil.copy2(src, target)
+                CONFIG["dance"]["logo"]["file"] = target.name
+                save_config(CONFIG)
+                if old and old != target:
+                    with contextlib.suppress(OSError):
+                        old.unlink()  # el logotipo anterior era una copia de EC-Tok (tu archivo original no se toca)
+                BUS.emit(new_event("config", overlay=overlay_payload()))
+                dance_emit()
             self.send_json({"ok": True, "config": CONFIG})
         elif path == "/api/connect":
             username = _text(data.get("username"), CONFIG["username"], 60).strip().lstrip("@")
