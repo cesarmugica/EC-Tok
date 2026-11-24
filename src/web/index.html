@@ -1469,7 +1469,8 @@
 
 
   // ---------- 💃 live de baile ----------
-  let DNS = null, dnGiftList = [], dnGiftFor = null;
+  let DNS = null, dnGiftList = [], dnGiftFor = null, dnSkewUI = 0;
+  const dnNow = () => Date.now() + dnSkewUI;
   const DK = {grid_show: 'Cuadrícula: mostrar / ocultar', grid_ref: 'Cuadrícula: actualizar', total_show: 'Diamantes: mostrar / ocultar', total_ref: 'Diamantes: actualizar',
     clock_run: 'Reloj: iniciar / pausar', clock_show: 'Reloj: mostrar / ocultar', logo_show: 'Logotipo: mostrar / ocultar', logo_ref: 'Logotipo: actualizar',
     vs_show: 'Pantalla Vs.: mostrar / ocultar', vs_ref: 'Pantalla Vs.: quitar el cristal', vs_alt: 'Pantalla Vs.: cambiar de lado', bar_show: 'Batalla: empezar / terminar', bar_ref: 'Batalla: barra Vs. a cero', round_next: 'Reloj: siguiente ronda',
@@ -1486,7 +1487,7 @@
   async function loadDance() { try { const d = await api('/api/dance'); dnGiftList = d.gifts || []; setDanceState(d.dance); } catch (_) {} fillDance(); }
   function setDanceState(d) {
     if (!d) return;
-    DNS = d;
+    DNS = d; if (d.now_ms) dnSkewUI = d.now_ms - Date.now();  // diferencia entre el reloj de EC-Tok y el de esta ventana
     // el nombre que trajo EC-Tok de TikTok (si tú no escribiste otro)
     if (cfg && cfg.dance) for (const x of d.dancers) {
       const c = cfg.dance.dancers.find(y => y.id === x.id);
@@ -1541,7 +1542,7 @@
     const bn = $('#dnBattleNow');
     if (bn) {
       const nm = id => (DNS.dancers.find(x => x.id === id) || {}).name || '';
-      const bline = () => { const left = DNS.battle && DNS.battle_end_ms ? Math.max(0, Math.ceil((DNS.battle_end_ms - Date.now()) / 1000)) : 0;
+      const bline = () => { const left = DNS.battle && DNS.battle_end_ms ? Math.max(0, Math.ceil((DNS.battle_end_ms - dnNow()) / 1000)) : 0;
         bn.textContent = DNS.battle ? tf('⚔ {0} {1} – {2} {3}', nm(DNS.left), fmt(dnLive(DNS.left).bpoints), fmt(dnLive(DNS.right).bpoints), nm(DNS.right)) + (DNS.battle_end_ms ? ' · ' + tf('quedan {0}', `${Math.floor(left / 60)}:${String(left % 60).padStart(2, '0')}`) : '')
           : DNS.bres && DNS.bres.a ? (DNS.bres.winner ? tf('🏆 Última batalla: ganó {0}', nm(DNS.bres.winner)) : t('🤝 Última batalla: empate')) : ''; };
       bline(); clearInterval(showDanceLive.b); if (DNS.battle && DNS.battle_end_ms) showDanceLive.b = setInterval(bline, 500);
@@ -1549,7 +1550,7 @@
     const sn = $('#dnSoloNow');
     if (sn) {
       const who = (DNS.dancers.find(x => x.id === so.id) || {}).name || '';
-      const line = () => { const left = so.active ? Math.max(0, Math.ceil((so.end_ms - Date.now()) / 1000)) : 0;
+      const line = () => { const left = so.active ? Math.max(0, Math.ceil((so.end_ms - dnNow()) / 1000)) : 0;
         sn.textContent = so.active ? tf('🎤 {0}: {1} de {2} · quedan {3}', who, fmt(so.pts), fmt(so.goal), `${Math.floor(left / 60)}:${String(left % 60).padStart(2, '0')}`)
           : so.result ? tf(so.result === 'win' ? '✅ {0} GANÓ su turno: {1} de {2}' : '❌ {0} no llegó: {1} de {2}', who, fmt(so.pts), fmt(so.goal)) : ''; };
       line(); clearInterval(showDanceLive.s); if (so.active) showDanceLive.s = setInterval(line, 500);
@@ -1559,7 +1560,7 @@
     clearInterval(showDanceLive.t);
     const clk = $('#dnClockNow');
     if (clk) {
-      const tick = () => { const c = DNS.clock, left = c.running ? Math.max(0, (c.end_ms - (Date.now() + (DNS.now_ms ? DNS.now_ms - showDanceLive.at : 0))) / 1000) : c.left, sec = Math.ceil(left - 0.001); clk.textContent = `${Math.floor(sec / 60)}:${String(sec % 60).padStart(2, '0')}`; };
+      const tick = () => { const c = DNS.clock, left = c.running ? Math.max(0, (c.end_ms - dnNow()) / 1000) : c.left, sec = Math.ceil(left - 0.001); clk.textContent = `${Math.floor(sec / 60)}:${String(sec % 60).padStart(2, '0')}`; };
       tick(); if (DNS.clock.running) showDanceLive.t = setInterval(tick, 250);
     }
   }

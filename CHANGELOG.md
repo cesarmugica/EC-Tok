@@ -1,5 +1,8 @@
 # Cambios de EC-Tok
 
+## 4.2.2
+- 💃 Live de Baile: en EC-Tok, «Va en» del reloj se quedaba en 0:00 aunque en el live sí corría. Ya se ve cómo va, igual que el tiempo que queda de la batalla y del turno sola.
+
 ## 4.2.1
 - ⚔ **La batalla Vs. tiene su propio reloj** (se pone en su tarjeta: «Tiempo de la batalla», 0:00 = sin reloj). Sale abajo del VS, se pone rojo en los últimos 10 segundos y al llegar a 0 la batalla **termina sola** y sale **«¡GANÓ …!»** o **«¡EMPATE!»** unos segundos. El reloj del baile grupal no se toca.
 - En la tarjeta se ve el marcador en vivo y quién ganó la última batalla.
