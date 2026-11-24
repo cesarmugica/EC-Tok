@@ -30,7 +30,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, unquote, urlsplit
 
-APP_VERSION = "4.2.0"
+APP_VERSION = "4.2.1"
 
 try:  # lo genera windows/build.ps1
     from ectok_build import BUILD_DATE  # type: ignore[import-not-found]
@@ -208,6 +208,7 @@ DANCE_KEYS = ("grid_show", "grid_ref", "total_show", "total_ref", "clock_run", "
 def dance_default() -> dict:
     return {"on": False, "layout": "bar", "show_total": True, "show_vs": True, "auto_remove": False, "battle_add": True,
             "total_title": "Puntos de hoy", "dancers": [_dancer_default(i) for i in range(6)],
+            "battle_secs": 120,  # ⏱ reloj propio de la batalla (0 = sin reloj)
             # 🎤 turno sola: pasa una bailarina y TODO lo que se done en su turno le cuenta a ella
             "solo": {"seconds": 60, "goal_mode": "same", "goal": 1000, "add_live": True, "count_win": True},
             "total_style": "classic", "clock": {"seconds": 180, "attach": False, "rounds": False}, "logo": {"file": "", "size": 60, "opacity": 100, "float": True},
@@ -1472,7 +1473,8 @@ DANCE_EFFECTS = ("rain", "glass", "ice", "curtain")
 DANCE_LAYOUTS = ("bar", "plates", "row", "rows2", "rows3", "col")
 def _dance_state_default() -> dict:
     return {"points": {}, "bpoints": {}, "wins": {}, "round": 0, "battle": False,
-            "solo": {"active": False, "id": "", "pts": 0, "goal": 0, "end": 0.0, "result": "", "until": 0.0}, "roster": {"grid": None, "total": None},
+            "solo": {"active": False, "id": "", "pts": 0, "goal": 0, "end": 0.0, "result": "", "until": 0.0},
+            "bend": 0.0, "bres": {"winner": "", "until": 0.0, "a": "", "b": ""}, "roster": {"grid": None, "total": None},
             "show": {"grid": True, "total": True, "clock": False, "logo": True, "vs": False, "bar": False},
             "clock": {"left": float(CONFIG["dance"]["clock"]["seconds"]), "end": 0.0, "running": False},
             "side": "", "logo_v": 0}
@@ -1491,7 +1493,7 @@ def _dance_load() -> dict:
                 for k in ("grid", "total"):
                     r = saved["roster"].get(k)
                     state["roster"][k] = [str(x) for x in r] if isinstance(r, list) else None
-            state["battle"] = bool(saved.get("battle"))
+            state["battle"] = False  # al abrir EC-Tok ninguna batalla queda corriendo
             solo = saved.get("solo") if isinstance(saved.get("solo"), dict) else {}
             state["solo"]["id"] = str(solo.get("id") or "")  # al abrir EC-Tok ningún turno queda corriendo
             state["side"] = saved.get("side") if saved.get("side") in ("left", "right") else ""
@@ -1582,7 +1584,9 @@ def dance_payload() -> dict:
             "side": dance_side(), "clock": {"total": d["clock"]["seconds"], "left": clock["left"], "running": clock["running"],
                                             "end_ms": int(clock["end"] * 1000), "attach": bool(d["clock"].get("attach")),
                                             "rounds": bool(d["clock"].get("rounds")), "round": DANCE["round"]},
-            "total_style": d.get("total_style", "classic"),
+            "total_style": d.get("total_style", "classic"), "battle_secs": int(d.get("battle_secs") or 0),
+            "battle_end_ms": int(DANCE.get("bend", 0) * 1000),
+            "bres": {**DANCE.get("bres", {}), "until": 0, "show": DANCE.get("bres", {}).get("until", 0) > time.time()},
             "solo": {**{k: v for k, v in DANCE["solo"].items() if k not in ("end", "until")}, "end_ms": int(DANCE["solo"]["end"] * 1000),
                      "until_ms": int(DANCE["solo"]["until"] * 1000), "seconds": d["solo"]["seconds"],
                      "show_result": DANCE["solo"]["until"] > time.time()},
@@ -1689,13 +1693,7 @@ def dance_action(action: str, arg: str = "") -> str:
             s["vs"] = True
         elif action == "bar_show":  # empezar / terminar la batalla
             if DANCE["battle"]:
-                left, right = _fighters()  # la que tenga más puntos gana la batalla (🏆); si empatan, nadie
-                if left and right:
-                    a, b = DANCE["bpoints"].get(left["id"], 0), DANCE["bpoints"].get(right["id"], 0)
-                    if a != b:
-                        win = left if a > b else right
-                        DANCE["wins"][win["id"]] = DANCE["wins"].get(win["id"], 0) + 1
-                DANCE["battle"], s["bar"], DANCE["side"] = False, False, ""
+                _battle_finish_locked()
             else:
                 left, right = _fighters()
                 if DANCE["solo"]["active"]:
@@ -1703,6 +1701,11 @@ def dance_action(action: str, arg: str = "") -> str:
                 if not (left and right):
                     return "Elige exactamente 2 bailarinas para la batalla: una a la izquierda y otra a la derecha."
                 DANCE["battle"], s["bar"], DANCE["bpoints"], DANCE["side"] = True, True, {}, ""  # la barra Vs. siempre empieza en 0
+                DANCE["bres"] = {"winner": "", "until": 0.0, "a": left["id"], "b": right["id"]}
+                secs = int(d.get("battle_secs") or 0)  # ⏱ el reloj propio de la batalla (0 = sin reloj)
+                DANCE["bend"] = now + secs if secs else 0.0
+                if secs:
+                    threading.Thread(target=_battle_watch, args=(DANCE["bend"],), daemon=True).start()
         elif action == "bar_ref":
             DANCE["bpoints"] = {}
         elif action == "solo_set":  # 🎤 elegir quién pasa sola
@@ -1747,6 +1750,35 @@ def dance_action(action: str, arg: str = "") -> str:
     dance_save()
     dance_emit()
     return ""
+def _battle_finish_locked() -> None:
+    """Se acabó la batalla: la que tenga más puntos gana (🏆); si empatan, nadie. El resultado se ve unos segundos."""
+    if not DANCE["battle"]:
+        return
+    res = DANCE.get("bres") or {}
+    a, b = res.get("a", ""), res.get("b", "")
+    pa, pb = DANCE["bpoints"].get(a, 0), DANCE["bpoints"].get(b, 0)
+    win = "" if pa == pb else (a if pa > pb else b)
+    if win:
+        DANCE["wins"][win] = DANCE["wins"].get(win, 0) + 1
+    DANCE["bres"] = {"winner": win, "until": time.time() + 7, "a": a, "b": b}
+    DANCE["battle"], DANCE["show"]["bar"], DANCE["side"], DANCE["bend"] = False, False, "", 0.0
+    t = threading.Timer(7.3, dance_emit)  # se quita el letrero del resultado
+    t.daemon = True
+    t.start()
+
+
+def _battle_watch(end: float) -> None:
+    while time.time() < end:
+        time.sleep(0.2)
+        if not DANCE["battle"] or DANCE.get("bend") != end:
+            return
+    with DANCE_LOCK:
+        if DANCE["battle"] and DANCE.get("bend") == end:
+            _battle_finish_locked()
+    dance_save()
+    dance_emit()
+
+
 def _solo_finish_locked() -> None:
     """Se acabó el turno: ¿llegó a la meta? (con DANCE_LOCK tomado)"""
     so = DANCE["solo"]
@@ -1870,6 +1902,8 @@ def clean_dance(new: dict, cur: dict) -> dict:
         for k in ("add_live", "count_win"):
             if isinstance(solo.get(k), bool):
                 so[k] = solo[k]
+    if "battle_secs" in new:
+        out["battle_secs"] = int(_num(new.get("battle_secs"), out.get("battle_secs", 120), 0, 3600))
     if new.get("total_style") in ("classic", "dynasty"):
         out["total_style"] = new["total_style"]
     logo = new.get("logo")

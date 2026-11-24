@@ -1,5 +1,9 @@
 # Cambios de EC-Tok
 
+## 4.2.1
+- ⚔ **La batalla Vs. tiene su propio reloj** (se pone en su tarjeta: «Tiempo de la batalla», 0:00 = sin reloj). Sale abajo del VS, se pone rojo en los últimos 10 segundos y al llegar a 0 la batalla **termina sola** y sale **«¡GANÓ …!»** o **«¡EMPATE!»** unos segundos. El reloj del baile grupal no se toca.
+- En la tarjeta se ve el marcador en vivo y quién ganó la última batalla.
+
 ## 4.2.0 — 🎤 Turno sola
 - Nueva modalidad del live de baile: **pasa una bailarina sola** y **todo lo que se done en su turno le cuenta a ella** (sin regalo de activación).
 - Nueva fuente **🎤 Turno sola**: su foto, barra de progreso, «puntos / meta», su nombre grande y el recuadro **TIEMPO**. Al acabarse el tiempo sale **«¡GANÓ!»** o **«¡PERDIÓ!»** unos segundos. Mientras dura, la cuadrícula y la barra Vs. se esconden.

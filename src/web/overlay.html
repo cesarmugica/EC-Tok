@@ -257,6 +257,13 @@
   #dbar .av { width: calc(6vw * var(--dz)); height: calc(6vw * var(--dz)); border: calc(.4vw * var(--dz)) solid var(--c); }
   #dbar .nm { font-weight: 900; font-style: italic; text-transform: uppercase; font-size: calc(2.8vw * var(--dz)); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 30vw; }
   #dbar .gi { width: calc(4.6vw * var(--dz)); height: calc(4.6vw * var(--dz)); }
+  #dbar .mid { display: flex; flex-direction: column; align-items: center; }
+  #dbar .bclk { margin-top: calc(.3vw * var(--dz)); font-weight: 900; font-style: italic; font-variant-numeric: tabular-nums; font-size: calc(3vw * var(--dz)); color: #111 !important; text-shadow: none !important;
+    background: linear-gradient(180deg, #ffe45c, #f5b900); padding: 0 calc(1.2vw * var(--dz)); border-radius: calc(.5vw * var(--dz)); transform: skewX(-10deg); box-shadow: 0 .3vw .8vw rgba(0,0,0,.4); }
+  #dbar .bclk.low { background: linear-gradient(180deg, #ff6b78, #e0283a); color: #fff !important; }
+  #dbar .wrap { position: relative; }
+  #dbar .stamp { position: absolute; left: 50%; top: 60%; transform: translate(-50%, -50%) rotate(-5deg); font-weight: 900; font-style: italic; font-size: calc(6.5vw * var(--dz)); white-space: nowrap;
+    color: #ffd54a; -webkit-text-stroke: calc(.4vw * var(--dz)) #111; paint-order: stroke fill; text-shadow: calc(.5vw * var(--dz)) calc(.5vw * var(--dz)) 0 #111; animation: dstamp .5s cubic-bezier(.2,1.6,.4,1) both; }
   #dbar .vs { font-weight: 900; font-style: italic; font-size: calc(4vw * var(--dz)); color: #ffd54a; text-shadow: 0 0 1.2vw rgba(255,170,0,.9), 0 .3vw .6vw #000; }
   #dbar .bar { position: relative; display: flex; height: calc(4.8vw * var(--dz)); margin-top: calc(.8vw * var(--dz)); border-radius: 999px; overflow: hidden;
     box-shadow: 0 0 0 calc(.35vw * var(--dz)) rgba(255,255,255,.85), 0 .6vw 1.6vw rgba(0,0,0,.45); }
@@ -657,6 +664,10 @@
   const dnAvC = (d, lead) => d.id === lead ? `<span class="crwrap">${dnAv(d)}<span class="crown">👑</span></span>` : dnAv(d);
   const dnClockHtml = () => { const c = DN.clock || {}; return `<div class="dclkbox"><span class="clk dclk">${c.rounds && c.round ? `<span class="rtag">R${c.round}</span>` : ''}<span class="tm"></span></span></div>`; };
   function dnTickClocks() {
+    document.querySelectorAll('#dbar .bclk').forEach(el => {
+      const left = Math.max(0, ((DN.battle_end_ms || 0) - (Date.now() + dnSkew)) / 1000), sec = Math.ceil(left - 0.001);
+      el.textContent = `${Math.floor(sec / 60)}:${String(sec % 60).padStart(2, '0')}`; el.classList.toggle('low', sec <= 10);
+    });
     document.querySelectorAll('.dsclk').forEach(el => {
       const so = DN.solo || {}, left = so.active ? Math.max(0, (so.end_ms - (Date.now() + dnSkew)) / 1000) : 0, sec = Math.ceil(left - 0.001);
       el.textContent = `${String(Math.floor(sec / 60)).padStart(2, '0')}:${String(sec % 60).padStart(2, '0')}`; el.classList.toggle('low', so.active && sec <= 10);
@@ -669,7 +680,7 @@
     const on = !!DN.on, s = DN.show || {};
     const so = DN.solo || {}, soloOn = !!(so.active || so.show_result);
     const vis = {dsolo: on && soloOn, dgrid: on && s.grid && !DN.battle && !soloOn, dtotal: on && DN.show_total && s.total, dclock: on && s.clock && !(DN.clock || {}).attach, dlogo: on && s.logo && !!(DN.logo || {}).url,
-      dbar: on && DN.show_vs && DN.battle && s.bar && !soloOn, dvs: on && DN.show_vs && s.vs && !!DN.side};
+      dbar: on && DN.show_vs && ((DN.battle && s.bar) || !!(DN.bres || {}).show) && !soloOn, dvs: on && DN.show_vs && s.vs && !!DN.side};
     for (const k of Object.keys(vis)) $('#' + k).hidden = !(which.includes(k) && vis[k]);
     if (which.includes('dgrid') && vis.dgrid) drawDGrid();
     if (which.includes('dtotal') && vis.dtotal) drawDTotal();
@@ -679,7 +690,7 @@
     if (which.includes('dvs')) drawDVs(vis.dvs);
     if (which.includes('dsolo') && vis.dsolo) drawDSolo();
     clearInterval(dnClockTimer);
-    if (document.querySelector('.dclk, .dsclk')) { dnTickClocks(); dnClockTimer = setInterval(dnTickClocks, 200); }
+    if (document.querySelector('.dclk, .dsclk, #dbar .bclk')) { dnTickClocks(); dnClockTimer = setInterval(dnTickClocks, 200); }
   }
   function drawDGrid() {
     const box = $('#dgrid'), list = (DN.grid || []).map(dnBy).filter(Boolean), n = list.length;
@@ -731,13 +742,14 @@
     img.style.width = (l.size || 60) + 'vw'; img.style.opacity = (l.opacity || 100) / 100; img.classList.toggle('float', l.float !== false);
   }
   function drawDBar() {
-    const box = $('#dbar'), a = dnBy(DN.left), b = dnBy(DN.right);
+    const res = DN.bres || {}, ended = !DN.battle && res.show;
+    const box = $('#dbar'), a = dnBy(ended ? res.a : DN.left), b = dnBy(ended ? res.b : DN.right);
     if (!a || !b) { box.innerHTML = ''; return; }
     const sum = a.bpoints + b.bpoints, pa = sum ? a.bpoints / sum : 0.5;
-    box.innerHTML = `<div class="wrap"><div class="tops"><div class="who" style="--c:${a.color}">${dnAv(a)}<span class="nm">${esc(a.name)}</span>${dnGift(a.battle_gift_url, a.circle)}</div><span class="vs">VS</span>
+    box.innerHTML = `<div class="wrap"><div class="tops"><div class="who" style="--c:${a.color}">${dnAv(a)}<span class="nm">${esc(a.name)}</span>${dnGift(a.battle_gift_url, a.circle)}</div><span class="mid"><span class="vs">VS</span>${DN.battle && DN.battle_end_ms ? '<span class="bclk"></span>' : ''}</span>
       <div class="who r" style="--c:${b.color}">${dnAv(b)}<span class="nm">${esc(b.name)}</span>${dnGift(b.battle_gift_url, b.circle)}</div></div>
       <div class="bar"><div style="--c:${a.color};flex-grow:${Math.max(pa, 0.001)}"><span class="pt">${dnFmt(a.bpoints)}</span></div><div class="r" style="--c:${b.color};flex-grow:${Math.max(1 - pa, 0.001)}"><span class="pt">${dnFmt(b.bpoints)}</span></div>
-      <span class="bolt" style="left:${Math.min(92, Math.max(8, pa * 100))}%">⚡</span></div>${(DN.clock || {}).attach && (DN.show || {}).clock ? dnClockHtml() : ''}</div>`;
+      <span class="bolt" style="left:${Math.min(92, Math.max(8, pa * 100))}%">⚡</span></div>${ended ? `<div class="stamp">${(() => { const w = dnBy(res.winner); const L = (cfg && cfg.lang) || 'es'; return w ? (L === 'en' ? `${esc(w.name)} WINS!` : L === 'pt' ? `${esc(w.name)} GANHOU!` : `¡GANÓ ${esc(w.name)}!`) : (L === 'en' ? 'TIE!' : L === 'pt' ? 'EMPATE!' : '¡EMPATE!'); })()}</div>` : ''}${(DN.clock || {}).attach && (DN.show || {}).clock ? dnClockHtml() : ''}</div>`;
     dnStyle(box, 'bar');
   }
   function drawDVs(visible) {

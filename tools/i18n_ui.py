@@ -698,4 +698,11 @@ T = {
 'Primero termina la batalla.': ('End the battle first.', 'Primeiro termine a batalha.'),
 'Primero termina el turno sola.': ('End the solo turn first.', 'Primeiro termine o turno solo.'),
 'Elige a la bailarina que va a pasar sola (tiene que estar presente).': ('Choose the dancer who goes solo (she must be present).', 'Escolha a dançarina que vai passar sozinha (tem que estar presente).'),
+'Tiempo de la batalla': ('Battle time', 'Tempo da batalha'),
+'0:00 = sin reloj': ('0:00 = no timer', '0:00 = sem relógio'),
+'Su propio reloj: sale abajo del VS y al llegar a 0 la batalla termina sola y sale quién ganó. 0:00 = sin reloj.': ('Its own timer: it shows under the VS, and when it reaches 0 the battle ends by itself and shows who won. 0:00 = no timer.', 'Relógio próprio: aparece embaixo do VS e, ao chegar a 0, a batalha termina sozinha e mostra quem ganhou. 0:00 = sem relógio.'),
+'⚔ {0} {1} – {2} {3}': ('⚔ {0} {1} – {2} {3}', '⚔ {0} {1} – {2} {3}'),
+'quedan {0}': ('{0} left', 'faltam {0}'),
+'🏆 Última batalla: ganó {0}': ('🏆 Last battle: {0} won', '🏆 Última batalha: {0} ganhou'),
+'🤝 Última batalla: empate': ('🤝 Last battle: tie', '🤝 Última batalha: empate'),
 }
