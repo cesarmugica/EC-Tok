@@ -157,6 +157,8 @@
   .dz { --dz: 1; font-family: var(--dfont, inherit); }
   .dz .nm, .dz .pt, .dz h1, .dz .clk { color: var(--dcol, #fff); }
   .dz.ring .nm, .dz.ring .pt, .dz.ring h1, .dz.ring .clk { text-shadow: var(--dring); }
+  /* los nombres en cursiva y con sombra no se cortan: espacio para la inclinación y la sombra (sin mover nada) */
+  .dz .nm { padding: .3em .45em .35em .3em; margin: -.3em -.45em -.35em -.3em; box-sizing: content-box; }
   .dz .av { border-radius: 50%; object-fit: cover; background: rgba(255,255,255,.18); display: grid; place-items: center; flex: none; overflow: hidden; }
   .dz .gi { object-fit: contain; flex: none; }
   .dz .gi.circle { border-radius: 50%; background: rgba(0,0,0,.6); box-sizing: border-box; padding: calc(.55vw * var(--dz)); }
@@ -226,10 +228,12 @@
   #dtotal.dyn .box { background: transparent !important; padding: 0; }
   #dtotal.dyn h1 { display: inline-block; transform: skewX(-12deg); background: linear-gradient(180deg, #ffe45c, #f5b900); color: #111 !important; text-shadow: none !important; font-style: italic;
     padding: calc(.3vw * var(--dz)) calc(2vw * var(--dz)); border-radius: calc(.4vw * var(--dz)); margin: 0 0 calc(.6vw * var(--dz)) calc(1vw * var(--dz)); }
-  #dtotal.dyn .r { transform: skewX(-12deg); gap: 0; margin-top: calc(.5vw * var(--dz)); box-shadow: 0 .3vw .8vw rgba(0,0,0,.4); }
+  #dtotal.dyn .r { transform: skewX(-12deg); gap: 0; margin-top: calc(.5vw * var(--dz)); }
+  #dtotal.dyn .n { box-shadow: 0 .3vw .8vw rgba(0,0,0,.4); }
   #dtotal.dyn .n { width: calc(4.4vw * var(--dz)); height: calc(4.4vw * var(--dz)); display: grid; place-items: center; background: linear-gradient(180deg, #ffe45c, #f5b900); color: #111; font-size: calc(2.6vw * var(--dz)); font-style: italic; }
   #dtotal.dyn .av { margin: 0 calc(-2.2vw * var(--dz)) 0 calc(.6vw * var(--dz)); position: relative; z-index: 1; transform: skewX(12deg); }
   #dtotal.dyn .b { border-radius: 0; height: calc(4.4vw * var(--dz)); padding-left: calc(2.8vw * var(--dz)); box-shadow: none;
+    box-shadow: 0 .3vw .8vw rgba(0,0,0,.4) !important;
     background: repeating-linear-gradient(-45deg, rgba(255,255,255,.1) 0 .4vw, transparent .4vw 1vw), linear-gradient(90deg, color-mix(in srgb, var(--c) 80%, #000), var(--c)); }
   #dtotal.dyn .b > * { transform: skewX(12deg); }
   /* reloj */

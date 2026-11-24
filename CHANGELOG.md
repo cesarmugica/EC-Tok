@@ -1,5 +1,9 @@
 # Cambios de EC-Tok
 
+## 4.1.1
+- 💃 Live de Baile: los nombres de las bailarinas ya no se cortan (la última letra en cursiva y la sombra se recortaban en la cuadrícula y en la lista de puntos).
+- Estilo «Dynasty»: sin la orilla clara alrededor de cada renglón.
+
 ## 4.1.0 — 💃 Más diseños para el live de baile
 - Cuadrícula de activación: nuevo arreglo **«Placas inclinadas»** (una placa por bailarina con su color, rayitas, foto, nombre, puntos y su regalo arriba).
 - **👑 Corona** a la que va ganando (se mueve sola), en todos los arreglos.
