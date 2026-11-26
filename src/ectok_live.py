@@ -491,7 +491,8 @@ def test_event(kind: str, gift: str = "") -> dict:
     name = random.choice(TEST_USERS)
     user = {"id": name.replace(" ", "_").lower(), "name": name, "avatar": ""}
     if kind == "gift":
-        options = [g for g in TEST_GIFTS if g[0].lower() == gift.lower()] or [random.choice(TEST_GIFTS[:8])]
+        options = ([g for g in TEST_GIFTS if g[0].lower() == gift.lower()] or ([(gift, 1)] if gift.strip() else [])
+                   or [random.choice(TEST_GIFTS[:8])])
         gname, each = options[0]
         # Heart Me: TikTok solo deja mandar uno al día por persona.
         count = 1 if each >= 100 or gname.lower() == "heart me" else random.choice([1, 1, 3, 5, 10])

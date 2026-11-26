@@ -1,5 +1,9 @@
 # Cambios de EC-Tok
 
+## 4.8.1
+- ⭐ La casilla de «Regalo especial» ya es del mismo tamaño que las demás (el nombre ahora es más corto: «⭐ Regalo especial»).
+- ⭐ Nuevo botón **«⭐ Regalo especial»** en «Probar:» (📢 Alertas): manda una prueba con el regalo que elegiste. Si la alerta está apagada, te pregunta si la prendes para verla.
+
 ## 4.8.0
 - ⭐ **Nueva alerta: «Un regalo en especial»** (en 📢 Alertas). Eliges el regalo (por ejemplo **Quiéreme / Heart Me**), su texto («¡Gracias por tu {gift}, {user}!»), y si sale el cartelito, una animación del banco o las dos. Ese regalo ya no sale en la alerta general de regalos, para que no se repita.
 - ❤️ **Banco de animaciones 4**: 36 corazones «Quiéreme» (6 corazones × 3 movimientos: se acercan, saludan y giran, felices). Descárgalo con «Buscar actualización» en el banco de animaciones. Como los corazones no traen letrero, el texto sale en la alerta.
