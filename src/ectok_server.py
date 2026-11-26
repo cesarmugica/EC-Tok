@@ -31,7 +31,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, unquote, urlsplit
 
-APP_VERSION = "4.7.2"
+APP_VERSION = "4.8.0"
 
 try:  # lo genera windows/build.ps1
     from ectok_build import BUILD_DATE  # type: ignore[import-not-found]
@@ -116,6 +116,9 @@ DEFAULT_CONFIG: dict = {
                   "banner": True, "anim": False, "anim_file": "", "anim_size": 70},
         "like": {"on": False, "every": 1000, "text": "¡Ya llevamos {likes} likes!", "seconds": 4,
                  "banner": True, "anim": False, "anim_file": "", "anim_size": 70},
+        # ⭐ un regalo en especial (ej. «Quiéreme»): su propia alerta y su animación; ese regalo ya no sale en la alerta general
+        "gift_special": {"on": False, "gift": "Heart Me", "text": "¡Gracias por tu {gift}, {user}!", "seconds": 6,
+                         "banner": True, "anim": False, "anim_file": "", "anim_size": 70},
     },
     # Consola de sonidos para tocar a mano durante el live (ventana flotante)
     "console": {"sounds": [], "ontop": True},
@@ -429,6 +432,7 @@ DEFAULT_TEXTS: dict[tuple, dict[str, str]] = {
     ("alerts", "follow", "text"): {"es": "{user} te empezó a seguir", "en": "{user} followed you", "pt": "{user} começou a te seguir"},
     ("alerts", "share", "text"): {"es": "{user} compartió el live", "en": "{user} shared the LIVE", "pt": "{user} compartilhou a live"},
     ("alerts", "like", "text"): {"es": "¡Ya llevamos {likes} likes!", "en": "We reached {likes} likes!", "pt": "Já temos {likes} curtidas!"},
+    ("alerts", "gift_special", "text"): {"es": "¡Gracias por tu {gift}, {user}!", "en": "Thanks for your {gift}, {user}!", "pt": "Obrigado pelo seu {gift}, {user}!"},
     ("tts", "comment_text"): {"es": "{user} dice: {text}", "en": "{user} says: {text}", "pt": "{user} diz: {text}"},
     ("tts", "gift_text"): {"es": "{user} envió {count} {gift}. ¡Gracias!", "en": "{user} sent {count} {gift}. Thank you!", "pt": "{user} enviou {count} {gift}. Obrigado!"},
     ("tts", "follow_text"): {"es": "Gracias por seguirme, {user}", "en": "Thanks for following, {user}", "pt": "Obrigado por me seguir, {user}"},
@@ -525,6 +529,8 @@ def clean_config(data: dict) -> dict:
                     current["min_diamonds"] = int(_num(new.get("min_diamonds"), current["min_diamonds"], 0, 100000))
                 if "every" in current:
                     current["every"] = int(_num(new.get("every"), current["every"], 10, 10_000_000))
+                if "gift" in current and "gift" in new:
+                    current["gift"] = _text(new.get("gift"), current["gift"], 60).strip()
                 for flag in ("banner", "anim"):
                     if isinstance(new.get(flag), bool):
                         current[flag] = new[flag]
@@ -1290,7 +1296,9 @@ def alert_anims(ev: dict) -> list[dict]:
     kind = ev.get("type")
     alerts = CONFIG["alerts"]
     conf, data = None, ev
-    if kind == "gift" and (ev.get("gift") or {}).get("total", 0) >= alerts["gift"].get("min_diamonds", 1):
+    if kind == "gift" and ev.get("special"):
+        conf = alerts["gift_special"]  # ⭐ su alerta propia (en vez de la general)
+    elif kind == "gift" and (ev.get("gift") or {}).get("total", 0) >= alerts["gift"].get("min_diamonds", 1):
         conf = alerts["gift"]
     elif kind in ("follow", "share"):
         conf = alerts[kind]
@@ -1315,7 +1323,14 @@ def alert_anims(ev: dict) -> list[dict]:
     return [anim_event(file, conf.get("seconds", 5), conf.get("anim_size", 70), who=who, caption=re.sub(r"\{user\}\s*", "", text).strip())]
 
 
+def _is_special(event: dict) -> bool:
+    sp = CONFIG["alerts"].get("gift_special") or {}
+    return bool(event.get("type") == "gift" and sp.get("on") and sp.get("gift") and same_gift((event.get("gift") or {}).get("name", ""), sp["gift"]))
+
+
 def live_emit(event: dict) -> None:
+    if _is_special(event):
+        event["special"] = True  # ⭐ el overlay le pone su alerta propia
     BUS.emit(event)
     if event.get("type") == "gift":
         with contextlib.suppress(Exception):

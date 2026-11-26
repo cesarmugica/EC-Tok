@@ -677,6 +677,7 @@
   function wantAlert(ev) {
     const a = cfg.alerts;
     const show = c => c.on && c.banner !== false;  // «📢 Alerta» desmarcada = solo la animación
+    if (ev.type === 'gift' && ev.special) return a.gift_special && show(a.gift_special) ? a.gift_special : null;  // ⭐ su alerta propia
     if (ev.type === 'gift') return show(a.gift) && ev.gift.total >= a.gift.min_diamonds ? a.gift : null;
     if (ev.type === 'follow') return show(a.follow) ? a.follow : null;
     if (ev.type === 'share') return show(a.share) ? a.share : null;

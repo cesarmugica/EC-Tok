@@ -789,4 +789,6 @@ T = {
 '↩ Cancelar (no prender a esta bailarina)': ('↩ Cancel (don’t turn this dancer on)', '↩ Cancelar (não ativar esta dançarina)'),
 'Con {0} bailarinas, el estilo «{1}» se acomoda en 2 renglones.': ('With {0} dancers, the «{1}» style is arranged in 2 rows.', 'Com {0} dançarinas, o estilo «{1}» se organiza em 2 linhas.'),
 '¿Prefieres conservar 1 renglón? (Pueden verse apretadas.) Si se pasa a 2 renglones, revisa en LIVE Studio que el cuadro de la fuente no corte la imagen.': ('Prefer to keep 1 row? (They may look tight.) If it goes to 2 rows, check in LIVE Studio that the source box doesn’t crop the image.', 'Prefere manter 1 linha? (Podem ficar apertadas.) Se passar para 2 linhas, confira no LIVE Studio que a caixa da fonte não corte a imagem.'),
+'⭐ Un regalo en especial': ('⭐ A specific gift', '⭐ Um presente especial'),
+'Este regalo tiene su propia alerta y su animación (por ejemplo el Quiéreme con un corazón); ya no sale en la alerta general de regalos': ('This gift has its own alert and animation (for example Heart Me with a heart); it no longer shows in the general gift alert', 'Este presente tem seu próprio alerta e animação (por exemplo o Heart Me com um coração); ele não aparece mais no alerta geral de presentes'),
 }

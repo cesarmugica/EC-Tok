@@ -1,0 +1,37 @@
+# Publica un banco de animaciones nuevo: toma el banco anterior (release banco-N-1), le agrega banco/nuevos/*.webm
+# y publica el release banco-N (N = banco/siguiente.txt). Corre cuando cambia algo en banco/.
+name: Banco de animaciones
+
+on:
+  push:
+    branches: [main]
+    paths: ['banco/**']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  banco:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Armar y publicar el banco
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -e
+          N=$(tr -dc '0-9' < banco/siguiente.txt)
+          if gh release view "banco-$N" > /dev/null 2>&1; then echo "banco-$N ya está publicado; sube el número en banco/siguiente.txt."; exit 0; fi
+          P=$((N-1))
+          gh release download "banco-$P" -p '*.zip' -D prev
+          mkdir work && cd work && unzip -q ../prev/*.zip
+          cp ../banco/nuevos/*.webm .
+          echo "$N" > version.txt
+          zip -q -0 -r "../ectok-banco-$N.zip" .
+          cd ..
+          COUNT=$(unzip -l "ectok-banco-$N.zip" | grep -c '\.webm$')
+          NEW=$(ls banco/nuevos/*.webm | wc -l)
+          gh release create "banco-$N" "ectok-banco-$N.zip" --target "$GITHUB_SHA" --latest=false \
+            --title "Banco de animaciones $N" \
+            --notes "Banco de animaciones de EC-Tok: $COUNT animaciones (el banco $P más $NEW nuevas). EC-Tok lo descarga con «Buscar actualización»."

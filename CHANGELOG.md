@@ -1,5 +1,9 @@
 # Cambios de EC-Tok
 
+## 4.8.0
+- ⭐ **Nueva alerta: «Un regalo en especial»** (en 📢 Alertas). Eliges el regalo (por ejemplo **Quiéreme / Heart Me**), su texto («¡Gracias por tu {gift}, {user}!»), y si sale el cartelito, una animación del banco o las dos. Ese regalo ya no sale en la alerta general de regalos, para que no se repita.
+- ❤️ **Banco de animaciones 4**: 36 corazones «Quiéreme» (6 corazones × 3 movimientos: se acercan, saludan y giran, felices). Descárgalo con «Buscar actualización» en el banco de animaciones. Como los corazones no traen letrero, el texto sale en la alerta.
+
 ## 4.7.2
 - 📐 **Aviso al cambiar de renglones**: si al prender una bailarina la Barra de Activación pasaría de 1 a 2 renglones (Tarjetas en 1 renglón y los estilos de tarjeta: Cristal, Dorado, Cómic, Retro y Pastel), EC-Tok pregunta: **SÍ, conservar 1 renglón** / **NO, pasar a 2 renglones** / **Cancelar** (la bailarina se queda apagada). Si cambia a 2 renglones, te recuerda revisar el cuadro de la fuente en LIVE Studio.
 
