@@ -1,5 +1,8 @@
 # Cambios de EC-Tok
 
+## 4.8.8
+- 📢 El cintillo de las alertas deja siempre espacio para **2 renglones de texto + los 💎**: casi nunca hace falta achicar la letra; solo si el texto ocupa 3 renglones o más.
+
 ## 4.8.7
 - 📢 El cintillo de las alertas ahora **siempre mide lo mismo** (mismo ancho y alto): si el texto o el nombre son largos, la letra se achica sola para que quepa y nunca se salga de su fuente en LIVE Studio u OBS.
 
