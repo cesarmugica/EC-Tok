@@ -1,5 +1,13 @@
 # Cambios de EC-Tok
 
+## 4.6.0
+- ⏱ **Cuenta 5, 4, 3, 2, 1… ¡YA!** antes de que arranque cada reloj (juego de activación, batalla 1vs1 y baile individual), grande y en el lugar del reloj, para que la gente sepa cuándo empieza. En la batalla y el baile individual los regalos cuentan desde el ¡YA!
+- 🎁 **Hasta 3 regalos de activación por bailarina** (en su ➕). Cualquiera de los 3 le suma.
+- 👑 **Quién donó más**: junto a sus regalos sale el usuario que más le ha donado en el juego de activación, en la batalla 1vs1 y en el baile individual (cada uno empieza de cero). Se puede apagar arriba con «👑 Quién donó más».
+- 👁 Los botones de las fuentes del Live de Baile dicen lo que van a hacer («👁 Mostrar» / «🙈 Ocultar») y mientras trabajan dicen «Activando…» / «Desactivando…». Mostrar la barra de activación durante una batalla o un baile individual te pregunta qué hacer con lo que está en curso.
+- 🔌 El botón de conectar dice **«Conectando…»** y el de desconectar **«Desconectando…»** mientras trabajan.
+- 🎁 La lista para elegir regalos ya muestra **todos** (antes se cortaba en 300).
+
 ## 4.5.0
 - 🎁 **La lista de regalos ahora es la del live al que te conectas.** Antes EC-Tok iba juntando los regalos de todos los lives a los que te habías conectado (por eso salía, por ejemplo, el regalo de la comunidad de otro live). Al conectarte, la lista se cambia por la que TikTok manda para ese live.
 - 🔄 **Botón «Actualizar lista de regalos»**: junto a «Desconectar» (cuando estás en vivo) y en la ventana para elegir el regalo de cada bailarina. Le vuelve a pedir a TikTok la lista de ese live.

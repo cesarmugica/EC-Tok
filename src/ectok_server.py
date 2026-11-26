@@ -31,7 +31,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, unquote, urlsplit
 
-APP_VERSION = "4.5.0"
+APP_VERSION = "4.6.0"
 
 try:  # lo genera windows/build.ps1
     from ectok_build import BUILD_DATE  # type: ignore[import-not-found]
@@ -193,7 +193,7 @@ DEFAULT_CONFIG: dict = {
 
 def _dancer_default(i: int) -> dict:
     colors = ["#FF3B8D", "#2EA8FF", "#FFB020", "#9B5CFF", "#FF4A3D", "#21D07A"]
-    return {"id": f"d{i + 1}", "on": True, "user": "", "label": "", "gift": "", "battle_gift": "", "goal": 0,
+    return {"id": f"d{i + 1}", "on": True, "user": "", "label": "", "gift": "", "gift2": "", "gift3": "", "battle_gift": "", "goal": 0,
             "color": colors[i % len(colors)], "circle": True, "photo": "", "side": "left" if i % 2 == 0 else "right",
             "fight": False, "label_auto": False, "solo_goal": 0}
 
@@ -207,7 +207,7 @@ DANCE_KEYS = ("grid_show", "grid_ref", "total_show", "total_ref", "clock_run", "
 
 
 def dance_default() -> dict:
-    return {"on": False, "layout": "bar", "show_total": True, "show_vs": True, "auto_remove": False, "battle_add": True,
+    return {"on": False, "layout": "bar", "show_total": True, "show_vs": True, "show_top": True, "auto_remove": False, "battle_add": True,
             "total_title": "Puntos de hoy", "dancers": [_dancer_default(i) for i in range(6)],
             "battle_secs": 120,  # ⏱ reloj propio de la batalla (0 = sin reloj)
             "clock_hold": 3,  # ⏱ segundos que se queda cada reloj en 0:00 antes de quitarse (1 a 5)
@@ -1564,12 +1564,12 @@ class DanceScript:
                     x["fight"], x["side"] = k < 2, "left" if k == 0 else "right"
             secs = int(d.get("battle_secs") or 0)
             span = min(secs, 60) if secs else 30
-            self.until = now + span + 0.5
+            self.until = now + COUNTDOWN + span + 0.5
             if dance_action("bar_show", resolve="win"):
                 self.until = now  # no se pudo (faltan las 2): sigue con lo demás
             elif DANCE.get("bend"):
                 with DANCE_LOCK:  # en la prueba la batalla dura máx. 1 min (y su reloj lo dice)
-                    DANCE["bend"] = min(DANCE["bend"], now + span)
+                    DANCE["bend"] = min(DANCE["bend"], now + COUNTDOWN + span)
                 threading.Thread(target=_battle_watch, args=(DANCE["bend"],), daemon=True).start()
                 dance_emit()
         elif self.phase == "solo":
@@ -1686,7 +1686,7 @@ def _dance_save_now() -> None:
         data = json.loads(json.dumps(DANCE))
     c = data["clock"]
     if c["running"]:
-        c["left"], c["running"], c["end"] = max(0.0, c["end"] - time.time()), False, 0.0
+        c["left"], c["running"], c["end"] = min(float(CONFIG["dance"]["clock"]["seconds"]), max(0.0, c["end"] - time.time())), False, 0.0
     with contextlib.suppress(OSError):
         DANCE_FILE.write_text(json.dumps(data, ensure_ascii=False), encoding="utf-8")
 def dance_save() -> None:
@@ -1749,7 +1749,9 @@ def dance_payload() -> dict:
         dancers.append({"id": x["id"], "on": bool(x.get("on")), "user": x.get("user", ""),
                         "name": x.get("label") or x.get("user") or "", "color": x.get("color", "#FF3B8D"),
                         "circle": bool(x.get("circle")), "goal": int(x.get("goal") or 0), "gift": x.get("gift", ""),
-                        "gift_url": _gift_url(x.get("gift", "")), "battle_gift": x.get("battle_gift") or x.get("gift", ""),
+                        "gift_url": _gift_url(x.get("gift", "")), "gift_urls": [u for u in (_gift_url(n) for n in _acts(x)) if u] or [""],
+                        "top": {k: _donor_top(k, x["id"]) for k in ("grid", "battle", "solo")},
+                        "battle_gift": x.get("battle_gift") or x.get("gift", ""),
                         "battle_gift_url": _gift_url(x.get("battle_gift") or x.get("gift", "")),
                         "photo": f"/baile/foto/{_q(photo.name)}?v={int(photo.stat().st_mtime)}" if photo else "",
                         "points": pts.get(x["id"], 0), "bpoints": bpts.get(x["id"], 0), "wins": wins.get(x["id"], 0)})
@@ -1760,11 +1762,12 @@ def dance_payload() -> dict:
             "total": [i for i in (roster["total"] if roster["total"] is not None else present)],
             "show": show, "battle": bool(DANCE["battle"]), "left": left["id"] if left else "", "right": right["id"] if right else "",
             "side": dance_side(), "clock": {"total": d["clock"]["seconds"], "left": clock["left"], "running": clock["running"],
-                                            "end_ms": int(clock["end"] * 1000), "done_ms": int(clock.get("done", 0.0) * 1000),
+                                            "end_ms": int(clock["end"] * 1000), "done_ms": int(clock.get("done", 0.0) * 1000), "go_ms": int(clock.get("go", 0.0) * 1000) if clock["running"] else 0,
                                             "rounds": bool(d["clock"].get("rounds")), "round": DANCE["round"]},
-            "total_style": d.get("total_style", "classic"), "bar_style": d.get("bar_style", "classic"), "clock_hold": int(_hold()), "solo_style": d.get("solo_style", "poster"),
+            "total_style": d.get("total_style", "classic"), "bar_style": d.get("bar_style", "classic"), "clock_hold": int(_hold()), "show_top": bool(d.get("show_top", True)), "solo_style": d.get("solo_style", "poster"),
             "battle_secs": int(d.get("battle_secs") or 0),
             "battle_end_ms": int(DANCE.get("bend", 0) * 1000),
+            "battle_go_ms": int(DANCE.get("bgo", 0) * 1000) if DANCE["battle"] else 0,
             "bres": {**DANCE.get("bres", {}), "until": 0, "show": DANCE.get("bres", {}).get("until", 0) > time.time()},
             "solo": {**{k: v for k, v in DANCE["solo"].items() if k not in ("end", "until")}, "end_ms": int(DANCE["solo"]["end"] * 1000),
                      "until_ms": int(DANCE["solo"]["until"] * 1000), "seconds": d["solo"]["seconds"],
@@ -1775,6 +1778,44 @@ def dance_payload() -> dict:
             "show_vs": d["show_vs"] or DANCE_SIM["active"], "now_ms": int(time.time() * 1000)}
 def dance_emit() -> None:
     BUS.emit(new_event("dance", dance=dance_payload()))
+COUNTDOWN = 5.0  # ⏱ 5, 4, 3, 2, 1… ¡YA!: la cuenta antes de que arranque cada reloj
+
+
+def _acts(x: dict) -> list[str]:
+    """Los regalos de activación de una bailarina (hasta 3)."""
+    out = []
+    for k in ("gift", "gift2", "gift3"):
+        n = (x.get(k) or "").strip()
+        if n and n not in out:
+            out.append(n)
+    return out
+
+
+def _donor_add(scope: str, did: str, user: dict, total: int) -> None:
+    """👑 quién le ha donado más a cada bailarina (en el juego de activación, la batalla o el turno)."""
+    u = user or {}
+    uid = str(u.get("id") or u.get("name") or "")
+    if not uid:
+        return
+    box = DANCE.setdefault("donors", {}).setdefault(scope, {}).setdefault(did, {})
+    row = box.get(uid) or [0, "", ""]
+    row[0] += total
+    row[1], row[2] = str(u.get("name") or uid)[:40], str(u.get("avatar") or row[2])
+    box[uid] = row
+
+
+def _donor_top(scope: str, did: str) -> dict | None:
+    box = ((DANCE.get("donors") or {}).get(scope) or {}).get(did) or {}
+    if not box:
+        return None
+    coins, name, avatar = max(box.values(), key=lambda r: r[0])
+    return {"name": name, "avatar": avatar, "coins": coins}
+
+
+def _donors_reset(scope: str) -> None:
+    DANCE.setdefault("donors", {})[scope] = {}
+
+
 def dance_gift(ev: dict) -> None:
     """Un regalo: le suma a la bailarina que tiene ese regalo de activación (y en batalla, a la barra Vs.)."""
     d = CONFIG["dance"]
@@ -1785,14 +1826,18 @@ def dance_gift(ev: dict) -> None:
     if not name or total <= 0:
         return
     left, right = _fighters()
-    fighters = {x["id"] for x in (left, right) if x} if DANCE["battle"] else set()
+    now = time.time()
+    user = ev.get("user") or {}
+    # durante la cuenta 5…1 todavía no empieza: los regalos cuentan como en el juego de activación
+    fighters = {x["id"] for x in (left, right) if x} if DANCE["battle"] and now >= DANCE.get("bgo", 0) else set()
     changed, reached = False, []
     solo = DANCE["solo"]
-    if solo["active"]:  # 🎤 turno sola: cualquier regalo le cuenta a ella
+    if solo["active"] and now >= solo.get("go", 0):  # 🎤 turno sola: cualquier regalo le cuenta a ella
         x = next((y for y in _dancers() if y["id"] == solo["id"]), None)
         if x:
             with DANCE_LOCK:
                 solo["pts"] += total
+                _donor_add("solo", x["id"], user, total)
                 if d["solo"]["add_live"]:  # también a sus puntos del live (meta diaria)
                     before = DANCE["points"].get(x["id"], 0)
                     DANCE["points"][x["id"]] = before + total
@@ -1805,18 +1850,20 @@ def dance_gift(ev: dict) -> None:
         return
     with DANCE_LOCK:
         for x in _present():
-            act = x.get("gift") or ""
-            bgift = x.get("battle_gift") or act
+            acts = _acts(x)
+            bgift = x.get("battle_gift") or (acts[0] if acts else "")
             if x["id"] in fighters and bgift and same_gift(name, bgift):
                 DANCE["bpoints"][x["id"]] = DANCE["bpoints"].get(x["id"], 0) + total
+                _donor_add("battle", x["id"], user, total)
                 changed = True
                 if d["battle_add"]:  # «Sumar los regalos de las batallas a los puntos del live de baile»
                     DANCE["points"][x["id"]] = DANCE["points"].get(x["id"], 0) + total
                     DANCE.setdefault("badd", {})[x["id"]] = DANCE.get("badd", {}).get(x["id"], 0) + total  # por si se cancela
                 continue
-            if act and same_gift(name, act):
+            if any(same_gift(name, a) for a in acts):
                 before = DANCE["points"].get(x["id"], 0)
                 DANCE["points"][x["id"]] = before + total
+                _donor_add("grid", x["id"], user, total)
                 changed = True
                 goal = int(x.get("goal") or 0)
                 if goal and before < goal <= before + total:
@@ -1850,12 +1897,16 @@ def dance_action(action: str, arg: str = "", resolve: str = "") -> str:
     with DANCE_LOCK:
         s, c = DANCE["show"], DANCE["clock"]
         starting = ("clock" if action == "clock_run" and not c["running"] else "battle" if action == "bar_show" and not DANCE["battle"]
-                    else "solo" if action == "solo_run" and not DANCE["solo"]["active"] else "")
+                    else "solo" if action == "solo_run" and not DANCE["solo"]["active"]
+                    else "grid" if action == "grid_show" and (DANCE["battle"] or DANCE["solo"]["active"]) else "")
         ongoing = "battle" if DANCE["battle"] else "solo" if DANCE["solo"]["active"] else ""
         if starting and ongoing and ongoing != starting and resolve not in ("win", "cancel"):
             return f"ASK:{ongoing}:{starting}"
         DANCE["_resolve"] = resolve or "win"
-        if action == "grid_show" and (DANCE["bres"].get("until", 0) > now or DANCE["solo"]["until"] > now):
+        if action == "grid_show" and (DANCE["battle"] or DANCE["solo"]["active"]):
+            _only_one_clock_locked("grid")  # 👁 mostrar la barra de activación: la batalla o el turno en curso se termina (o se cancela)
+            s["grid"] = True
+        elif action == "grid_show" and (DANCE["bres"].get("until", 0) > now or DANCE["solo"]["until"] > now):
             _results_clear_locked()  # estaba el «¡GANÓ …!»: se quita y regresa la cuadrícula
             s["grid"] = True
         elif action in ("grid_show", "total_show", "clock_show", "logo_show", "vs_show"):
@@ -1870,7 +1921,11 @@ def dance_action(action: str, arg: str = "", resolve: str = "") -> str:
                 if c["left"] <= 0.05:
                     c["left"] = float(d["clock"]["seconds"])
                 _only_one_clock_locked("clock")
-                c["end"], c["running"], c["done"] = now + c["left"], True, 0.0
+                fresh = c["left"] >= float(d["clock"]["seconds"]) - 0.05
+                go = now + COUNTDOWN if fresh else now  # juego nuevo: 5, 4, 3, 2, 1… ¡YA! (al reanudar una pausa, sigue directo)
+                if fresh:
+                    _donors_reset("grid")
+                c["end"], c["running"], c["done"], c["go"] = go + c["left"], True, 0.0, go
                 s["clock"] = True
                 threading.Thread(target=_clock_watch, args=(c["end"],), daemon=True).start()
         elif action == "clock_reset":
@@ -1896,7 +1951,9 @@ def dance_action(action: str, arg: str = "", resolve: str = "") -> str:
                 DANCE["battle"], s["bar"], DANCE["bpoints"], DANCE["side"], DANCE["badd"] = True, True, {}, "", {}  # la barra Vs. siempre empieza en 0
                 DANCE["bres"] = {"winner": "", "until": 0.0, "a": left["id"], "b": right["id"]}
                 secs = int(d.get("battle_secs") or 0)  # ⏱ el reloj propio de la batalla (0 = sin reloj)
-                DANCE["bend"] = now + secs if secs else 0.0
+                DANCE["bgo"] = now + COUNTDOWN  # 5, 4, 3, 2, 1… ¡YA!
+                _donors_reset("battle")
+                DANCE["bend"] = DANCE["bgo"] + secs if secs else 0.0
                 if secs:
                     threading.Thread(target=_battle_watch, args=(DANCE["bend"],), daemon=True).start()
         elif action == "bar_ref":
@@ -1930,7 +1987,8 @@ def dance_action(action: str, arg: str = "", resolve: str = "") -> str:
                 _only_one_clock_locked("solo")
                 so = d["solo"]
                 goal = int(x.get("solo_goal") or 0) if so["goal_mode"] == "each" else 0
-                DANCE["solo"].update(active=True, pts=0, goal=goal or int(so["goal"]), end=now + so["seconds"], result="", until=0.0, added=0)
+                _donors_reset("solo")
+                DANCE["solo"].update(active=True, pts=0, goal=goal or int(so["goal"]), go=now + COUNTDOWN, end=now + COUNTDOWN + so["seconds"], result="", until=0.0, added=0)
                 threading.Thread(target=_solo_watch, args=(DANCE["solo"]["end"],), daemon=True).start()
         elif action == "round_next":  # la ronda (R1, R2…) que sale junto al reloj
             DANCE["round"] += 1
@@ -2122,7 +2180,7 @@ def fetch_dancer_profile(dancer_id: str) -> None:
 def clean_dance(new: dict, cur: dict) -> dict:
     """Validar lo que manda la ventana del live de baile. La foto la pone EC-Tok (no la ventana)."""
     out = json.loads(json.dumps(cur))
-    for key in ("on", "show_total", "show_vs", "auto_remove", "battle_add"):
+    for key in ("on", "show_total", "show_vs", "show_top", "auto_remove", "battle_add"):
         if isinstance(new.get(key), bool):
             out[key] = new[key]
     if new.get("layout") in DANCE_LAYOUTS:
@@ -2140,6 +2198,8 @@ def clean_dance(new: dict, cur: dict) -> dict:
                  # sin nombre escrito: el que trajo EC-Tok de TikTok (mientras sea el mismo @)
                  "label": _text(x.get("label"), "", 30).strip() or (base.get("label", "") if user == base.get("user") else ""),
                  "gift": _text(x.get("gift"), "", 60).strip(),
+                 "gift2": _text(x.get("gift2"), "", 60).strip(),
+                 "gift3": _text(x.get("gift3"), "", 60).strip(),
                  "battle_gift": _text(x.get("battle_gift"), "", 60).strip(),
                  "goal": int(_num(x.get("goal"), 0, 0, 100_000_000)),
                  "color": str(x.get("color")).upper() if HEX.fullmatch(str(x.get("color") or "")) else base["color"],
@@ -2272,7 +2332,7 @@ def _gifts_in_use() -> set[str]:
     """Los regalos que ya usas (bailarinas, metas de acción): no se pierden al cambiar de lista."""
     used = set()
     for x in CONFIG["dance"]["dancers"]:
-        used.update(n for n in (x.get("gift"), x.get("battle_gift")) if n)
+        used.update(n for n in (x.get("gift"), x.get("gift2"), x.get("gift3"), x.get("battle_gift")) if n)
     for it in CONFIG.get("actions", {}).get("items", []):
         img = str(it.get("image") or "")
         if img.startswith("t/"):
