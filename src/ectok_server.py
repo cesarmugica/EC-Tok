@@ -31,7 +31,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, unquote, urlsplit
 
-APP_VERSION = "4.9.0"
+APP_VERSION = "5.0.0"
 ALERT_ONE_OF = ("gift", "follow", "share", "like", "gift_special")  # 4.8.6: alerta O animación en todas (la animación trae su letrero)
 
 try:  # lo genera windows/build.ps1
@@ -433,31 +433,31 @@ def save_config(config: dict) -> None:
 # Textos que trae EC-Tok de fábrica, en cada idioma. Al cambiar de idioma se cambian solo los que
 # no habías editado (si el texto sigue igual al de fábrica del idioma anterior).
 DEFAULT_TEXTS: dict[tuple, dict[str, str]] = {
-    ("alerts", "gift", "text"): {"es": "{user} envió {count}× {gift}", "en": "{user} sent {count}× {gift}", "pt": "{user} enviou {count}× {gift}"},
-    ("alerts", "follow", "text"): {"es": "{user} te empezó a seguir", "en": "{user} followed you", "pt": "{user} começou a te seguir"},
-    ("alerts", "share", "text"): {"es": "{user} compartió el live", "en": "{user} shared the LIVE", "pt": "{user} compartilhou a live"},
-    ("alerts", "like", "text"): {"es": "¡Ya llevamos {likes} likes!", "en": "We reached {likes} likes!", "pt": "Já temos {likes} curtidas!"},
-    ("alerts", "gift_special", "text"): {"es": "¡Gracias por tu {gift}, {user}!", "en": "Thanks for your {gift}, {user}!", "pt": "Obrigado pelo seu {gift}, {user}!"},
-    ("tts", "comment_text"): {"es": "{user} dice: {text}", "en": "{user} says: {text}", "pt": "{user} diz: {text}"},
-    ("tts", "gift_text"): {"es": "{user} envió {count} {gift}. ¡Gracias!", "en": "{user} sent {count} {gift}. Thank you!", "pt": "{user} enviou {count} {gift}. Obrigado!"},
-    ("tts", "follow_text"): {"es": "Gracias por seguirme, {user}", "en": "Thanks for following, {user}", "pt": "Obrigado por me seguir, {user}"},
-    ("tts", "share_text"): {"es": "Gracias por compartir, {user}", "en": "Thanks for sharing, {user}", "pt": "Obrigado por compartilhar, {user}"},
-    ("top", "title"): {"es": "Top donadores", "en": "Top gifters", "pt": "Top doadores"},
-    ("likers", "title"): {"es": "Top likes", "en": "Top likers", "pt": "Top curtidas"},
-    ("anims", "brb", "text"): {"es": "Ya regresamos", "en": "Be right back", "pt": "Já voltamos"},
-    ("anims", "brb", "sub"): {"es": "No te vayas 💖", "en": "Don't go anywhere 💖", "pt": "Não vá embora 💖"},
+    ("alerts", "gift", "text"): {"es": "{user} envió {count}× {gift}", "en": "{user} sent {count}× {gift}", "pt": "{user} enviou {count}× {gift}", "zh": "{user} 送出了 {count}× {gift}"},
+    ("alerts", "follow", "text"): {"es": "{user} te empezó a seguir", "en": "{user} followed you", "pt": "{user} começou a te seguir", "zh": "{user} 关注了你"},
+    ("alerts", "share", "text"): {"es": "{user} compartió el live", "en": "{user} shared the LIVE", "pt": "{user} compartilhou a live", "zh": "{user} 分享了直播"},
+    ("alerts", "like", "text"): {"es": "¡Ya llevamos {likes} likes!", "en": "We reached {likes} likes!", "pt": "Já temos {likes} curtidas!", "zh": "已经有 {likes} 个赞了！"},
+    ("alerts", "gift_special", "text"): {"es": "¡Gracias por tu {gift}, {user}!", "en": "Thanks for your {gift}, {user}!", "pt": "Obrigado pelo seu {gift}, {user}!", "zh": "谢谢你的 {gift}，{user}！"},
+    ("tts", "comment_text"): {"es": "{user} dice: {text}", "en": "{user} says: {text}", "pt": "{user} diz: {text}", "zh": "{user} 说：{text}"},
+    ("tts", "gift_text"): {"es": "{user} envió {count} {gift}. ¡Gracias!", "en": "{user} sent {count} {gift}. Thank you!", "pt": "{user} enviou {count} {gift}. Obrigado!", "zh": "{user} 送出了 {count} 个 {gift}。谢谢！"},
+    ("tts", "follow_text"): {"es": "Gracias por seguirme, {user}", "en": "Thanks for following, {user}", "pt": "Obrigado por me seguir, {user}", "zh": "谢谢关注，{user}"},
+    ("tts", "share_text"): {"es": "Gracias por compartir, {user}", "en": "Thanks for sharing, {user}", "pt": "Obrigado por compartilhar, {user}", "zh": "谢谢分享，{user}"},
+    ("top", "title"): {"es": "Top donadores", "en": "Top gifters", "pt": "Top doadores", "zh": "送礼榜"},
+    ("likers", "title"): {"es": "Top likes", "en": "Top likers", "pt": "Top curtidas", "zh": "点赞榜"},
+    ("anims", "brb", "text"): {"es": "Ya regresamos", "en": "Be right back", "pt": "Já voltamos", "zh": "马上回来"},
+    ("anims", "brb", "sub"): {"es": "No te vayas 💖", "en": "Don't go anywhere 💖", "pt": "Não vá embora 💖", "zh": "别走开 💖"},
 }
 DEFAULT_LIST_TEXTS = {  # (lista, id, campo)
-    ("goals", "likes", "title"): {"es": "Meta de likes", "en": "Likes goal", "pt": "Meta de curtidas"},
-    ("quick", "q1", "label"): {"es": "Corazones", "en": "Hearts", "pt": "Corações"},
-    ("quick", "q2", "label"): {"es": "Confeti", "en": "Confetti", "pt": "Confete"},
-    ("quick", "q3", "label"): {"es": "¡Gracias!", "en": "Thank you!", "pt": "Obrigado!"},
-    ("quick", "q6", "label"): {"es": "Fuegos", "en": "Fireworks", "pt": "Fogos"},
-    ("custom", "c1", "text"): {"es": "¡Gracias!", "en": "Thank you!", "pt": "Obrigado!"},
-    ("custom", "c2", "text"): {"es": "¡Bienvenidos!", "en": "Welcome!", "pt": "Bem-vindos!"},
-    ("custom", "c3", "text"): {"es": "¡Síganme!", "en": "Follow me!", "pt": "Me sigam!"},
-    ("custom", "c4", "text"): {"es": "¡Compartan el live!", "en": "Share the LIVE!", "pt": "Compartilhem a live!"},
-    ("custom", "c5", "text"): {"es": "¡Toquen la pantalla!", "en": "Tap the screen!", "pt": "Toquem na tela!"},
+    ("goals", "likes", "title"): {"es": "Meta de likes", "en": "Likes goal", "pt": "Meta de curtidas", "zh": "点赞目标"},
+    ("quick", "q1", "label"): {"es": "Corazones", "en": "Hearts", "pt": "Corações", "zh": "爱心"},
+    ("quick", "q2", "label"): {"es": "Confeti", "en": "Confetti", "pt": "Confete", "zh": "彩纸"},
+    ("quick", "q3", "label"): {"es": "¡Gracias!", "en": "Thank you!", "pt": "Obrigado!", "zh": "谢谢！"},
+    ("quick", "q6", "label"): {"es": "Fuegos", "en": "Fireworks", "pt": "Fogos", "zh": "烟花"},
+    ("custom", "c1", "text"): {"es": "¡Gracias!", "en": "Thank you!", "pt": "Obrigado!", "zh": "谢谢！"},
+    ("custom", "c2", "text"): {"es": "¡Bienvenidos!", "en": "Welcome!", "pt": "Bem-vindos!", "zh": "欢迎！"},
+    ("custom", "c3", "text"): {"es": "¡Síganme!", "en": "Follow me!", "pt": "Me sigam!", "zh": "关注我！"},
+    ("custom", "c4", "text"): {"es": "¡Compartan el live!", "en": "Share the LIVE!", "pt": "Compartilhem a live!", "zh": "分享直播吧！"},
+    ("custom", "c5", "text"): {"es": "¡Toquen la pantalla!", "en": "Tap the screen!", "pt": "Toquem na tela!", "zh": "点点屏幕！"},
 }
 
 
@@ -473,7 +473,7 @@ def set_language(cfg: dict, old: str, new: str) -> None:
             node = node[key]
         if node.get(path[-1]) == texts.get(old):
             node[path[-1]] = texts[new]
-    thanks = {"es": "gracias.webp", "en": "thank-you.webp", "pt": "obrigado.webp"}  # la animación con texto
+    thanks = {"es": "gracias.webp", "en": "thank-you.webp", "pt": "obrigado.webp", "zh": "thank-you.webp"}  # la animación con texto
     for item in [*cfg["anims"]["rules"], *cfg["anims"]["quick"]]:
         if item.get("file") == thanks.get(old):
             item["file"] = thanks[new]
@@ -490,7 +490,7 @@ def _first_language() -> None:
         return
     with contextlib.suppress(OSError):
         lang = (HOME / "language.txt").read_text(encoding="utf-8").strip().lower()[:2]
-        if lang in ("en", "pt"):
+        if lang in ("en", "pt", "zh"):
             set_language(CONFIG, "es", lang)
             save_config(CONFIG)
 
@@ -517,7 +517,7 @@ def clean_config(data: dict) -> dict:
         cfg["euler_key"] = _text(data["euler_key"], "", 200).strip()
     if isinstance(data.get("autoconnect"), bool):
         cfg["autoconnect"] = data["autoconnect"]
-    if data.get("language") in ("es", "en", "pt") and data["language"] != cfg["language"]:
+    if data.get("language") in ("es", "en", "pt", "zh") and data["language"] != cfg["language"]:
         new_lang = data["language"]
         data = {k: v for k, v in data.items() if k not in ("alerts", "tts", "top", "anims", "goals")}  # se cambian abajo
         set_language(cfg, cfg["language"], new_lang)
@@ -958,15 +958,15 @@ def bank_remove() -> None:
 
 # Texto de fábrica del letrero, según lo que pasó (cada regla puede poner el suyo).
 SIGN_DEFAULTS = {
-    "gift": {"es": "¡Gracias por tu {gift}, {user}!", "en": "Thanks for the {gift}, {user}!", "pt": "Obrigado pelo {gift}, {user}!"},
-    "follow": {"es": "¡Gracias por seguirme, {user}!", "en": "Thanks for following, {user}!", "pt": "Obrigado por me seguir, {user}!"},
-    "share": {"es": "¡Gracias por compartir, {user}!", "en": "Thanks for sharing, {user}!", "pt": "Obrigado por compartilhar, {user}!"},
-    "like": {"es": "¡Ya somos {likes} likes!", "en": "We hit {likes} likes!", "pt": "Já são {likes} curtidas!"},
-    "user_likes": {"es": "¡Gracias por tus {likes} likes, {user}!", "en": "Thanks for your {likes} likes, {user}!", "pt": "Obrigado pelas suas {likes} curtidas, {user}!"},
-    "subscribe": {"es": "¡Gracias por suscribirte, {user}!", "en": "Thanks for subscribing, {user}!", "pt": "Obrigado por se inscrever, {user}!"},
-    "superfan": {"es": "¡Gracias, súper fan {user}!", "en": "Thank you, super fan {user}!", "pt": "Obrigado, super fã {user}!"},
-    "envelope": {"es": "¡Gracias por el cofre, {user}!", "en": "Thanks for the treasure chest, {user}!", "pt": "Obrigado pelo baú, {user}!"},
-    "": {"es": "¡Gracias!", "en": "Thank you!", "pt": "Obrigado!"},
+    "gift": {"es": "¡Gracias por tu {gift}, {user}!", "en": "Thanks for the {gift}, {user}!", "pt": "Obrigado pelo {gift}, {user}!", "zh": "谢谢你的 {gift}，{user}！"},
+    "follow": {"es": "¡Gracias por seguirme, {user}!", "en": "Thanks for following, {user}!", "pt": "Obrigado por me seguir, {user}!", "zh": "谢谢关注，{user}！"},
+    "share": {"es": "¡Gracias por compartir, {user}!", "en": "Thanks for sharing, {user}!", "pt": "Obrigado por compartilhar, {user}!", "zh": "谢谢分享，{user}！"},
+    "like": {"es": "¡Ya somos {likes} likes!", "en": "We hit {likes} likes!", "pt": "Já são {likes} curtidas!", "zh": "已经 {likes} 个赞了！"},
+    "user_likes": {"es": "¡Gracias por tus {likes} likes, {user}!", "en": "Thanks for your {likes} likes, {user}!", "pt": "Obrigado pelas suas {likes} curtidas, {user}!", "zh": "谢谢你的 {likes} 个赞，{user}！"},
+    "subscribe": {"es": "¡Gracias por suscribirte, {user}!", "en": "Thanks for subscribing, {user}!", "pt": "Obrigado por se inscrever, {user}!", "zh": "谢谢订阅，{user}！"},
+    "superfan": {"es": "¡Gracias, súper fan {user}!", "en": "Thank you, super fan {user}!", "pt": "Obrigado, super fã {user}!", "zh": "谢谢你，超级粉丝 {user}！"},
+    "envelope": {"es": "¡Gracias por el cofre, {user}!", "en": "Thanks for the treasure chest, {user}!", "pt": "Obrigado pelo baú, {user}!", "zh": "谢谢你的宝箱，{user}！"},
+    "": {"es": "¡Gracias!", "en": "Thank you!", "pt": "Obrigado!", "zh": "谢谢！"},
 }
 GIFT_NAMES_ES = {"heart me": "Quiéreme", "rose": "Rosa", "lion": "León", "universe": "Universo", "galaxy": "Galaxia",
                  "finger heart": "Corazón con los dedos", "ice cream cone": "Helado", "doughnut": "Dona", "perfume": "Perfume",
@@ -1799,7 +1799,7 @@ def dance_payload() -> dict:
                      "show_result": DANCE["solo"]["until"] > time.time()},
             "logo": {**d["logo"], "url": f"/baile/logo/{_q(logo.name)}?v={int(logo.stat().st_mtime)}-{DANCE['logo_v']}" if logo else ""},
             "vs": d["vs"], "styles": d["styles"],
-            "total_title": {"en": "Today's points", "pt": "Pontos de hoje"}.get(CONFIG["language"], d["total_title"]) if d["total_title"] == "Puntos de hoy" else d["total_title"], "show_total": d["show_total"] or DANCE_SIM["active"],
+            "total_title": {"en": "Today's points", "pt": "Pontos de hoje", "zh": "今日积分"}.get(CONFIG["language"], d["total_title"]) if d["total_title"] == "Puntos de hoy" else d["total_title"], "show_total": d["show_total"] or DANCE_SIM["active"],
             "show_vs": d["show_vs"] or DANCE_SIM["active"], "now_ms": int(time.time() * 1000)}
 def dance_emit() -> None:
     BUS.emit(new_event("dance", dance=dance_payload()))
@@ -1910,7 +1910,7 @@ def dance_gift(ev: dict) -> None:
     dance_emit()
 def msg_goal(x: dict) -> str:
     goal = f"{int(x.get('goal') or 0):,}"
-    return {"en": f"reached her goal ({goal})", "pt": f"chegou à meta ({goal})"}.get(CONFIG["language"], f"llegó a su meta ({goal})")
+    return {"en": f"reached her goal ({goal})", "pt": f"chegou à meta ({goal})", "zh": f"达到了她的目标（{goal}）"}.get(CONFIG["language"], f"llegó a su meta ({goal})")
 def dance_action(action: str, arg: str = "", resolve: str = "") -> str:
     """Las teclas y botones del live de baile. Regresa el error, o «» si salió.
     Si empezar algo termina una batalla o un turno sola en curso, primero se le pregunta al operador
@@ -2198,7 +2198,7 @@ def fetch_dancer_profile(dancer_id: str) -> None:
         log(f"Live de baile: no se pudo traer la foto de @{user} ({exc})")
         BUS.emit(new_event("dance_msg", dancer=dancer_id, error=True,
                            text={"en": f"I couldn't get @{user}'s photo from TikTok. You can upload one with 📷.",
-                                 "pt": f"Não consegui trazer a foto de @{user} do TikTok. Você pode enviar uma com 📷."}.get(
+                                 "pt": f"Não consegui trazer a foto de @{user} do TikTok. Você pode enviar uma com 📷.", "zh": f"无法从 TikTok 获取 @{user} 的头像。你可以用 📷 上传一张。"}.get(
                                      CONFIG["language"], f"No pude traer la foto de @{user} desde TikTok. Puedes subir una con 📷.")))
     BUS.emit(new_event("config", overlay=overlay_payload()))
     dance_emit()
@@ -2473,8 +2473,8 @@ def import_action_image(path: Path) -> str:
 
 
 def pick_sound() -> str | None:
-    return (_pick_file({"en": "Choose the sound", "pt": "Escolha o som"}.get(CONFIG["language"], "Elige el sonido"),
-                      {"en": "Sounds", "pt": "Sons"}.get(CONFIG["language"], "Sonidos"), SOUND_EXTS, Path.home() / "Music") or [None])[0]
+    return (_pick_file({"en": "Choose the sound", "pt": "Escolha o som", "zh": "选择音效"}.get(CONFIG["language"], "Elige el sonido"),
+                      {"en": "Sounds", "pt": "Sons", "zh": "音效"}.get(CONFIG["language"], "Sonidos"), SOUND_EXTS, Path.home() / "Music") or [None])[0]
 
 
 def find_ffmpeg() -> str | None:
@@ -2580,8 +2580,8 @@ def _copy_unique(src: Path, folder: Path, stem: str, ext: str) -> Path:
 
 
 def pick_anim(multi: bool = False) -> list[str]:
-    return _pick_file({"en": "Choose your animation", "pt": "Escolha sua animação"}.get(CONFIG["language"], "Elige tu animación"),
-                      {"en": "Animations and videos", "pt": "Animações e vídeos"}.get(CONFIG["language"], "Animaciones y videos"),
+    return _pick_file({"en": "Choose your animation", "pt": "Escolha sua animação", "zh": "选择你的动画"}.get(CONFIG["language"], "Elige tu animación"),
+                      {"en": "Animations and videos", "pt": "Animações e vídeos", "zh": "动画和视频"}.get(CONFIG["language"], "Animaciones y videos"),
                       IMPORT_EXTS, Path.home() / "Videos", multi=multi) or []
 
 
@@ -3034,8 +3034,8 @@ class Handler(BaseHTTPRequestHandler):
                 threading.Thread(target=fetch_dancer_profile, args=(x["id"],), daemon=True).start()
                 self.send_json({"ok": True, "config": CONFIG})
                 return
-            files = _pick_file({"en": "Choose her photo", "pt": "Escolha a foto dela"}.get(CONFIG["language"], "Elige su foto"),
-                               {"en": "Images", "pt": "Imagens"}.get(CONFIG["language"], "Imágenes"), DANCE_IMG_EXTS, Path.home() / "Pictures")
+            files = _pick_file({"en": "Choose her photo", "pt": "Escolha a foto dela", "zh": "选择她的照片"}.get(CONFIG["language"], "Elige su foto"),
+                               {"en": "Images", "pt": "Imagens", "zh": "图片"}.get(CONFIG["language"], "Imágenes"), DANCE_IMG_EXTS, Path.home() / "Pictures")
             if files:
                 src = Path(files[0])
                 if src.suffix.lower() not in DANCE_IMG_EXTS or src.stat().st_size > 20 * 1024 * 1024:
@@ -3050,8 +3050,8 @@ class Handler(BaseHTTPRequestHandler):
                 dance_emit()
             self.send_json({"ok": True, "config": CONFIG})
         elif path == "/api/dance/logo":  # 💃 el logotipo del live (se copia a la carpeta de EC-Tok)
-            files = _pick_file({"en": "Choose your logo", "pt": "Escolha seu logotipo"}.get(CONFIG["language"], "Elige tu logotipo"),
-                               {"en": "Images", "pt": "Imagens"}.get(CONFIG["language"], "Imágenes"), DANCE_IMG_EXTS, Path.home() / "Pictures")
+            files = _pick_file({"en": "Choose your logo", "pt": "Escolha seu logotipo", "zh": "选择你的标志"}.get(CONFIG["language"], "Elige tu logotipo"),
+                               {"en": "Images", "pt": "Imagens", "zh": "图片"}.get(CONFIG["language"], "Imágenes"), DANCE_IMG_EXTS, Path.home() / "Pictures")
             if files:
                 src = Path(files[0])
                 if src.suffix.lower() not in DANCE_IMG_EXTS or src.stat().st_size > 30 * 1024 * 1024:
@@ -3186,8 +3186,8 @@ class Handler(BaseHTTPRequestHandler):
             self.send_json({"ok": True, "config": CONFIG})
         elif path == "/api/sound/pick":
             if data.get("multi"):  # consola: varios a la vez
-                chosen = _pick_file({"en": "Choose the sounds", "pt": "Escolha os sons"}.get(CONFIG["language"], "Elige los sonidos"),
-                                    {"en": "Sounds", "pt": "Sons"}.get(CONFIG["language"], "Sonidos"), SOUND_EXTS,
+                chosen = _pick_file({"en": "Choose the sounds", "pt": "Escolha os sons", "zh": "选择音效"}.get(CONFIG["language"], "Elige los sonidos"),
+                                    {"en": "Sounds", "pt": "Sons", "zh": "音效"}.get(CONFIG["language"], "Sonidos"), SOUND_EXTS,
                                     Path.home() / "Music", multi=True)[:CONSOLE_MAX]
                 done, errors = [], []
                 for item in chosen:
@@ -3206,8 +3206,8 @@ class Handler(BaseHTTPRequestHandler):
             except (ValueError, OSError) as exc:
                 self.send_json({"ok": False, "error": str(exc)}, 400)
         elif path == "/api/actions/add-images":
-            chosen = _pick_file({"en": "Choose your images", "pt": "Escolha suas imagens"}.get(CONFIG["language"], "Elige tus imágenes"),
-                                {"en": "Images", "pt": "Imagens"}.get(CONFIG["language"], "Imágenes"), ACTION_EXTS, Path.home() / "Pictures", multi=True)
+            chosen = _pick_file({"en": "Choose your images", "pt": "Escolha suas imagens", "zh": "选择你的图片"}.get(CONFIG["language"], "Elige tus imágenes"),
+                                {"en": "Images", "pt": "Imagens", "zh": "图片"}.get(CONFIG["language"], "Imágenes"), ACTION_EXTS, Path.home() / "Pictures", multi=True)
             added, errors = [], []
             for item in chosen:
                 try:

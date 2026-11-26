@@ -112,22 +112,22 @@ def _user(u) -> dict:
 
 # Mensajes del estado de la conexión, en el idioma de la app.
 MESSAGES = {
-    "connecting": {"es": "Conectando con @{u}…", "en": "Connecting to @{u}…", "pt": "Conectando com @{u}…"},
-    "live": {"es": "Conectado al live de @{u}.", "en": "Connected to @{u}'s LIVE.", "pt": "Conectado à live de @{u}."},
+    "connecting": {"es": "Conectando con @{u}…", "en": "Connecting to @{u}…", "pt": "Conectando com @{u}…", "zh": "正在连接 @{u}…"},
+    "live": {"es": "Conectado al live de @{u}.", "en": "Connected to @{u}'s LIVE.", "pt": "Conectado à live de @{u}.", "zh": "已连接到 @{u} 的直播。"},
     "offline": {"es": "@{u} no está en vivo. Vuelvo a intentar cada {s} s…", "en": "@{u} is not live. Trying again every {s} s…",
-                "pt": "@{u} não está ao vivo. Tento de novo a cada {s} s…"},
+                "pt": "@{u} não está ao vivo. Tento de novo a cada {s} s…", "zh": "@{u} 没有在直播。每 {s} 秒重试一次…"},
     "notfound": {"es": "No existe la cuenta @{u}. Revisa el usuario.", "en": "The account @{u} does not exist. Check the username.",
-                 "pt": "A conta @{u} não existe. Confira o usuário."},
+                 "pt": "A conta @{u} não existe. Confira o usuário.", "zh": "账号 @{u} 不存在。请检查用户名。"},
     "ratelimit": {"es": "Se alcanzó el límite gratis de conexiones de Euler Stream. Espera un rato o pon tu clave de Euler en Ajustes.",
                   "en": "The free Euler Stream connection limit was reached. Wait a while or add your Euler key in Settings.",
-                  "pt": "O limite grátis de conexões do Euler Stream foi atingido. Espere um pouco ou coloque sua chave do Euler em Ajustes."},
+                  "pt": "O limite grátis de conexões do Euler Stream foi atingido. Espere um pouco ou coloque sua chave do Euler em Ajustes.", "zh": "已达到 Euler Stream 的免费连接上限。请稍等一会儿，或在设置中填入你的 Euler 密钥。"},
     "failed": {"es": "No se pudo conectar ({e}). Vuelvo a intentar en {s} s…", "en": "Could not connect ({e}). Trying again in {s} s…",
-               "pt": "Não foi possível conectar ({e}). Tento de novo em {s} s…"},
+               "pt": "Não foi possível conectar ({e}). Tento de novo em {s} s…", "zh": "无法连接（{e}）。{s} 秒后重试…"},
     "ended": {"es": "El live terminó o se cortó. Vuelvo a intentar en {s} s…", "en": "The LIVE ended or dropped. Trying again in {s} s…",
-              "pt": "A live terminou ou caiu. Tento de novo em {s} s…"},
-    "disconnected": {"es": "Desconectado.", "en": "Disconnected.", "pt": "Desconectado."},
-    "live_end": {"es": "El live terminó.", "en": "The LIVE ended.", "pt": "A live terminou."},
-    "need_user": {"es": "Escribe tu @usuario de TikTok.", "en": "Type your TikTok @username.", "pt": "Escreva seu @usuário do TikTok."},
+              "pt": "A live terminou ou caiu. Tento de novo em {s} s…", "zh": "直播结束或中断了。{s} 秒后重试…"},
+    "disconnected": {"es": "Desconectado.", "en": "Disconnected.", "pt": "Desconectado.", "zh": "已断开连接。"},
+    "live_end": {"es": "El live terminó.", "en": "The LIVE ended.", "pt": "A live terminou.", "zh": "直播结束了。"},
+    "need_user": {"es": "Escribe tu @usuario de TikTok.", "en": "Type your TikTok @username.", "pt": "Escreva seu @usuário do TikTok.", "zh": "请输入你的 TikTok @用户名。"},
 }
 LANG = {"value": "es"}
 
@@ -509,7 +509,7 @@ def test_event(kind: str, gift: str = "") -> dict:
     if kind == "comment":
         samples = {"es": ["¡Hola a todos!", "Saludos desde Monterrey 🔥", "Esa canción está buenísima", "¿Cantas otra?", "Qué bonito live"],
                    "en": ["Hi everyone!", "Greetings from Texas 🔥", "That song is great", "Can you sing another one?", "Lovely LIVE"],
-                   "pt": ["Oi, gente!", "Saudações de São Paulo 🔥", "Essa música é demais", "Canta outra?", "Que live linda"]}
+                   "pt": ["Oi, gente!", "Saudações de São Paulo 🔥", "Essa música é demais", "Canta outra?", "Que live linda"], "zh": ["大家好！", "来自上海的问候 🔥", "这首歌太好听了", "再唱一首吧？", "好棒的直播"]}
         text = random.choice(samples.get(LANG["value"], samples["es"]))
         return new_event("comment", user=user, text=text, test=True)
     return new_event(kind if kind in ("follow", "share") else "follow", user=user, test=True)

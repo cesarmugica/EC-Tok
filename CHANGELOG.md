@@ -1,5 +1,10 @@
 # Cambios de EC-Tok
 
+## 5.0.0
+- 🇨🇳 **Nuevo idioma: chino (简体中文).** Toda la ventana de EC-Tok, la consola de sonidos, los textos de fábrica (alertas, voz, letreros, botones) y lo que sale en las fuentes del live (top, relojes «开始！», «赢了！»…).
+- 🏳 El selector de idioma ahora muestra **banderitas** (🇲🇽 Español, 🇺🇸 English, 🇧🇷 Português, 🇨🇳 中文) en lugar del mundito. Son imágenes, para que se vean también en Windows (Windows no pinta los emojis de bandera).
+- Arreglo: los avisos «Todavía nadie…» del top se partían letra por letra en idiomas sin espacios.
+
 ## 4.9.0
 - 🔄 **Las fuentes se recargan solas después de actualizar EC-Tok**, aunque la conexión de LIVE Studio se haya quedado colgada: cada fuente revisa cada 15 segundos si EC-Tok volvió o cambió de versión y se recarga. También se corrigió un choque entre la conexión de la versión vieja y la nueva.
 - 📝 Nota en «Poner las alertas en tu live» y en las fuentes de baile: si alguna fuente se queda en blanco después de actualizar, cierra y vuelve a abrir TikTok LIVE Studio (en OBS: clic derecho → «Actualizar»).

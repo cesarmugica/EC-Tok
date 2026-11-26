@@ -654,8 +654,8 @@
   const $ = s => document.querySelector(s);
   const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[c]));
   let cfg = null, stats = null, likeMark = 0, LOC = 'es-MX';
-  const EMPTY_TOP = {es: 'Todavía nadie… ¡manda el primer regalo!', en: 'Nobody yet… send the first gift!', pt: 'Ninguém ainda… mande o primeiro presente!'};
-  const EMPTY_LIKES = {es: 'Todavía nadie… ¡dale tap a la pantalla!', en: 'Nobody yet… tap the screen!', pt: 'Ninguém ainda… toque na tela!'};
+  const EMPTY_TOP = {es: 'Todavía nadie… ¡manda el primer regalo!', en: 'Nobody yet… send the first gift!', pt: 'Ninguém ainda… mande o primeiro presente!', zh: '还没有人… 送出第一个礼物吧！'};
+  const EMPTY_LIKES = {es: 'Todavía nadie… ¡dale tap a la pantalla!', en: 'Nobody yet… tap the screen!', pt: 'Ninguém ainda… toque na tela!', zh: '还没有人… 点点屏幕吧！'};
   const EMOJI = {gift: '🎁', follow: '💖', share: '📣', like: '❤️', custom: '💬'};
 
   function applyStyle() {
@@ -1001,7 +1001,7 @@
     if (!goMs) return null;
     const d = goMs - (Date.now() + dnSkew);
     if (d > 0) return String(Math.min(5, Math.ceil(d / 1000)));
-    if (d > -900) return ({en: 'GO!', pt: 'JÁ!'})[(cfg && cfg.lang)] || '¡YA!';
+    if (d > -900) return ({en: 'GO!', pt: 'JÁ!', zh: '开始！'})[(cfg && cfg.lang)] || '¡YA!';
     return null;
   }
   function dnPut(el, normal, cd) {  // pone el número de la cuenta (con su brinco) o el reloj
@@ -1138,8 +1138,8 @@
     const box = $('#dsolo'), so = DN.solo || {}, d = dnBy(so.id);
     if (!d) { box.innerHTML = ''; return; }
     const pct = so.goal ? Math.min(100, so.pts / so.goal * 100) : 0, L = (cfg && cfg.lang) || 'es';
-    const tword = L === 'en' ? 'TIME' : L === 'pt' ? 'TEMPO' : 'TIEMPO';
-    const stampS = so.show_result && so.result ? `<div class="stamp ${so.result}">${so.result === 'win' ? (L === 'en' ? 'WON!' : L === 'pt' ? 'GANHOU!' : '¡GANÓ!') : (L === 'en' ? 'LOST!' : L === 'pt' ? 'PERDEU!' : '¡PERDIÓ!')}</div>` : '';
+    const tword = L === 'en' ? 'TIME' : L === 'pt' ? 'TEMPO' : L === 'zh' ? '时间' : 'TIEMPO';
+    const stampS = so.show_result && so.result ? `<div class="stamp ${so.result}">${so.result === 'win' ? (L === 'en' ? 'WON!' : L === 'pt' ? 'GANHOU!' : L === 'zh' ? '赢了！' : '¡GANÓ!') : (L === 'en' ? 'LOST!' : L === 'pt' ? 'PERDEU!' : L === 'zh' ? '输了！' : '¡PERDIÓ!')}</div>` : '';
     dnTheme(box, DN.solo_style);
     if (DN.solo_style === 'ring') {  // ⭕ foto redonda con su avance alrededor
       box.innerHTML = `<div class="rg" style="--c:${d.color}"><div class="ring" style="--p:${pct.toFixed(1)}"><div class="in">${d.photo ? `<img src="${esc(d.photo)}" alt="">` : `<span class="noph">💃</span>`}</div></div>
@@ -1166,8 +1166,8 @@
     }
     box.innerHTML = `<div class="so" style="--c:${d.color}"><div class="ph">${d.photo ? `<img src="${esc(d.photo)}" alt="">` : `<span class="noph">💃</span>`}</div>
       <div class="mid"><div class="bar"><div class="fill" style="width:${pct}%"></div></div><span class="pg">${dnFmt(so.pts)} / ${dnFmt(so.goal)}</span><span class="nm big">${esc(d.name)}</span>${dnTop(d, 'solo')}</div>
-      <div class="tbox"${so.active || (so.ended && Date.now() + dnSkew < so.ended * 1000 + dnHold()) ? '' : ' style="visibility:hidden"'}><small>${esc((cfg && cfg.lang) === 'en' ? 'TIME' : (cfg && cfg.lang) === 'pt' ? 'TEMPO' : 'TIEMPO')}</small><span class="clk dsclk"></span></div>
-      ${so.show_result && so.result ? `<div class="stamp ${so.result}">${so.result === 'win' ? ((cfg && cfg.lang) === 'en' ? 'WON!' : (cfg && cfg.lang) === 'pt' ? 'GANHOU!' : '¡GANÓ!') : ((cfg && cfg.lang) === 'en' ? 'LOST!' : (cfg && cfg.lang) === 'pt' ? 'PERDEU!' : '¡PERDIÓ!')}</div>` : ''}</div>`;
+      <div class="tbox"${so.active || (so.ended && Date.now() + dnSkew < so.ended * 1000 + dnHold()) ? '' : ' style="visibility:hidden"'}><small>${esc((cfg && cfg.lang) === 'en' ? 'TIME' : (cfg && cfg.lang) === 'pt' ? 'TEMPO' : (cfg && cfg.lang) === 'zh' ? '时间' : 'TIEMPO')}</small><span class="clk dsclk"></span></div>
+      ${so.show_result && so.result ? `<div class="stamp ${so.result}">${so.result === 'win' ? ((cfg && cfg.lang) === 'en' ? 'WON!' : (cfg && cfg.lang) === 'pt' ? 'GANHOU!' : (cfg && cfg.lang) === 'zh' ? '赢了！' : '¡GANÓ!') : ((cfg && cfg.lang) === 'en' ? 'LOST!' : (cfg && cfg.lang) === 'pt' ? 'PERDEU!' : (cfg && cfg.lang) === 'zh' ? '输了！' : '¡PERDIÓ!')}</div>` : ''}</div>`;
     dnStyle(box, 'solo');
   }
   function drawDLogo() {
@@ -1183,7 +1183,7 @@
     if (!a || !b) { box.innerHTML = ''; return; }
     const sum = a.bpoints + b.bpoints, pa = sum ? a.bpoints / sum : 0.5;
     dnTheme(box, DN.bar_style);
-    const stamp = ended ? `<div class="stamp">${(() => { const w = dnBy(res.winner); const L = (cfg && cfg.lang) || 'es'; return w ? (L === 'en' ? `${esc(w.name)} WINS!` : L === 'pt' ? `${esc(w.name)} GANHOU!` : `¡GANÓ ${esc(w.name)}!`) : (L === 'en' ? 'TIE!' : L === 'pt' ? 'EMPATE!' : '¡EMPATE!'); })()}</div>` : '';
+    const stamp = ended ? `<div class="stamp">${(() => { const w = dnBy(res.winner); const L = (cfg && cfg.lang) || 'es'; return w ? (L === 'en' ? `${esc(w.name)} WINS!` : L === 'pt' ? `${esc(w.name)} GANHOU!` : L === 'zh' ? `${esc(w.name)} 赢了！` : `¡GANÓ ${esc(w.name)}!`) : (L === 'en' ? 'TIE!' : L === 'pt' ? 'EMPATE!' : L === 'zh' ? '平局！' : '¡EMPATE!'); })()}</div>` : '';
     const clkOn = (DN.battle && (DN.battle_end_ms || Date.now() + dnSkew < (DN.battle_go_ms || 0) + 1000)) || (ended && DN.battle_secs && res.at && Date.now() + dnSkew < res.at * 1000 + dnHold());
     const mid = `<span class="mid"><span class="vs">VS</span><span class="bclk"${clkOn ? '' : ' style="visibility:hidden"'}>0:00</span></span>`;  // su lugar siempre está
     if (DN.bar_style === 'fighter') {  // 🥊 como juego de peleas: cada una con su barra de vida desde el centro
@@ -1335,7 +1335,7 @@
     // Si EC-Tok se actualizó, recargar este overlay para usar la versión nueva (LIVE Studio/OBS lo dejan abierto).
     if (OV_VERSION && data.version && data.version !== OV_VERSION) { location.reload(); return; }
     OV_VERSION = data.version || OV_VERSION;
-    cfg = data; stats = data.stats; LOC = {en: 'en-US', pt: 'pt-BR'}[data.lang] || 'es-MX'; likeMark = Math.floor(stats.likes / (cfg.alerts.like.every || 1)) * (cfg.alerts.like.every || 1);
+    cfg = data; stats = data.stats; LOC = {en: 'en-US', pt: 'pt-BR', zh: 'zh-CN'}[data.lang] || 'es-MX'; likeMark = Math.floor(stats.likes / (cfg.alerts.like.every || 1)) * (cfg.alerts.like.every || 1);
     applyStyle();
     showBrb(data.brb);
     $('#goal').hidden = !which.includes('goal'); $('#top').hidden = !which.includes('top'); $('#likers').hidden = !which.includes('likes'); $('#alerts').hidden = !which.includes('alerts');
