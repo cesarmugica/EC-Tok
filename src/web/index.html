@@ -1190,7 +1190,7 @@
   });
 
   // ---------- llenar las pestañas ----------
-  const ALERT_ONE_OF = ['like', 'gift_special'];  // alerta O animación (si salen las dos se enciman)
+  const ALERT_ONE_OF = ['gift', 'follow', 'share', 'like', 'gift_special'];  // alerta O animación (si salen las dos se enciman)
   const ALERT_NAMES = {gift: '🎁 Regalos', follow: '💖 Follows', share: '📣 Compartir', like: '❤️ Cada N likes', gift_special: '⭐ Regalo especial'};  // t() al pintar
   const giftOpts = cur => { const l = [...dnGiftList].sort((a, b) => (a.diamonds || 0) - (b.diamonds || 0)); if (cur && !l.some(g => g.name === cur)) l.unshift({name: cur});
     return l.map(g => `<option value="${esc(g.name)}" ${g.name === cur ? 'selected' : ''}>${esc(g.name)}${g.diamonds ? ` · 💎${g.diamonds}` : ''}</option>`).join(''); };

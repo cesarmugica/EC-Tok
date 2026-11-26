@@ -1,5 +1,8 @@
 # Cambios de EC-Tok
 
+## 4.8.6
+- 🔔 Ahora **todas las alertas** (Regalos, Follows, Compartir, Cada N likes y Regalo especial) son **📢 Alerta o 🎬 Animación**, una u otra: son dos fuentes distintas en LIVE Studio y si salen las dos el agradecimiento se repite o se enciman. Si tenías las dos prendidas, se queda la animación. Tip: en el texto puedes usar {diamonds} para que el letrero de la animación diga los 💎.
+
 ## 4.8.5
 - 🔔 En «Cada N likes» y «Regalo especial» ahora eliges **📢 Alerta o 🎬 Animación** (una u otra): la animación ya trae su propio letrero con la foto, el nombre y tu texto, así el agradecimiento no sale dos veces. Si tenías las dos prendidas, se queda la animación.
 - 🎬 El letrero de las animaciones de alerta ya no queda cortado: «¡Gracias por tu Quiéreme, !» → «¡Gracias por tu Quiéreme!» (el nombre ya sale arriba).

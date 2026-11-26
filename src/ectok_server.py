@@ -31,8 +31,8 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, unquote, urlsplit
 
-APP_VERSION = "4.8.5"
-ALERT_ONE_OF = ("like", "gift_special")  # alerta O animación, no las dos (la animación trae su propio letrero)
+APP_VERSION = "4.8.6"
+ALERT_ONE_OF = ("gift", "follow", "share", "like", "gift_special")  # 4.8.6: alerta O animación en todas (la animación trae su letrero)
 
 try:  # lo genera windows/build.ps1
     from ectok_build import BUILD_DATE  # type: ignore[import-not-found]
