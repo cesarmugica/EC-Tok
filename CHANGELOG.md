@@ -1,5 +1,8 @@
 # Cambios de EC-Tok
 
+## 4.8.3
+- 🔊 En Sonidos, la opción «Un regalo en especial» ahora se llama «Regalo especial», igual que en Alertas y Animaciones.
+
 ## 4.8.2
 - 🎬 En Animaciones, la opción «Un regalo en especial» ahora se llama «Regalo especial», igual que en Alertas.
 

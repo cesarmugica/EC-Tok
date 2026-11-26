@@ -794,4 +794,5 @@ T = {
 '⭐ Regalo especial': ('⭐ Special gift', '⭐ Presente especial'),
 'La alerta «⭐ Regalo especial» está apagada.\n\n¿La prendo para que puedas ver cómo se ve?': ('The “⭐ Special gift” alert is off.\n\nShall I turn it on so you can see how it looks?', 'O alerta «⭐ Presente especial» está desligado.\n\nPosso ligá-lo para você ver como fica?'),
 '🎁 Regalo especial': ('🎁 Special gift', '🎁 Presente especial'),
+'Regalo especial': ('Special gift', 'Presente especial'),
 }
