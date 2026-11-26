@@ -1,5 +1,8 @@
 # Cambios de EC-Tok
 
+## 5.1.1
+- 💜 Nueva en el Staff EC-Tok: **@soumariaac** (en el pie de página, junto a @deysyzoneu.u, @imuxoficial y @laurely_blog).
+
 ## 5.1.0
 - 🌐 **Dos idiomas separados** (en ⚙ Ajustes → 🌐 Idiomas):
   - **🖥 Idioma de EC-Tok**: los botones y textos de la ventana (solo lo ves tú). Es el de la banderita de arriba.
