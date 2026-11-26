@@ -1,5 +1,11 @@
 # Cambios de EC-Tok
 
+## 5.1.0
+- 🌐 **Dos idiomas separados** (en ⚙ Ajustes → 🌐 Idiomas):
+  - **🖥 Idioma de EC-Tok**: los botones y textos de la ventana (solo lo ves tú). Es el de la banderita de arriba.
+  - **📺 Idioma de tu live**: lo que ve y oye tu público (alertas, letreros de las animaciones, voz, top y relojes).
+  Ejemplo: la ventana en chino y tu live en inglés. Al cambiar el idioma del live, los textos de fábrica pasan al nuevo idioma y los que escribiste tú no cambian. En el menú de la banderita también se ve el idioma de tu live, con un atajo para cambiarlo.
+
 ## 5.0.0
 - 🇨🇳 **Nuevo idioma: chino (简体中文).** Toda la ventana de EC-Tok, la consola de sonidos, los textos de fábrica (alertas, voz, letreros, botones) y lo que sale en las fuentes del live (top, relojes «开始！», «赢了！»…).
 - 🏳 El selector de idioma ahora muestra **banderitas** (🇲🇽 Español, 🇺🇸 English, 🇧🇷 Português, 🇨🇳 中文) en lugar del mundito. Son imágenes, para que se vean también en Windows (Windows no pinta los emojis de bandera).

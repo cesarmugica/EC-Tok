@@ -31,7 +31,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, unquote, urlsplit
 
-APP_VERSION = "5.0.0"
+APP_VERSION = "5.1.0"
 ALERT_ONE_OF = ("gift", "follow", "share", "like", "gift_special")  # 4.8.6: alerta O animación en todas (la animación trae su letrero)
 
 try:  # lo genera windows/build.ps1
@@ -191,7 +191,8 @@ DEFAULT_CONFIG: dict = {
         # Animaciones especiales: las del streamer (intro de batalla, etc.); solo se muestran cuando él las lanza.
         "special": [],
     },
-    "language": "es",
+    "language": "es",  # idioma de tu live: lo que ve tu público (alertas, letreros, voz, fuentes)
+    "ui_language": "",  # 5.1.0: idioma de la ventana de EC-Tok ("" = el mismo que el del live)
 }
 
 
@@ -465,6 +466,14 @@ def _list_for(cfg: dict, name: str) -> list:
     return cfg["goals"] if name == "goals" else cfg["anims"][name]
 
 
+LANGS = ("es", "en", "pt", "zh")
+
+
+def ui_lang() -> str:
+    """5.1.0: idioma de la ventana de EC-Tok (botones, avisos, ventanas para elegir archivos)."""
+    return CONFIG.get("ui_language") or CONFIG.get("language") or "es"
+
+
 def set_language(cfg: dict, old: str, new: str) -> None:
     """Cambiar los textos de fábrica al nuevo idioma (los que editaste se quedan)."""
     for path, texts in DEFAULT_TEXTS.items():
@@ -517,7 +526,11 @@ def clean_config(data: dict) -> dict:
         cfg["euler_key"] = _text(data["euler_key"], "", 200).strip()
     if isinstance(data.get("autoconnect"), bool):
         cfg["autoconnect"] = data["autoconnect"]
-    if data.get("language") in ("es", "en", "pt", "zh") and data["language"] != cfg["language"]:
+    if data.get("ui_language") in LANGS:
+        cfg["ui_language"] = data["ui_language"]
+    if data.get("language") in LANGS and data["language"] != cfg["language"]:
+        if not cfg.get("ui_language"):
+            cfg["ui_language"] = cfg["language"]  # la ventana se queda en el idioma que ya tenías
         new_lang = data["language"]
         data = {k: v for k, v in data.items() if k not in ("alerts", "tts", "top", "anims", "goals")}  # se cambian abajo
         set_language(cfg, cfg["language"], new_lang)
@@ -2199,7 +2212,7 @@ def fetch_dancer_profile(dancer_id: str) -> None:
         BUS.emit(new_event("dance_msg", dancer=dancer_id, error=True,
                            text={"en": f"I couldn't get @{user}'s photo from TikTok. You can upload one with 📷.",
                                  "pt": f"Não consegui trazer a foto de @{user} do TikTok. Você pode enviar uma com 📷.", "zh": f"无法从 TikTok 获取 @{user} 的头像。你可以用 📷 上传一张。"}.get(
-                                     CONFIG["language"], f"No pude traer la foto de @{user} desde TikTok. Puedes subir una con 📷.")))
+                                     ui_lang(), f"No pude traer la foto de @{user} desde TikTok. Puedes subir una con 📷.")))
     BUS.emit(new_event("config", overlay=overlay_payload()))
     dance_emit()
 def clean_dance(new: dict, cur: dict) -> dict:
@@ -2306,7 +2319,8 @@ def dance_fix_keys(cfg: dict) -> None:
         elif v:
             used.add(v)
 
-ectok_live.LANG["value"] = CONFIG["language"]
+ectok_live.LANG["value"] = ui_lang()
+ectok_live.LIVE_LANG["value"] = CONFIG["language"]
 
 
 def overlay_actions() -> dict:
@@ -2473,8 +2487,8 @@ def import_action_image(path: Path) -> str:
 
 
 def pick_sound() -> str | None:
-    return (_pick_file({"en": "Choose the sound", "pt": "Escolha o som", "zh": "选择音效"}.get(CONFIG["language"], "Elige el sonido"),
-                      {"en": "Sounds", "pt": "Sons", "zh": "音效"}.get(CONFIG["language"], "Sonidos"), SOUND_EXTS, Path.home() / "Music") or [None])[0]
+    return (_pick_file({"en": "Choose the sound", "pt": "Escolha o som", "zh": "选择音效"}.get(ui_lang(), "Elige el sonido"),
+                      {"en": "Sounds", "pt": "Sons", "zh": "音效"}.get(ui_lang(), "Sonidos"), SOUND_EXTS, Path.home() / "Music") or [None])[0]
 
 
 def find_ffmpeg() -> str | None:
@@ -2580,8 +2594,8 @@ def _copy_unique(src: Path, folder: Path, stem: str, ext: str) -> Path:
 
 
 def pick_anim(multi: bool = False) -> list[str]:
-    return _pick_file({"en": "Choose your animation", "pt": "Escolha sua animação", "zh": "选择你的动画"}.get(CONFIG["language"], "Elige tu animación"),
-                      {"en": "Animations and videos", "pt": "Animações e vídeos", "zh": "动画和视频"}.get(CONFIG["language"], "Animaciones y videos"),
+    return _pick_file({"en": "Choose your animation", "pt": "Escolha sua animação", "zh": "选择你的动画"}.get(ui_lang(), "Elige tu animación"),
+                      {"en": "Animations and videos", "pt": "Animações e vídeos", "zh": "动画和视频"}.get(ui_lang(), "Animaciones y videos"),
                       IMPORT_EXTS, Path.home() / "Videos", multi=multi) or []
 
 
@@ -2811,14 +2825,14 @@ class Handler(BaseHTTPRequestHandler):
         parts = urlsplit(self.path)
         path, query = parts.path, parse_qs(parts.query)
         if path in ("/", "/index.html"):
-            html = (WEB_ROOT / "index.html").read_text(encoding="utf-8").replace('<html lang="es">', f'<html lang="{CONFIG["language"]}">', 1)
+            html = (WEB_ROOT / "index.html").read_text(encoding="utf-8").replace('<html lang="es">', f'<html lang="{ui_lang()}">', 1)
             self.send_file(WEB_ROOT / "index.html", html.encode("utf-8"))
         elif path in ("/overlay", "/overlay.html"):
             self.send_file(WEB_ROOT / "overlay.html")
         elif path == "/overlay-worker.js":
             self._send_bytes(WEB_ROOT / "overlay-worker.js", "text/javascript; charset=utf-8")
         elif path in ("/consola", "/consola.html"):
-            html = (WEB_ROOT / "consola.html").read_text(encoding="utf-8").replace('<html lang="es">', f'<html lang="{CONFIG["language"]}">', 1)
+            html = (WEB_ROOT / "consola.html").read_text(encoding="utf-8").replace('<html lang="es">', f'<html lang="{ui_lang()}">', 1)
             self.send_file(WEB_ROOT / "consola.html", html.encode("utf-8"))
         elif path.startswith("/img/") and re.fullmatch(r"/img/[\w.-]+", path):
             target = WEB_ROOT / "img" / path.rsplit("/", 1)[-1]
@@ -2854,7 +2868,7 @@ class Handler(BaseHTTPRequestHandler):
         elif path.startswith("/sound/"):
             self._send_sound(unquote(path[len("/sound/"):]))
         elif path == "/api/console":  # la consola flotante (no cuenta como «ventana abierta» para el actualizador)
-            self.send_json({"console": CONFIG["console"], "audio": CONFIG["audio"], "lang": CONFIG["language"], "version": APP_VERSION})
+            self.send_json({"console": CONFIG["console"], "audio": CONFIG["audio"], "lang": ui_lang(), "version": APP_VERSION})
         elif path == "/api/info":
             LAST_PING = time.time()
             self.send_json({"version": APP_VERSION, "build_date": BUILD_DATE, "config": CONFIG, "brb": BRB, "aliases": aliases_payload(),
@@ -2994,7 +3008,8 @@ class Handler(BaseHTTPRequestHandler):
                     threading.Thread(target=fetch_dancer_profile, args=(d["id"],), daemon=True).start()
             dance_emit()
             HOTKEYS.refresh()
-            ectok_live.LANG["value"] = CONFIG["language"]
+            ectok_live.LANG["value"] = ui_lang()
+            ectok_live.LIVE_LANG["value"] = CONFIG["language"]
             BUS.emit(new_event("config", overlay=overlay_payload()))
             self.send_json({"ok": True, "config": CONFIG})
         elif path == "/api/gifts/refresh":  # 🔄 actualizar la lista de regalos con la del live conectado
@@ -3034,8 +3049,8 @@ class Handler(BaseHTTPRequestHandler):
                 threading.Thread(target=fetch_dancer_profile, args=(x["id"],), daemon=True).start()
                 self.send_json({"ok": True, "config": CONFIG})
                 return
-            files = _pick_file({"en": "Choose her photo", "pt": "Escolha a foto dela", "zh": "选择她的照片"}.get(CONFIG["language"], "Elige su foto"),
-                               {"en": "Images", "pt": "Imagens", "zh": "图片"}.get(CONFIG["language"], "Imágenes"), DANCE_IMG_EXTS, Path.home() / "Pictures")
+            files = _pick_file({"en": "Choose her photo", "pt": "Escolha a foto dela", "zh": "选择她的照片"}.get(ui_lang(), "Elige su foto"),
+                               {"en": "Images", "pt": "Imagens", "zh": "图片"}.get(ui_lang(), "Imágenes"), DANCE_IMG_EXTS, Path.home() / "Pictures")
             if files:
                 src = Path(files[0])
                 if src.suffix.lower() not in DANCE_IMG_EXTS or src.stat().st_size > 20 * 1024 * 1024:
@@ -3050,8 +3065,8 @@ class Handler(BaseHTTPRequestHandler):
                 dance_emit()
             self.send_json({"ok": True, "config": CONFIG})
         elif path == "/api/dance/logo":  # 💃 el logotipo del live (se copia a la carpeta de EC-Tok)
-            files = _pick_file({"en": "Choose your logo", "pt": "Escolha seu logotipo", "zh": "选择你的标志"}.get(CONFIG["language"], "Elige tu logotipo"),
-                               {"en": "Images", "pt": "Imagens", "zh": "图片"}.get(CONFIG["language"], "Imágenes"), DANCE_IMG_EXTS, Path.home() / "Pictures")
+            files = _pick_file({"en": "Choose your logo", "pt": "Escolha seu logotipo", "zh": "选择你的标志"}.get(ui_lang(), "Elige tu logotipo"),
+                               {"en": "Images", "pt": "Imagens", "zh": "图片"}.get(ui_lang(), "Imágenes"), DANCE_IMG_EXTS, Path.home() / "Pictures")
             if files:
                 src = Path(files[0])
                 if src.suffix.lower() not in DANCE_IMG_EXTS or src.stat().st_size > 30 * 1024 * 1024:
@@ -3186,8 +3201,8 @@ class Handler(BaseHTTPRequestHandler):
             self.send_json({"ok": True, "config": CONFIG})
         elif path == "/api/sound/pick":
             if data.get("multi"):  # consola: varios a la vez
-                chosen = _pick_file({"en": "Choose the sounds", "pt": "Escolha os sons", "zh": "选择音效"}.get(CONFIG["language"], "Elige los sonidos"),
-                                    {"en": "Sounds", "pt": "Sons", "zh": "音效"}.get(CONFIG["language"], "Sonidos"), SOUND_EXTS,
+                chosen = _pick_file({"en": "Choose the sounds", "pt": "Escolha os sons", "zh": "选择音效"}.get(ui_lang(), "Elige los sonidos"),
+                                    {"en": "Sounds", "pt": "Sons", "zh": "音效"}.get(ui_lang(), "Sonidos"), SOUND_EXTS,
                                     Path.home() / "Music", multi=True)[:CONSOLE_MAX]
                 done, errors = [], []
                 for item in chosen:
@@ -3206,8 +3221,8 @@ class Handler(BaseHTTPRequestHandler):
             except (ValueError, OSError) as exc:
                 self.send_json({"ok": False, "error": str(exc)}, 400)
         elif path == "/api/actions/add-images":
-            chosen = _pick_file({"en": "Choose your images", "pt": "Escolha suas imagens", "zh": "选择你的图片"}.get(CONFIG["language"], "Elige tus imágenes"),
-                                {"en": "Images", "pt": "Imagens", "zh": "图片"}.get(CONFIG["language"], "Imágenes"), ACTION_EXTS, Path.home() / "Pictures", multi=True)
+            chosen = _pick_file({"en": "Choose your images", "pt": "Escolha suas imagens", "zh": "选择你的图片"}.get(ui_lang(), "Elige tus imágenes"),
+                                {"en": "Images", "pt": "Imagens", "zh": "图片"}.get(ui_lang(), "Imágenes"), ACTION_EXTS, Path.home() / "Pictures", multi=True)
             added, errors = [], []
             for item in chosen:
                 try:

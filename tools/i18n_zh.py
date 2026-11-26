@@ -797,4 +797,12 @@ ZH = {
 'Regalo especial': '特别礼物',
 'En lugar del cartelito sale una animación del banco con este mismo texto en su letrero (una u otra, para que no se encimen)': '代替横幅，从动画库播放一个动画，它的牌子上显示同样的文字（二选一，以免重叠）',
 '🔄 Al actualizarse, EC-Tok recarga solas sus fuentes en LIVE Studio u OBS (puede tardar unos 15 segundos). <b>Si alguna fuente se queda en blanco o deja de funcionar después de actualizar, cierra y vuelve a abrir TikTok LIVE Studio</b> (en OBS: clic derecho en la fuente → «Actualizar»).': '🔄 更新后，EC-Tok 会自动重新加载它在 LIVE Studio 或 OBS 中的来源（可能需要大约 15 秒）。<b>如果更新后某个来源一直空白或不工作，请关闭并重新打开 TikTok LIVE Studio</b>（在 OBS 中：右键点击来源 → “刷新”）。',
+'🖥 Idioma de EC-Tok': '🖥 EC-Tok 界面语言',
+'📺 Idioma de tu live:': '📺 直播语言：',
+'🌐 Idiomas': '🌐 语言',
+'Puedes usar EC-Tok en un idioma y que tu live salga en otro. Por ejemplo: la ventana en chino y tu público ve todo en inglés.': '你可以用一种语言使用 EC-Tok，而直播显示另一种语言。例如：窗口用中文，观众看到的全是英文。',
+'Los botones y textos de esta ventana. Solo lo ves tú.': '这个窗口的按钮和文字。只有你能看到。',
+'📺 Idioma de tu live': '📺 直播语言',
+'Lo que ve tu público: alertas, letreros de las animaciones, voz, top y relojes.': '观众看到的内容：提醒、动画牌子、语音、排行榜和计时器。',
+'¿Cambiar el idioma de tu live a {0}?\n\nLas alertas, letreros, voz y botones que vienen de fábrica pasan a {0}. Los textos que escribiste tú NO cambian, y la ventana de EC-Tok se queda en su idioma.': '把直播语言改成 {0}？\n\n自带的提醒、牌子、语音和按钮会改成 {0}。你自己写的文字不会改变，EC-Tok 窗口保持原来的语言。',
 }

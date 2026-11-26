@@ -129,7 +129,8 @@ MESSAGES = {
     "live_end": {"es": "El live terminó.", "en": "The LIVE ended.", "pt": "A live terminou.", "zh": "直播结束了。"},
     "need_user": {"es": "Escribe tu @usuario de TikTok.", "en": "Type your TikTok @username.", "pt": "Escreva seu @usuário do TikTok.", "zh": "请输入你的 TikTok @用户名。"},
 }
-LANG = {"value": "es"}
+LANG = {"value": "es"}  # idioma de la ventana de EC-Tok (avisos de conexión)
+LIVE_LANG = {"value": "es"}  # idioma del live (comentarios de prueba)
 
 
 def msg(key: str, **kw) -> str:
@@ -510,6 +511,6 @@ def test_event(kind: str, gift: str = "") -> dict:
         samples = {"es": ["¡Hola a todos!", "Saludos desde Monterrey 🔥", "Esa canción está buenísima", "¿Cantas otra?", "Qué bonito live"],
                    "en": ["Hi everyone!", "Greetings from Texas 🔥", "That song is great", "Can you sing another one?", "Lovely LIVE"],
                    "pt": ["Oi, gente!", "Saudações de São Paulo 🔥", "Essa música é demais", "Canta outra?", "Que live linda"], "zh": ["大家好！", "来自上海的问候 🔥", "这首歌太好听了", "再唱一首吧？", "好棒的直播"]}
-        text = random.choice(samples.get(LANG["value"], samples["es"]))
+        text = random.choice(samples.get(LIVE_LANG["value"], samples["es"]))
         return new_event("comment", user=user, text=text, test=True)
     return new_event(kind if kind in ("follow", "share") else "follow", user=user, test=True)
