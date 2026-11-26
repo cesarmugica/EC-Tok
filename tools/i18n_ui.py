@@ -782,4 +782,11 @@ T = {
 '🃏 Tarjeta acostada': ('🃏 Wide card', '🃏 Cartão deitado'),
 '🫧 Burbuja que se llena': ('🫧 Filling bubble', '🫧 Bolha que enche'),
 '🏆 Columna que sube': ('🏆 Rising column', '🏆 Coluna que sobe'),
+'{0} bailarinas pueden verse muy apretadas en un solo renglón.': ('{0} dancers may look very tight in a single row.', '{0} dançarinas podem ficar muito apertadas em uma só linha.'),
+'Estilo: {0}. ¿Conservar la vista en 1 renglón? Si la cambias a 2 renglones, la fuente se acomoda distinto: revisa en LIVE Studio que su cuadro no corte la imagen.': ('Style: {0}. Keep the 1-row view? If you switch to 2 rows, the source is arranged differently: check in LIVE Studio that its box doesn’t crop the image.', 'Estilo: {0}. Manter a visão em 1 linha? Se mudar para 2 linhas, a fonte se reorganiza: confira no LIVE Studio que a caixa não corte a imagem.'),
+'✅ SÍ, conservar 1 renglón': ('✅ YES, keep 1 row', '✅ SIM, manter 1 linha'),
+'↕ NO, pasar a 2 renglones': ('↕ NO, switch to 2 rows', '↕ NÃO, passar para 2 linhas'),
+'↩ Cancelar (no prender a esta bailarina)': ('↩ Cancel (don’t turn this dancer on)', '↩ Cancelar (não ativar esta dançarina)'),
+'Con {0} bailarinas, el estilo «{1}» se acomoda en 2 renglones.': ('With {0} dancers, the «{1}» style is arranged in 2 rows.', 'Com {0} dançarinas, o estilo «{1}» se organiza em 2 linhas.'),
+'¿Prefieres conservar 1 renglón? (Pueden verse apretadas.) Si se pasa a 2 renglones, revisa en LIVE Studio que el cuadro de la fuente no corte la imagen.': ('Prefer to keep 1 row? (They may look tight.) If it goes to 2 rows, check in LIVE Studio that the source box doesn’t crop the image.', 'Prefere manter 1 linha? (Podem ficar apertadas.) Se passar para 2 linhas, confira no LIVE Studio que a caixa da fonte não corte a imagem.'),
 }

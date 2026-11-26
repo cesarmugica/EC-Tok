@@ -1,5 +1,8 @@
 # Cambios de EC-Tok
 
+## 4.7.2
+- 📐 **Aviso al cambiar de renglones**: si al prender una bailarina la Barra de Activación pasaría de 1 a 2 renglones (Tarjetas en 1 renglón y los estilos de tarjeta: Cristal, Dorado, Cómic, Retro y Pastel), EC-Tok pregunta: **SÍ, conservar 1 renglón** / **NO, pasar a 2 renglones** / **Cancelar** (la bailarina se queda apagada). Si cambia a 2 renglones, te recuerda revisar el cuadro de la fuente en LIVE Studio.
+
 ## 4.7.1
 - 📐 **Las barras ya no cambian de tamaño durante el live** (Barra de Activación, Barra 1vs1 y Baile individual): la cuenta 5…1 se ve más grande sin agrandar la fuente, el lugar del reloj y del donador siempre está apartado, y los renglones de tarjetas se cuentan con todas las bailarinas del live (aunque alguna salga a descansar). Así su cuadro en LIVE Studio se ajusta una vez y nunca se corta.
 - 📏 **Mismo estilo = mismo tamaño**: si usas el mismo estilo en las tres (por ejemplo Placas inclinadas), las tres miden lo mismo de alto y de ancho, para que sus cuadros en LIVE Studio queden iguales.

@@ -31,7 +31,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, unquote, urlsplit
 
-APP_VERSION = "4.7.1"
+APP_VERSION = "4.7.2"
 
 try:  # lo genera windows/build.ps1
     from ectok_build import BUILD_DATE  # type: ignore[import-not-found]
@@ -207,7 +207,7 @@ DANCE_KEYS = ("grid_show", "grid_ref", "total_show", "total_ref", "clock_run", "
 
 
 def dance_default() -> dict:
-    return {"on": False, "layout": "bar", "show_total": True, "show_vs": True, "show_top": True, "auto_remove": False, "battle_add": True,
+    return {"on": False, "layout": "bar", "show_total": True, "show_vs": True, "show_top": True, "rows_mode": "auto", "auto_remove": False, "battle_add": True,
             "total_title": "Puntos de hoy", "dancers": [_dancer_default(i) for i in range(6)],
             "battle_secs": 120,  # ⏱ reloj propio de la batalla (0 = sin reloj)
             "clock_hold": 3,  # ⏱ segundos que se queda cada reloj en 0:00 antes de quitarse (1 a 5)
@@ -1765,7 +1765,7 @@ def dance_payload() -> dict:
             "side": dance_side(), "clock": {"total": d["clock"]["seconds"], "left": clock["left"], "running": clock["running"],
                                             "end_ms": int(clock["end"] * 1000), "done_ms": int(clock.get("done", 0.0) * 1000), "go_ms": int(clock.get("go", 0.0) * 1000) if clock["running"] else 0,
                                             "rounds": bool(d["clock"].get("rounds")), "round": DANCE["round"]},
-            "total_style": d.get("total_style", "classic"), "bar_style": d.get("bar_style", "classic"), "clock_hold": int(_hold()), "show_top": bool(d.get("show_top", True)), "solo_style": d.get("solo_style", "poster"),
+            "total_style": d.get("total_style", "classic"), "bar_style": d.get("bar_style", "classic"), "clock_hold": int(_hold()), "show_top": bool(d.get("show_top", True)), "rows_mode": d.get("rows_mode", "auto"), "solo_style": d.get("solo_style", "poster"),
             "battle_secs": int(d.get("battle_secs") or 0),
             "battle_end_ms": int(DANCE.get("bend", 0) * 1000),
             "battle_go_ms": int(DANCE.get("bgo", 0) * 1000) if DANCE["battle"] else 0,
@@ -2236,7 +2236,7 @@ def clean_dance(new: dict, cur: dict) -> dict:
         out["clock_hold"] = int(_num(new.get("clock_hold"), out.get("clock_hold", 3), 1, 5))
     if "battle_secs" in new:
         out["battle_secs"] = int(_num(new.get("battle_secs"), out.get("battle_secs", 120), 0, 3600))
-    for key, allowed in (("total_style", DANCE_TOTAL_STYLES), ("bar_style", DANCE_BAR_STYLES), ("solo_style", DANCE_SOLO_STYLES)):
+    for key, allowed in (("rows_mode", ("auto", "one")), ("total_style", DANCE_TOTAL_STYLES), ("bar_style", DANCE_BAR_STYLES), ("solo_style", DANCE_SOLO_STYLES)):
         if new.get(key) in allowed:
             out[key] = new[key]
     logo = new.get("logo")

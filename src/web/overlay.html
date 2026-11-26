@@ -1081,7 +1081,7 @@
     } else {
       // los renglones se cuentan con todas las bailarinas del live (aunque alguna salga a descansar): el tamaño no cambia
       const nA = Math.max(n, (DN.dancers || []).filter(x => x.on).length);
-      const cols = struct === 'cards' ? (nA <= 4 ? nA : Math.ceil(nA / 2)) : lay === 'row' ? nA : lay === 'rows2' ? Math.ceil(nA / 2) : lay === 'rows3' ? Math.ceil(nA / 3) : 1;
+      const cols = struct === 'cards' ? (nA <= 4 || DN.rows_mode === 'one' ? nA : Math.ceil(nA / 2)) : lay === 'row' ? nA : lay === 'rows2' ? Math.ceil(nA / 2) : lay === 'rows3' ? Math.ceil(nA / 3) : 1;
       // 4 o más por renglón: la tarjeta va parada (foto arriba, nombre, puntos, regalos y donador abajo) para que todo quepa
       box.innerHTML = `<div class="wrap"><div class="cards${cols >= 4 ? ' vert' : ''}" style="--cols:${cols}">${list.map(d => `<div class="card" style="--c:${d.color}">${dnAvC(d, lead)}<span class="tx"><span class="nm">${esc(d.name)}${d.wins ? ` <small style="color:#ffd54a">🏆${d.wins}</small>` : ''}</span><span class="pt">${dnFmt(d.points)}</span>${dnTop(d, 'grid')}</span>${dnGifts(d)}</div>`).join('')}</div>${clk}</div>`;
     }
