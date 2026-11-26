@@ -1,5 +1,8 @@
 # Cambios de EC-Tok
 
+## 4.8.9
+- 📢 El cintillo de las alertas ahora es **más angosto (62 % del ancho de la fuente)** y su contenido va **centrado**: con textos cortos ya no queda un hueco grande a la derecha. Sigue midiendo siempre lo mismo.
+
 ## 4.8.8
 - 📢 El cintillo de las alertas deja siempre espacio para **2 renglones de texto + los 💎**: casi nunca hace falta achicar la letra; solo si el texto ocupa 3 renglones o más.
 

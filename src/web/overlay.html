@@ -13,13 +13,13 @@
   /* ---------- alertas ---------- */
   #alerts { position: fixed; left: 0; right: 0; display: flex; justify-content: center; pointer-events: none; padding: 24px; }
   #alerts.top { top: 0; } #alerts.center { top: 50%; transform: translateY(-50%); } #alerts.bottom { bottom: 0; }
-  .alert { display: flex; align-items: center; gap: 18px; width: min(92vw, 900px); box-sizing: border-box; padding: 18px 26px 18px 18px;
+  .alert { display: flex; align-items: center; justify-content: center; gap: 18px; width: min(62vw, 680px); box-sizing: border-box; padding: 18px 26px 18px 18px;
     border-radius: 26px; background: linear-gradient(135deg, rgba(20,20,28,.88), rgba(40,20,40,.88));
     border: 3px solid var(--c1); box-shadow: 0 0 0 3px rgba(37,244,238,.35), 0 18px 40px rgba(0,0,0,.45); }
   .alert .pic { width: calc(var(--fs) * 2.6); height: calc(var(--fs) * 2.6); flex: none; border-radius: 22px; display: grid;
     place-items: center; font-size: calc(var(--fs) * 1.7); background: rgba(255,255,255,.08); overflow: hidden; }
   .alert .pic img { width: 100%; height: 100%; object-fit: contain; }
-  .alert .body { flex: 1; min-width: 0; height: calc(var(--fs) * 3.05 + 6px);  /* siempre caben 2 renglones + los 💎 */ display: flex; flex-direction: column; justify-content: center; overflow: hidden; }
+  .alert .body { flex: 0 1 auto; min-width: 0; height: calc(var(--fs) * 3.05 + 6px);  /* siempre caben 2 renglones + los 💎 */ display: flex; flex-direction: column; justify-content: center; overflow: hidden; }
   .alert .txt { font-size: var(--fs); font-weight: 800; line-height: 1.15; overflow-wrap: anywhere; }  /* 4.8.7: el cintillo siempre mide lo mismo; si el texto es largo, la letra se achica */
   .alert .txt .u { color: var(--c2); }
   .alert .txt .g { color: var(--c1); }
@@ -661,7 +661,7 @@
   function applyStyle() {
     const s = cfg.style, r = document.documentElement.style;
     let fs = +params.get('size') || s.font_size;
-    fs = Math.min(fs, innerWidth * 0.075, innerHeight * 0.1);  // que el cintillo quepa en la fuente (y en la vista previa angosta)
+    fs = Math.min(fs, innerWidth * 0.055, innerHeight * 0.1);  // que el cintillo quepa en la fuente (y en la vista previa angosta)
     r.setProperty('--c1', s.color); r.setProperty('--c2', s.accent); r.setProperty('--fs', fs + 'px');
     $('#alerts').className = s.position;
   }
