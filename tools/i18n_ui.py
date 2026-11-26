@@ -795,4 +795,5 @@ T = {
 'La alerta «⭐ Regalo especial» está apagada.\n\n¿La prendo para que puedas ver cómo se ve?': ('The “⭐ Special gift” alert is off.\n\nShall I turn it on so you can see how it looks?', 'O alerta «⭐ Presente especial» está desligado.\n\nPosso ligá-lo para você ver como fica?'),
 '🎁 Regalo especial': ('🎁 Special gift', '🎁 Presente especial'),
 'Regalo especial': ('Special gift', 'Presente especial'),
+'En lugar del cartelito sale una animación del banco con este mismo texto en su letrero (una u otra, para que no se encimen)': ('Instead of the banner, an animation from the library plays with this same text on its sign (one or the other, so they don\'t overlap)', 'No lugar do cartaz sai uma animação do banco com este mesmo texto na sua placa (um ou outro, para não se sobreporem)'),
 }

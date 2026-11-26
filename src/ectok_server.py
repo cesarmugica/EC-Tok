@@ -31,7 +31,8 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, unquote, urlsplit
 
-APP_VERSION = "4.8.4"
+APP_VERSION = "4.8.5"
+ALERT_ONE_OF = ("like", "gift_special")  # alerta O animación, no las dos (la animación trae su propio letrero)
 
 try:  # lo genera windows/build.ps1
     from ectok_build import BUILD_DATE  # type: ignore[import-not-found]
@@ -341,6 +342,10 @@ def load_config() -> dict:
             _keys_for_all(cfg, saved)
             _seed_console(cfg, saved)
             dance_fix_config(cfg)
+            for k in ALERT_ONE_OF:  # 4.8.5: alerta O animación (la animación trae su letrero)
+                al = cfg["alerts"].get(k) or {}
+                if al.get("banner") and al.get("anim"):
+                    al["banner"] = False
             return cfg
     cfg = _merge(DEFAULT_CONFIG, {})
     dance_fix_config(cfg)
@@ -534,6 +539,8 @@ def clean_config(data: dict) -> dict:
                 for flag in ("banner", "anim"):
                     if isinstance(new.get(flag), bool):
                         current[flag] = new[flag]
+                if kind in ALERT_ONE_OF and current.get("banner") and current.get("anim"):
+                    current["banner"] = False  # 4.8.5: la animación ya trae su letrero; si salen los dos se enciman
                 if "anim_file" in new:
                     current["anim_file"] = Path(str(new.get("anim_file") or "")).name
                 current["anim_size"] = int(_num(new.get("anim_size"), current.get("anim_size", 70), 10, 100))
@@ -1320,7 +1327,9 @@ def alert_anims(ev: dict) -> list[dict]:
     text = sign_text(conf.get("text", ""), data, True)
     if file in SCENES:
         return [anim_event(file, conf.get("seconds", 5), conf.get("anim_size", 70), who=who, sign=text)]
-    return [anim_event(file, conf.get("seconds", 5), conf.get("anim_size", 70), who=who, caption=re.sub(r"\{user\}\s*", "", text).strip())]
+    caption = re.sub(r",?\s*\{user\}", "", text)  # el nombre ya sale arriba: «¡Gracias por tu X, {user}!» → «¡Gracias por tu X!»
+    caption = re.sub(r"\s+([!?.,;:])", r"\1", caption).strip()
+    return [anim_event(file, conf.get("seconds", 5), conf.get("anim_size", 70), who=who, caption=caption)]
 
 
 def _is_special(event: dict) -> bool:

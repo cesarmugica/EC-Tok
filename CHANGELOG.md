@@ -1,5 +1,9 @@
 # Cambios de EC-Tok
 
+## 4.8.5
+- 🔔 En «Cada N likes» y «Regalo especial» ahora eliges **📢 Alerta o 🎬 Animación** (una u otra): la animación ya trae su propio letrero con la foto, el nombre y tu texto, así el agradecimiento no sale dos veces. Si tenías las dos prendidas, se queda la animación.
+- 🎬 El letrero de las animaciones de alerta ya no queda cortado: «¡Gracias por tu Quiéreme, !» → «¡Gracias por tu Quiéreme!» (el nombre ya sale arriba).
+
 ## 4.8.4
 - 🔔 La vista previa de Alertas ahora también muestra la **animación** de la alerta (si la tiene prendida), no solo el cintillo. El cuadro de vista previa es más alto para que quepa.
 
