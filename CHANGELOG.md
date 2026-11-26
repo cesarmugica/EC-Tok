@@ -1,5 +1,9 @@
 # Cambios de EC-Tok
 
+## 4.9.0
+- 🔄 **Las fuentes se recargan solas después de actualizar EC-Tok**, aunque la conexión de LIVE Studio se haya quedado colgada: cada fuente revisa cada 15 segundos si EC-Tok volvió o cambió de versión y se recarga. También se corrigió un choque entre la conexión de la versión vieja y la nueva.
+- 📝 Nota en «Poner las alertas en tu live» y en las fuentes de baile: si alguna fuente se queda en blanco después de actualizar, cierra y vuelve a abrir TikTok LIVE Studio (en OBS: clic derecho → «Actualizar»).
+
 ## 4.8.9
 - 📢 El cintillo de las alertas ahora es **más angosto (62 % del ancho de la fuente)** y su contenido va **centrado**: con textos cortos ya no queda un hueco grande a la derecha. Sigue midiendo siempre lo mismo.
 

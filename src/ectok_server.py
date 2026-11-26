@@ -31,7 +31,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, unquote, urlsplit
 
-APP_VERSION = "4.8.9"
+APP_VERSION = "4.9.0"
 ALERT_ONE_OF = ("gift", "follow", "share", "like", "gift_special")  # 4.8.6: alerta O animación en todas (la animación trae su letrero)
 
 try:  # lo genera windows/build.ps1
@@ -2865,6 +2865,9 @@ class Handler(BaseHTTPRequestHandler):
             if query.get("here") == ["brb"]:  # la fuente propia de «Ya regresamos» avisa que está abierta
                 BRB_SEEN["t"] = time.time()
                 self.send_json({"ok": True})
+                return
+            if query.get("ping") == ["1"]:  # 4.9.0: el vigilante de las fuentes solo pregunta la versión
+                self.send_json({"version": APP_VERSION})
                 return
             self.send_json(overlay_payload())
         elif path == "/api/state":

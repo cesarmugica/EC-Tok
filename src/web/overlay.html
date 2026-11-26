@@ -1356,7 +1356,7 @@
     let shared = false;
     if (typeof SharedWorker === 'function') {
       try {
-        const w = new SharedWorker('/overlay-worker.js?v=' + encodeURIComponent(OV_VERSION || ''), {name: 'ectok-eventos'});
+        const w = new SharedWorker('/overlay-worker.js?v=' + encodeURIComponent(OV_VERSION || ''), {name: 'ectok-eventos-' + (OV_VERSION || '')});  // 4.9.0: nombre por versión (si no, el de la versión vieja choca)
         w.port.onmessage = m => { try { handle(JSON.parse(m.data)); } catch (_) {} };
         w.port.start();
         addEventListener('pagehide', () => { try { w.port.postMessage('bye'); } catch (_) {} });
@@ -1365,6 +1365,14 @@
       } catch (_) { shared = false; }
     }
     if (!shared) ownStream();
+    // 4.9.0: vigilante aparte de la conexión de eventos. Si EC-Tok se cerró (actualización) y volvió, o cambió de versión,
+    // la fuente se recarga sola aunque la conexión de eventos de LIVE Studio se haya quedado colgada.
+    let down = false;
+    setInterval(() => {
+      fetch('/api/overlay?ping=1', {cache: 'no-store'}).then(r => r.json()).then(d => {
+        if (down || (d.version && OV_VERSION && d.version !== OV_VERSION)) location.reload();
+      }).catch(() => { down = true; });
+    }, 15000);
     // la fuente propia de «Ya regresamos» avisa que está abierta (las vistas previas de EC-Tok no cuentan)
     if (which.includes('brb') && !isPreviewFrame) {
       const here = () => fetch('/api/overlay?here=brb').catch(() => {});
