@@ -31,7 +31,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, unquote, urlsplit
 
-APP_VERSION = "4.8.6"
+APP_VERSION = "4.8.7"
 ALERT_ONE_OF = ("gift", "follow", "share", "like", "gift_special")  # 4.8.6: alerta O animación en todas (la animación trae su letrero)
 
 try:  # lo genera windows/build.ps1

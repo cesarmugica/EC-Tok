@@ -1,5 +1,8 @@
 # Cambios de EC-Tok
 
+## 4.8.7
+- 📢 El cintillo de las alertas ahora **siempre mide lo mismo** (mismo ancho y alto): si el texto o el nombre son largos, la letra se achica sola para que quepa y nunca se salga de su fuente en LIVE Studio u OBS.
+
 ## 4.8.6
 - 🔔 Ahora **todas las alertas** (Regalos, Follows, Compartir, Cada N likes y Regalo especial) son **📢 Alerta o 🎬 Animación**, una u otra: son dos fuentes distintas en LIVE Studio y si salen las dos el agradecimiento se repite o se enciman. Si tenías las dos prendidas, se queda la animación. Tip: en el texto puedes usar {diamonds} para que el letrero de la animación diga los 💎.
 
