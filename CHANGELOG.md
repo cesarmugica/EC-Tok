@@ -1,5 +1,8 @@
 # Cambios de EC-Tok
 
+## 4.8.4
+- 🔔 La vista previa de Alertas ahora también muestra la **animación** de la alerta (si la tiene prendida), no solo el cintillo. El cuadro de vista previa es más alto para que quepa.
+
 ## 4.8.3
 - 🔊 En Sonidos, la opción «Un regalo en especial» ahora se llama «Regalo especial», igual que en Alertas y Animaciones.
 

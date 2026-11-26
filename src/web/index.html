@@ -422,7 +422,7 @@
         <button type="button" class="secondary small" data-test="gift" data-gift-special>⭐ Regalo especial</button>
         <button type="button" class="secondary small" data-test="follow">💖 Follow</button>
         <button type="button" class="secondary small" data-test="share">📣 Compartir</button></div>
-      <div class="preview"><iframe id="previewAlerts" title="Vista previa"></iframe></div>
+      <div class="preview" style="height:340px"><iframe id="previewAlerts" title="Vista previa"></iframe></div>
     </div>
   </section>
 
@@ -1512,7 +1512,7 @@
     const base = `http://localtest.me:${port}/overlay?w=`;
     const list = [[t('🔔 Alertas'), base + 'alerts'], [t('🎬 Animaciones'), base + 'anim'], [t('🎯 Metas'), base + 'goal'], [t('🏆 Top donadores'), base + 'top'], [t('❤️ Top likes'), base + 'likes'], [t('🎯 Metas de acción'), base + 'actions'], [t('🌟 Especiales'), base + 'special'], [t('☕ Ya regresamos'), base + 'brb']];
     $('#urls').innerHTML = $('#simUrls').innerHTML = list.map(([n, u]) => `<div class="url"><b>${n}</b><code>${esc(u)}</code><button type="button" class="secondary small" data-copy="${esc(u)}">${t('📋 Copiar')}</button></div>`).join('');
-    $('#previewAlerts').dataset.src = '/overlay?w=alerts&size=22'; $('#previewGoal').dataset.src = '/overlay?w=goal&size=26'; $('#previewTop').dataset.src = '/overlay?w=top&size=26'; $('#previewLikers').dataset.src = '/overlay?w=likes&size=26'; $('#previewActions').dataset.src = '/overlay?w=actions&size=26&preview=1';
+    $('#previewAlerts').dataset.src = '/overlay?w=alerts,anim&size=22&preview=1'; $('#previewGoal').dataset.src = '/overlay?w=goal&size=26'; $('#previewTop').dataset.src = '/overlay?w=top&size=26'; $('#previewLikers').dataset.src = '/overlay?w=likes&size=26'; $('#previewActions').dataset.src = '/overlay?w=actions&size=26&preview=1';
     loadPreviews();
   }
   for (const box of ['#urls', '#simUrls']) $(box).addEventListener('click', async e => {
