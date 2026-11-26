@@ -1,5 +1,8 @@
 # Cambios de EC-Tok
 
+## 4.8.2
+- 🎬 En Animaciones, la opción «Un regalo en especial» ahora se llama «Regalo especial», igual que en Alertas.
+
 ## 4.8.1
 - ⭐ La casilla de «Regalo especial» ya es del mismo tamaño que las demás (el nombre ahora es más corto: «⭐ Regalo especial»).
 - ⭐ Nuevo botón **«⭐ Regalo especial»** en «Probar:» (📢 Alertas): manda una prueba con el regalo que elegiste. Si la alerta está apagada, te pregunta si la prendes para verla.

@@ -793,4 +793,5 @@ T = {
 'Este regalo tiene su propia alerta y su animación (por ejemplo el Quiéreme con un corazón); ya no sale en la alerta general de regalos': ('This gift has its own alert and animation (for example Heart Me with a heart); it no longer shows in the general gift alert', 'Este presente tem seu próprio alerta e animação (por exemplo o Heart Me com um coração); ele não aparece mais no alerta geral de presentes'),
 '⭐ Regalo especial': ('⭐ Special gift', '⭐ Presente especial'),
 'La alerta «⭐ Regalo especial» está apagada.\n\n¿La prendo para que puedas ver cómo se ve?': ('The “⭐ Special gift” alert is off.\n\nShall I turn it on so you can see how it looks?', 'O alerta «⭐ Presente especial» está desligado.\n\nPosso ligá-lo para você ver como fica?'),
+'🎁 Regalo especial': ('🎁 Special gift', '🎁 Presente especial'),
 }
