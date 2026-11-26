@@ -31,7 +31,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, unquote, urlsplit
 
-APP_VERSION = "4.6.0"
+APP_VERSION = "4.7.0"
 
 try:  # lo genera windows/build.ps1
     from ectok_build import BUILD_DATE  # type: ignore[import-not-found]
@@ -1630,9 +1630,10 @@ DANCE_FONTS = ("", "Impact", "Arial Black", "Bahnschrift", "Segoe UI Black", "Tr
 DANCE_EFFECTS = ("rain", "glass", "ice", "curtain", "fire", "snow", "smoke", "jail", "tv", "cracked", "hearts")
 DANCE_THEMES = ("neon", "glass", "gold", "sport", "minimal", "comic", "retro", "pastel", "fire")  # 🎨 estilos que comparten todas las fuentes
 DANCE_LAYOUTS = ("bar", "plates", "row", "rows2", "rows3", "col", "bubbles", "podium", *(f"t-{t}" for t in DANCE_THEMES))
-DANCE_TOTAL_STYLES = ("classic", "dynasty", *DANCE_THEMES)
-DANCE_BAR_STYLES = ("classic", "fighter", *DANCE_THEMES)
-DANCE_SOLO_STYLES = ("poster", "ring", *DANCE_THEMES)
+# 💎 ⚔ 🎤 los estilos de las demás fuentes hacen juego con los de la barra de activación
+DANCE_TOTAL_STYLES = ("classic", "dynasty", "row", "rows2", "rows3", "col", "bubbles", "podium", *DANCE_THEMES)
+DANCE_BAR_STYLES = ("classic", "fighter", "plates", "row", "col", "bubbles", "podium", *DANCE_THEMES)
+DANCE_SOLO_STYLES = ("poster", "ring", "plates", "row", "col", "bubbles", "podium", *DANCE_THEMES)
 # 🧪 entorno de prueba del live de baile: bailarinas de prueba (no tocan las tuyas) y un guion que se repite
 DANCE_SIM: dict = {"active": False, "dancers": None, "snap": None}
 SIM_DANCER_NAMES = ["LUNA", "SOFI", "MIA", "ARI", "VALE", "NINA"]

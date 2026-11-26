@@ -166,27 +166,34 @@
   #dgrid { position: fixed; left: 0; right: 0; top: 0; padding: calc(1.2vw * var(--dz)) 2.5vw; }
   #dgrid .wrap { border-radius: calc(2vw * var(--dz)); padding: calc(1vw * var(--dz)) calc(1.4vw * var(--dz)); }
   #dgrid .tops, #dgrid .gifts { display: flex; }
-  #dgrid .tops > div, #dgrid .gifts > div { flex: 1 1 0; min-width: 0; display: flex; align-items: center; justify-content: center; gap: .6vw; }
-  #dgrid .tops > div { flex-direction: column; gap: .2vw; }
+  #dgrid .tops > div, #dgrid .gifts > div { flex: 1 1 0; min-width: 11%; display: flex; align-items: flex-start; justify-content: flex-start; gap: .6vw;
+    transition: flex-grow .6s ease; padding-left: calc(.6vw * var(--dz)); box-sizing: border-box; }
+  #dgrid .tops > div { flex-direction: column; gap: .2vw; justify-content: flex-end; }
+  #dgrid .tops .nm { overflow: visible !important; max-width: none !important; }
   #dgrid .tops .av { width: calc(5.4vw * var(--dz)); height: calc(5.4vw * var(--dz)); border: calc(.4vw * var(--dz)) solid var(--avb, var(--c)); box-shadow: var(--avg, none); }
   #dgrid .tops .nm { font-weight: 900; font-size: calc(2.2vw * var(--dz)); max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-transform: uppercase; font-style: italic; }
   #dgrid .segs { display: flex; height: calc(4.6vw * var(--dz)); margin: calc(.7vw * var(--dz)) 0; border-radius: var(--rad, 999px); overflow: hidden;
     box-shadow: var(--frame, 0 0 0 calc(.35vw * var(--dz)) rgba(255,255,255,.85), 0 .6vw 1.6vw rgba(0,0,0,.45)); }
-  #dgrid .segs > div { min-width: 7%; display: flex; align-items: center; padding: 0 1.2vw; box-sizing: border-box; transition: flex-grow .6s ease;
+  #dgrid .segs > div { min-width: 11%; display: flex; align-items: center; padding: 0 1.2vw; box-sizing: border-box; transition: flex-grow .6s ease;
     background: var(--fill, linear-gradient(180deg, color-mix(in srgb, var(--c) 70%, #fff), var(--c) 55%, color-mix(in srgb, var(--c) 75%, #000))); }
   #dgrid .segs > div + div { border-left: calc(.3vw * var(--dz)) solid var(--sep, rgba(255,255,255,.9)); }
   #dgrid .segs .pt { font-weight: 900; font-style: italic; font-size: calc(2.8vw * var(--dz)); }
   #dgrid .gifts .gi { width: calc(5vw * var(--dz)); height: calc(5vw * var(--dz)); }
-  #dgrid .gifts > div { flex-direction: column; gap: calc(.3vw * var(--dz)); }
+  #dgrid .gifts > div { flex-direction: column; gap: calc(.3vw * var(--dz)); min-height: calc(8.8vw * var(--dz)); }  /* lugar fijo para el 👑 donador: nada se mueve */
   .dz .gis { display: inline-flex; align-items: center; gap: calc(.3vw * var(--dz)); flex: none; }
   .dz .gis:empty { display: none; }
-  #dgrid .gifts .gis:has(.gi + .gi) .gi { width: calc(3.6vw * var(--dz)); height: calc(3.6vw * var(--dz)); }
+  #dgrid .gifts .gis { max-width: 100%; min-width: 0; }
+  #dgrid .gifts .gis:has(.gi + .gi) .gi { width: calc(3.6vw * var(--dz)); height: auto; aspect-ratio: 1; flex: 0 1 auto; min-width: 0; }  /* 2 o 3 regalos: se achican para caber en su lugar */
   /* 👑 quién le ha donado más */
   .dz .tdn { display: inline-flex; align-items: center; gap: calc(.35vw * var(--dz)); max-width: 100%; min-width: 0; padding: calc(.15vw * var(--dz)) calc(.7vw * var(--dz)) calc(.15vw * var(--dz)) calc(.15vw * var(--dz));
     border-radius: 999px; background: rgba(0,0,0,.6); color: #fff; font-family: "Segoe UI", sans-serif; font-style: normal; font-size: calc(1.9vw * var(--dz)); line-height: 1.2; white-space: nowrap; box-sizing: border-box; flex: none; }
   .dz .tdn img { width: calc(3vw * var(--dz)); height: calc(3vw * var(--dz)); border-radius: 50%; object-fit: cover; flex: none; border: calc(.15vw * var(--dz)) solid #ffd54a; }
+  .dz .tdn { height: calc(3.3vw * var(--dz)); }  /* siempre del mismo alto (con o sin foto): nada se mueve */
+  .dz .tdn.ph { visibility: hidden; width: 1px; padding: 0; }
   .dz .tdn b { overflow: hidden; text-overflow: ellipsis; font-weight: 800; min-width: 0; }
-  #dgrid .card .tdn, #dgrid .pl .tdn { margin-top: calc(.2vw * var(--dz)); align-self: flex-start; }
+  #dgrid .card .tdn { margin-top: calc(.2vw * var(--dz)); align-self: flex-start; }
+  /* placas: el 👑 donador va abajo de su placa (con su lugar apartado) */
+  #dgrid .pl .tdn { position: absolute; left: 50%; top: calc(100% + 1.7vw * var(--dz)); transform: translateX(-50%); max-width: 125%; }
   #dgrid .bub .tdn, #dgrid .pod .tdn { margin-top: calc(.3vw * var(--dz)); }
   #dbar .tdn { margin: 0 calc(.4vw * var(--dz)); }
   #dsolo .tdn { align-self: flex-start; margin: calc(.3vw * var(--dz)) 0 0 calc(1vw * var(--dz)); font-size: calc(2.3vw * var(--dz)); }
@@ -205,8 +212,19 @@
   #dgrid .card .nm { font-weight: 900; font-size: calc(2.4vw * var(--dz)); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-transform: uppercase; font-style: italic; }
   #dgrid .card .pt { font-weight: 900; font-size: calc(3vw * var(--dz)); }
   #dgrid .card .gi { width: calc(5.4vw * var(--dz)); height: calc(5.4vw * var(--dz)); }
+  /* tarjeta acostada con 2 o 3 regalos: van en cuadrito de 2×2 para no apretar el nombre */
+  #dgrid .cards:not(.vert) .card .gis:has(.gi + .gi) { display: grid; grid-template-columns: repeat(2, auto); gap: calc(.2vw * var(--dz)); }
+  #dgrid .cards:not(.vert) .card .gis:has(.gi + .gi) .gi { width: calc(3vw * var(--dz)); height: calc(3vw * var(--dz)); }
+  #dgrid .cards.vert .card { flex-direction: column; align-items: center; text-align: center; gap: calc(.4vw * var(--dz)); padding: calc(1vw * var(--dz)) calc(.6vw * var(--dz)); }
+  #dgrid .cards.vert .card .tx { display: contents; }
+  #dgrid .cards.vert .card .av { order: 0; width: calc(7vw * var(--dz)); height: calc(7vw * var(--dz)); }
+  #dgrid .cards.vert .card .nm { order: 1; max-width: 100%; font-size: calc(2.1vw * var(--dz)); }
+  #dgrid .cards.vert .card .pt { order: 2; font-size: calc(3vw * var(--dz)); line-height: 1; }
+  #dgrid .cards.vert .card .gis { order: 3; max-width: 100%; }
+  #dgrid .cards.vert .card .gi { width: calc(4.4vw * var(--dz)); height: auto; aspect-ratio: 1; flex: 0 1 auto; min-width: 0; }
+  #dgrid .cards.vert .card .tdn { order: 4; align-self: center; margin-top: auto; }
   /* cuadrícula de activación: placas inclinadas */
-  #dgrid .plates { display: flex; gap: calc(1.4vw * var(--dz)); padding: calc(2.6vw * var(--dz)) calc(1vw * var(--dz)) calc(1vw * var(--dz)); }
+  #dgrid .plates { display: flex; gap: calc(1.4vw * var(--dz)); padding: calc(2.6vw * var(--dz)) calc(1vw * var(--dz)) calc(5.6vw * var(--dz)); }
   #dgrid .pl { position: relative; flex: 1 1 0; min-width: 0; transform: skewX(-12deg); border-radius: calc(.8vw * var(--dz));
     border: calc(.35vw * var(--dz)) solid rgba(255,255,255,.95); box-shadow: 0 .6vw 1.4vw rgba(0,0,0,.45);
     background: repeating-linear-gradient(-45deg, rgba(255,255,255,.14) 0 .5vw, transparent .5vw 1.3vw),
@@ -216,9 +234,10 @@
   #dgrid .pl .av { width: calc(5.8vw * var(--dz)); height: calc(5.8vw * var(--dz)); border: calc(.35vw * var(--dz)) solid #fff; margin-left: calc(-1.8vw * var(--dz)); }
   #dgrid .pl .tx { display: flex; flex-direction: column; min-width: 0; flex: 1; line-height: 1; }
   #dgrid .pl .nm { font-weight: 900; font-style: italic; text-transform: uppercase; font-size: calc(1.6vw * var(--dz)); letter-spacing: -.02em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  #dgrid .pl .pt { font-weight: 900; font-style: italic; font-size: calc(3vw * var(--dz)); white-space: nowrap; }
+  #dgrid .pl .pt { font-weight: 900; font-style: italic; font-size: calc(2.6vw * var(--dz)); white-space: nowrap; letter-spacing: -.03em; }
   #dgrid .pl .gis { position: absolute; top: calc(-1.9vw * var(--dz)); right: calc(.4vw * var(--dz)); }
   #dgrid .pl .gi { width: calc(3.4vw * var(--dz)); height: calc(3.4vw * var(--dz)); }
+  #dgrid .pl .gis:has(.gi + .gi) .gi { width: calc(2.6vw * var(--dz)); height: calc(2.6vw * var(--dz)); }
   #dgrid .pl .win { position: absolute; right: calc(-.6vw * var(--dz)); bottom: calc(-1.3vw * var(--dz)); transform: skewX(12deg); background: #111; color: #ffd54a;
     font-weight: 900; font-style: italic; font-size: calc(1.2vw * var(--dz)); padding: calc(.15vw * var(--dz)) calc(.7vw * var(--dz)); border-radius: calc(.4vw * var(--dz)); border: 1px solid #ffd54a; }
   /* corona: la que va ganando */
@@ -354,6 +373,115 @@
   #dvs .half.hearts { background: linear-gradient(180deg, rgba(60,0,30,.6), rgba(120,10,50,.5)); }
   #dvs .line.fire { background: linear-gradient(180deg, transparent, #ffb000, #fff, #ffb000, transparent); box-shadow: 0 0 2vw #ff4d00; }
   #dvs .line.hearts { background: linear-gradient(180deg, transparent, #ff6fa8, #fff, #ff6fa8, transparent); box-shadow: 0 0 2vw #ff3d8d; }
+
+  /* ===== 💎 Diamantes por bailarina: estilos que hacen juego con la barra de activación ===== */
+  #dtotal.wide .box { min-width: calc(80vw * var(--dz)); }
+  #dtotal .rk { flex: none; display: grid; place-items: center; width: calc(3vw * var(--dz)); height: calc(3vw * var(--dz)); border-radius: 50%; background: #111; color: var(--rk, #ffd54a);
+    font-weight: 900; font-size: calc(1.8vw * var(--dz)); box-shadow: 0 0 0 calc(.25vw * var(--dz)) #fff; }
+  #dtotal .tw { font-size: .7em; color: #ffd54a; }
+  #dtotal .tcs { display: grid; grid-template-columns: repeat(var(--cols), minmax(0, 1fr)); gap: calc(1vw * var(--dz)); }
+  #dtotal .tc { position: relative; display: flex; align-items: center; gap: calc(.8vw * var(--dz)); padding: calc(.7vw * var(--dz)) calc(1vw * var(--dz)); border-radius: var(--crd, calc(1.4vw * var(--dz)));
+    background: var(--card, linear-gradient(90deg, color-mix(in srgb, var(--c) 85%, transparent), color-mix(in srgb, var(--c) 30%, transparent))); box-shadow: var(--cardb, 0 0 0 calc(.22vw * var(--dz)) rgba(255,255,255,.75)); }
+  #dtotal .tc .tx { display: flex; flex-direction: column; min-width: 0; line-height: 1.05; }
+  #dtotal .tc .nm { font-size: calc(2vw * var(--dz)); }
+  #dtotal .tc .pt { font-size: calc(2.6vw * var(--dz)); font-style: italic; }
+  #dtotal .tcs.vert .tc { flex-direction: column; text-align: center; padding-top: calc(1.2vw * var(--dz)); }
+  #dtotal .tcs.vert .tc .tx { align-items: center; max-width: 100%; }
+  #dtotal .tcs.vert .tc .rk { position: absolute; left: calc(.5vw * var(--dz)); top: calc(.5vw * var(--dz)); }
+  #dtotal .tcs.vert .tc .av { width: calc(6vw * var(--dz)); height: calc(6vw * var(--dz)); }
+  #dtotal .tbubs { display: flex; justify-content: center; gap: calc(1.4vw * var(--dz)); padding-top: calc(.6vw * var(--dz)); }
+  #dtotal .tb { flex: 1 1 0; min-width: 0; max-width: calc(16vw * var(--dz)); display: flex; flex-direction: column; align-items: center; }
+  #dtotal .tb .avw { position: relative; }
+  #dtotal .tb .av { width: calc(9vw * var(--dz)); height: calc(9vw * var(--dz)); border: calc(.5vw * var(--dz)) solid var(--avb, var(--c)); box-shadow: var(--avg, 0 0 0 calc(.25vw * var(--dz)) #fff); }
+  #dtotal .tb .rk { position: absolute; left: calc(-.4vw * var(--dz)); top: calc(-.4vw * var(--dz)); }
+  #dtotal .tb .nm { margin-top: calc(.4vw * var(--dz)); font-size: calc(1.9vw * var(--dz)); max-width: 100%; }
+  #dtotal .tb .pt { padding: 0 calc(1vw * var(--dz)); border-radius: 999px; font-style: italic; font-size: calc(2.2vw * var(--dz));
+    background: var(--fill, linear-gradient(180deg, color-mix(in srgb, var(--c) 70%, #fff), var(--c) 55%, color-mix(in srgb, var(--c) 75%, #000))); box-shadow: var(--frame, 0 0 0 calc(.22vw * var(--dz)) #fff); }
+  #dtotal .tpod { display: flex; align-items: flex-end; justify-content: center; gap: calc(1.2vw * var(--dz)); }
+  #dtotal .tpod > div { flex: 0 1 calc(18vw * var(--dz)); display: flex; flex-direction: column; align-items: center; justify-content: flex-end; }
+  #dtotal .tpod .av { width: calc(7vw * var(--dz)); height: calc(7vw * var(--dz)); border: calc(.45vw * var(--dz)) solid var(--avb, var(--c)); box-shadow: var(--avg, none); }
+  #dtotal .tpod .nm { font-size: calc(1.9vw * var(--dz)); max-width: 100%; }
+  #dtotal .tpod .pt { font-size: calc(2.3vw * var(--dz)); font-style: italic; margin-bottom: calc(.3vw * var(--dz)); }
+  #dtotal .tpod .col { width: 100%; display: grid; place-items: start center; border-radius: var(--rad, calc(1vw * var(--dz))) var(--rad, calc(1vw * var(--dz))) 0 0;
+    background: var(--fill, linear-gradient(90deg, color-mix(in srgb, var(--c) 70%, #fff), var(--c) 50%, color-mix(in srgb, var(--c) 70%, #000))); box-shadow: var(--frame, 0 0 0 calc(.3vw * var(--dz)) rgba(255,255,255,.85)); }
+  #dtotal .tpod .col b { font-size: calc(5vw * var(--dz)); font-weight: 900; color: #fff; text-shadow: 0 .2vw .6vw rgba(0,0,0,.5); line-height: 1.3; }
+  #dtotal .trest { display: flex; justify-content: center; flex-wrap: wrap; gap: calc(.8vw * var(--dz)); margin-top: calc(1vw * var(--dz)); }
+  #dtotal .trest > span { display: inline-flex; align-items: center; gap: calc(.5vw * var(--dz)); padding: calc(.3vw * var(--dz)) calc(1vw * var(--dz)) calc(.3vw * var(--dz)) calc(.4vw * var(--dz)); border-radius: 999px;
+    background: var(--card, color-mix(in srgb, var(--c) 70%, transparent)); box-shadow: var(--cardb, none); }
+  #dtotal .trest b { font-weight: 900; color: var(--rk, #ffd54a); font-size: calc(1.8vw * var(--dz)); }
+  #dtotal .trest .av { width: calc(3.4vw * var(--dz)); height: calc(3.4vw * var(--dz)); }
+  #dtotal .trest .nm { font-size: calc(1.6vw * var(--dz)); } #dtotal .trest .pt { font-size: calc(1.8vw * var(--dz)); }
+
+  /* ===== ⚔ Barra 1vs1: estilos que hacen juego ===== */
+  #dbar .bar.thin { height: calc(1.6vw * var(--dz)); margin-top: calc(.8vw * var(--dz)); }
+  #dbar .bpls { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: calc(1.6vw * var(--dz)); padding: calc(1vw * var(--dz)) calc(1.4vw * var(--dz)) 0; }
+  #dbar .bpl { position: relative; transform: skewX(-12deg); border-radius: calc(.8vw * var(--dz)); border: calc(.35vw * var(--dz)) solid rgba(255,255,255,.95); box-shadow: 0 .6vw 1.4vw rgba(0,0,0,.45);
+    background: repeating-linear-gradient(-45deg, rgba(255,255,255,.14) 0 .5vw, transparent .5vw 1.3vw), linear-gradient(180deg, color-mix(in srgb, var(--c) 75%, #fff), var(--c) 55%, color-mix(in srgb, var(--c) 70%, #000)); }
+  #dbar .bpl > .in { transform: skewX(12deg); display: flex; align-items: center; gap: calc(.8vw * var(--dz)); padding: calc(.6vw * var(--dz)) calc(1.2vw * var(--dz)); }
+  #dbar .bpl.r > .in { flex-direction: row-reverse; text-align: right; }
+  #dbar .bpl .tx { display: flex; flex-direction: column; min-width: 0; flex: 1; line-height: 1; }
+  #dbar .bpl .pt { font-weight: 900; font-style: italic; font-size: calc(3vw * var(--dz)); }
+  #dbar .bpl .tdn { align-self: flex-start; } #dbar .bpl.r .tdn { align-self: flex-end; }
+  #dbar .bcds { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: calc(1.4vw * var(--dz)); }
+  #dbar .bcds.col { grid-template-columns: 1fr; justify-items: stretch; }
+  #dbar .bcds.col .mid { justify-self: center; flex-direction: row; gap: calc(1vw * var(--dz)); }
+  #dbar .bcd { position: relative; overflow: hidden; display: flex; align-items: center; gap: calc(1vw * var(--dz)); padding: calc(.8vw * var(--dz)) calc(1.2vw * var(--dz)); border-radius: var(--crd, calc(1.6vw * var(--dz)));
+    background: var(--card, linear-gradient(90deg, color-mix(in srgb, var(--c) 85%, transparent), color-mix(in srgb, var(--c) 30%, transparent))); box-shadow: var(--cardb, 0 0 0 calc(.25vw * var(--dz)) rgba(255,255,255,.75)); }
+  #dbar .bcds.row .bcd:last-child { flex-direction: row-reverse; text-align: right; }
+  #dbar .bcd .tx { display: flex; flex-direction: column; min-width: 0; flex: 1; line-height: 1.05; position: relative; z-index: 1; }
+  #dbar .bcd .tx .tdn { align-self: flex-start; } #dbar .bcds.row .bcd:last-child .tx .tdn { align-self: flex-end; }
+  #dbar .bcd .pt { font-weight: 900; font-style: italic; font-size: calc(3.2vw * var(--dz)); }
+  #dbar .bcd .av, #dbar .bcd .gi { position: relative; z-index: 1; }
+  #dbar .bcd .fl { position: absolute; left: 0; bottom: 0; height: calc(.8vw * var(--dz)); background: #fff; opacity: .85; transition: width .6s ease; }
+  #dbar .bcds.row .fl { display: none; }
+  #dbar .bbbs { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: calc(1vw * var(--dz)); }
+  #dbar .bbb { display: flex; flex-direction: column; align-items: center; position: relative; }
+  #dbar .bbb .rg { display: grid; place-items: center; width: calc(14vw * var(--dz)); height: calc(14vw * var(--dz)); border-radius: 50%;
+    background: conic-gradient(var(--c) calc(var(--p) * 1%), rgba(255,255,255,.25) 0); box-shadow: 0 0 calc(1.4vw * var(--dz)) color-mix(in srgb, var(--c) 60%, transparent); transition: background .6s; }
+  #dbar .bbb .rg .av { width: 84%; height: 84%; border: calc(.4vw * var(--dz)) solid #fff; }
+  #dbar .bbb > .gi { position: absolute; top: calc(10vw * var(--dz)); right: 18%; }
+  #dbar .bbb .nm { margin-top: calc(.4vw * var(--dz)); font-size: calc(2.3vw * var(--dz)); }
+  #dbar .bbb .pt { padding: 0 calc(1.2vw * var(--dz)); border-radius: 999px; font-weight: 900; font-style: italic; font-size: calc(2.6vw * var(--dz));
+    background: var(--fill, linear-gradient(180deg, color-mix(in srgb, var(--c) 70%, #fff), var(--c) 55%, color-mix(in srgb, var(--c) 75%, #000))); box-shadow: var(--frame, 0 0 0 calc(.22vw * var(--dz)) #fff); }
+  #dbar .bbb .tdn { margin-top: calc(.3vw * var(--dz)); }
+  #dbar .bpod { display: grid; grid-template-columns: 1fr auto 1fr; align-items: end; gap: calc(1.4vw * var(--dz)); padding: 0 calc(4vw * var(--dz)); }
+  #dbar .bpod > .mid { align-self: start; }
+  #dbar .bpc { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; }
+  #dbar .bpc .pt { font-weight: 900; font-style: italic; font-size: calc(3vw * var(--dz)); }
+  #dbar .bpc > .gi { margin: calc(.3vw * var(--dz)) 0; }
+  #dbar .bpc .col { width: 100%; min-height: calc(3vw * var(--dz)); transition: height .6s ease; border-radius: var(--rad, calc(1vw * var(--dz))) var(--rad, calc(1vw * var(--dz))) 0 0;
+    background: var(--fill, linear-gradient(90deg, color-mix(in srgb, var(--c) 70%, #fff), var(--c) 50%, color-mix(in srgb, var(--c) 70%, #000))); box-shadow: var(--frame, 0 0 0 calc(.3vw * var(--dz)) rgba(255,255,255,.85)); }
+  #dbar .bpc .base { display: flex; flex-direction: column; align-items: center; margin-top: calc(-3.4vw * var(--dz)); position: relative; z-index: 1; }
+  #dbar .bpc .av { width: calc(7vw * var(--dz)); height: calc(7vw * var(--dz)); }
+
+  /* ===== 🎤 Baile individual: estilos que hacen juego ===== */
+  #dsolo .sc, #dsolo .sb, #dsolo .sp { position: relative; display: flex; align-items: center; gap: calc(1.4vw * var(--dz)); }
+  #dsolo .sc .card { flex: 1; min-width: 0; display: flex; align-items: center; gap: calc(1.4vw * var(--dz)); padding: calc(1vw * var(--dz)) calc(1.6vw * var(--dz)); border-radius: var(--crd, calc(1.8vw * var(--dz)));
+    background: var(--card, linear-gradient(90deg, color-mix(in srgb, var(--c) 85%, transparent), color-mix(in srgb, var(--c) 30%, transparent))); box-shadow: var(--cardb, 0 0 0 calc(.3vw * var(--dz)) rgba(255,255,255,.8)); }
+  #dsolo .ph2 { flex: none; width: calc(12vw * var(--dz)); height: calc(12vw * var(--dz)); border-radius: 50%; overflow: hidden; background: #222; display: grid; place-items: center;
+    border: calc(.5vw * var(--dz)) solid var(--avb, #fff); box-shadow: var(--avg, none); }
+  #dsolo .ph2 img { width: 100%; height: 100%; object-fit: cover; } #dsolo .ph2 .noph { font-size: calc(6vw * var(--dz)); }
+  #dsolo .sc .tx, #dsolo .sb .tx, #dsolo .sp .tx { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+  #dsolo .sc .bar, #dsolo .sc .bar { transform: none; border-radius: var(--rad0, 999px); margin: calc(.4vw * var(--dz)) 0; height: calc(3vw * var(--dz)); }
+  #dsolo .sc .pg { margin-left: 0; }
+  #dsolo .sc.row { flex-direction: column; align-items: center; }
+  #dsolo .sc.row .card { flex-direction: column; text-align: center; width: calc(40vw * var(--dz)); }
+  #dsolo .sc.row .tx { width: 100%; align-items: center; } #dsolo .sc.row .tx .bar { width: 100%; }
+  #dsolo .sc.plates .card { transform: skewX(-12deg); border-radius: calc(.8vw * var(--dz)); border: calc(.4vw * var(--dz)) solid rgba(255,255,255,.95);
+    background: repeating-linear-gradient(-45deg, rgba(255,255,255,.14) 0 .5vw, transparent .5vw 1.3vw), linear-gradient(180deg, color-mix(in srgb, var(--c) 75%, #fff), var(--c) 55%, color-mix(in srgb, var(--c) 70%, #000)); }
+  #dsolo .sc.plates .card > * { transform: skewX(12deg); }
+  #dsolo .sc.plates .ph2 { border-radius: calc(.6vw * var(--dz)); }
+  #dsolo .sc .tbox, #dsolo .sb .tbox, #dsolo .sp .tbox { margin-top: 0; }
+  #dsolo .sb .bub { position: relative; flex: none; width: calc(22vw * var(--dz)); height: calc(22vw * var(--dz)); border-radius: 50%; overflow: hidden; background: #222;
+    border: calc(.6vw * var(--dz)) solid var(--avb, #fff); box-shadow: 0 0 calc(2vw * var(--dz)) color-mix(in srgb, var(--c) 70%, transparent); display: grid; place-items: center; }
+  #dsolo .sb .bub > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; } #dsolo .sb .bub .noph { font-size: calc(11vw * var(--dz)); }
+  #dsolo .sb .lq { position: absolute; left: 0; right: 0; bottom: 0; height: calc(var(--p) * 1%); background: linear-gradient(180deg, color-mix(in srgb, var(--c) 55%, transparent), color-mix(in srgb, var(--c) 85%, transparent));
+    transition: height .6s ease; border-top: calc(.4vw * var(--dz)) solid color-mix(in srgb, var(--c) 40%, #fff); }
+  #dsolo .sb .pc { position: relative; font-weight: 900; font-style: italic; font-size: calc(5vw * var(--dz)); color: #fff; text-shadow: 0 .2vw .6vw rgba(0,0,0,.7); }
+  #dsolo .sp .tube { position: relative; flex: none; width: calc(5vw * var(--dz)); height: calc(24vw * var(--dz)); border-radius: 999px; background: rgba(0,0,0,.45); overflow: hidden;
+    box-shadow: var(--frame, 0 0 0 calc(.35vw * var(--dz)) rgba(255,255,255,.9)); display: flex; align-items: flex-end; }
+  #dsolo .sp .tube i { display: block; width: 100%; transition: height .6s ease; background: var(--fill, linear-gradient(90deg, color-mix(in srgb, var(--c) 70%, #fff), var(--c) 55%, color-mix(in srgb, var(--c) 70%, #000))); }
+  #dsolo .sp .tube b { position: absolute; top: calc(.4vw * var(--dz)); left: 0; right: 0; text-align: center; font-size: calc(2.4vw * var(--dz)); }
   /* ===== 🎨 estilos del live de baile: cada fuente elige el suyo y su reloj se viste igual ===== */
   /* 💡 Neón */
   .th-neon { --tfont: "Bahnschrift", "Segoe UI", sans-serif; --dring: 0 0 .35em rgba(0,240,255,.9), 0 0 .1em #000; }
@@ -456,8 +584,9 @@
   #dgrid .pod .pt { font-weight: 900; font-style: italic; font-size: calc(2.6vw * var(--dz)); margin-bottom: calc(.3vw * var(--dz)); }
   #dgrid .pod .col { width: 100%; min-height: calc(3vw * var(--dz)); transition: height .6s ease; border-radius: var(--rad, calc(1vw * var(--dz))) var(--rad, calc(1vw * var(--dz))) 0 0;
     background: var(--fill, linear-gradient(90deg, color-mix(in srgb, var(--c) 70%, #fff), var(--c) 50%, color-mix(in srgb, var(--c) 70%, #000))); box-shadow: var(--frame, 0 0 0 calc(.3vw * var(--dz)) rgba(255,255,255,.85)); position: relative; }
-  #dgrid .pod .col .gis { position: absolute; left: 50%; top: calc(.6vw * var(--dz)); transform: translateX(-50%); }
-  #dgrid .pod .col .gi { width: calc(3.8vw * var(--dz)); height: calc(3.8vw * var(--dz)); }
+  /* podio: los regalos van arriba de su columna (junto a sus puntos), así se ven aunque tenga 0 */
+  #dgrid .pod .gis { margin-bottom: calc(.4vw * var(--dz)); max-width: 100%; }
+  #dgrid .pod .gi { width: calc(3.8vw * var(--dz)); height: auto; aspect-ratio: 1; flex: 0 1 auto; min-width: 0; }
   #dgrid .pod .base { display: flex; flex-direction: column; align-items: center; margin-top: calc(-3vw * var(--dz)); position: relative; z-index: 1; width: 100%; }
   #dgrid .pod .av { width: calc(6vw * var(--dz)); height: calc(6vw * var(--dz)); border: calc(.4vw * var(--dz)) solid var(--avb, #fff); box-shadow: var(--avg, none); }
   #dgrid .pod .nm { font-weight: 900; font-style: italic; text-transform: uppercase; font-size: calc(1.9vw * var(--dz)); max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -837,7 +966,8 @@
   const dnAv = d => d.photo ? `<img class="av" src="${esc(d.photo)}" alt="">` : `<span class="av" style="font-size:2.6vw">💃</span>`;
   // 🎁 sus regalos de activación (hasta 3) y 👑 quién le ha donado más
   const dnGifts = d => `<span class="gis">${(d.gift_urls || [d.gift_url]).filter(Boolean).map(u => dnGift(u, d.circle)).join('')}</span>`;
-  const dnTop = (d, scope) => { const t = DN.show_top !== false && d.top && d.top[scope]; return t ? `<span class="tdn">${t.avatar ? `<img src="${esc(t.avatar)}" alt="" referrerpolicy="no-referrer" onerror="this.remove()">` : ''}<b>👑 ${esc(t.name)}</b></span>` : ''; };
+  // sin donador todavía: en la barra de activación se aparta su lugar (invisible) para que nada se mueva cuando llegue
+  const dnTop = (d, scope) => { const on = DN.show_top !== false, t = on && d.top && d.top[scope]; if (!t && on) return '<span class="tdn ph"></span>'; return t ? `<span class="tdn">${t.avatar ? `<img src="${esc(t.avatar)}" alt="" referrerpolicy="no-referrer" onerror="this.remove()">` : ''}<b>👑 ${esc(t.name)}</b></span>` : ''; };
   const dnGift = (url, circle) => url ? `<img class="gi${circle ? ' circle' : ''}" src="${esc(url)}" alt="" referrerpolicy="no-referrer" onerror="this.style.visibility='hidden'">` : '';
   function dnStyle(box, key) {
     const st = (DN.styles || {})[key] || {}, r = box.style;
@@ -920,18 +1050,20 @@
       box.innerHTML = `<div class="wrap"><div class="bubs">${list.map(d => `<div class="bub" style="--c:${d.color}">${dnAvC(d, lead)}${dnGifts(d)}<span class="nm">${esc(d.name)}${tw(d)}</span><span class="pt">${dnFmt(d.points)}</span>${dnTop(d, 'grid')}</div>`).join('')}</div>${clk}</div>`;
     } else if (struct === 'podium') {
       const top = Math.max(1, ...list.map(d => d.points));
-      box.innerHTML = `<div class="wrap"><div class="pod">${list.map(d => `<div style="--c:${d.color}"><span class="pt">${dnFmt(d.points)}</span><div class="col" style="height:${Math.round(18 + 82 * d.points / top)}%">${dnGifts(d)}</div>
+      box.innerHTML = `<div class="wrap"><div class="pod">${list.map(d => `<div style="--c:${d.color}"><span class="pt">${dnFmt(d.points)}</span>${dnGifts(d)}<div class="col" style="height:${Math.round(14 + 56 * d.points / top)}%"></div>
         <div class="base">${dnAvC(d, lead)}<span class="nm">${esc(d.name)}${tw(d)}</span>${dnTop(d, 'grid')}</div></div>`).join('')}</div>${clk}</div>`;
     } else if (struct === 'plates') {
       box.innerHTML = `<div class="wrap"><div class="plates">${list.map(d => `<div class="pl" style="--c:${d.color}"><div class="in">${dnAvC(d, lead)}<span class="tx"><span class="nm">${esc(d.name)}</span><span class="pt">${dnFmt(d.points)}</span>${dnTop(d, 'grid')}</span>${dnGifts(d)}</div>${wins(d)}</div>`).join('')}</div>${clk}</div>`;
     } else if (struct === 'bar') {
-      const sum = list.reduce((a, d) => a + d.points, 0);
-      box.innerHTML = `<div class="wrap"><div class="tops">${list.map(d => `<div style="--c:${d.color}">${dnAvC(d, lead)}<span class="nm">${esc(d.name)}${d.wins ? ` <small style="color:#ffd54a">🏆${d.wins}</small>` : ''}</span></div>`).join('')}</div>
-        <div class="segs">${list.map(d => `<div style="--c:${d.color};flex-grow:${sum ? Math.max(d.points / sum, 0.001) : 1}"><span class="pt">${dnFmt(d.points)}</span></div>`).join('')}</div>
-        <div class="gifts">${list.map(d => `<div>${dnGifts(d)}${dnTop(d, 'grid')}</div>`).join('')}</div>${clk}</div>`;
+      const sum = list.reduce((a, d) => a + d.points, 0), g = d => sum ? Math.max(d.points / sum, 0.001) : 1;
+      // 📐 la foto arriba y los regalos abajo van justo donde empieza su barra de color (mismo ancho que su pedazo de barra)
+      box.innerHTML = `<div class="wrap"><div class="tops">${list.map(d => `<div style="--c:${d.color};flex-grow:${g(d)}">${dnAvC(d, lead)}<span class="nm">${esc(d.name)}${d.wins ? ` <small style="color:#ffd54a">🏆${d.wins}</small>` : ''}</span></div>`).join('')}</div>
+        <div class="segs">${list.map(d => `<div style="--c:${d.color};flex-grow:${g(d)}"><span class="pt">${dnFmt(d.points)}</span></div>`).join('')}</div>
+        <div class="gifts">${list.map(d => `<div style="flex-grow:${g(d)}">${dnGifts(d)}${dnTop(d, 'grid')}</div>`).join('')}</div>${clk}</div>`;
     } else {
-      const cols = struct === 'cards' ? (n <= 3 ? n : Math.ceil(n / 2)) : lay === 'row' ? n : lay === 'rows2' ? Math.ceil(n / 2) : lay === 'rows3' ? Math.ceil(n / 3) : 1;
-      box.innerHTML = `<div class="wrap"><div class="cards" style="--cols:${cols}">${list.map(d => `<div class="card" style="--c:${d.color}">${dnAvC(d, lead)}<span class="tx"><span class="nm">${esc(d.name)}${d.wins ? ` <small style="color:#ffd54a">🏆${d.wins}</small>` : ''}</span><span class="pt">${dnFmt(d.points)}</span>${dnTop(d, 'grid')}</span>${dnGifts(d)}</div>`).join('')}</div>${clk}</div>`;
+      const cols = struct === 'cards' ? (n <= 4 ? n : Math.ceil(n / 2)) : lay === 'row' ? n : lay === 'rows2' ? Math.ceil(n / 2) : lay === 'rows3' ? Math.ceil(n / 3) : 1;
+      // 4 o más por renglón: la tarjeta va parada (foto arriba, nombre, puntos, regalos y donador abajo) para que todo quepa
+      box.innerHTML = `<div class="wrap"><div class="cards${cols >= 4 ? ' vert' : ''}" style="--cols:${cols}">${list.map(d => `<div class="card" style="--c:${d.color}">${dnAvC(d, lead)}<span class="tx"><span class="nm">${esc(d.name)}${d.wins ? ` <small style="color:#ffd54a">🏆${d.wins}</small>` : ''}</span><span class="pt">${dnFmt(d.points)}</span>${dnTop(d, 'grid')}</span>${dnGifts(d)}</div>`).join('')}</div>${clk}</div>`;
     }
     dnStyle(box, 'grid');
   }
@@ -939,6 +1071,26 @@
     const box = $('#dtotal'), list = (DN.total || []).map(dnBy).filter(Boolean).sort((a, b) => b.points - a.points);
     box.classList.toggle('dyn', DN.total_style === 'dynasty'); dnTheme(box, DN.total_style);
     const medal = i => DN.total_style === 'gold' && i < 3 ? ['🥇', '🥈', '🥉'][i] : '';
+    const ts = DN.total_style || 'classic', h1 = DN.total_title ? `<h1>${esc(DN.total_title)}</h1>` : '', n = list.length;
+    const wins = d => d.wins ? ` <small class="tw">🏆${d.wins}</small>` : '';
+    const goal = d => d.goal ? `<small> / ${dnFmt(d.goal)}</small>` : '';
+    box.classList.toggle('wide', ['row', 'rows2', 'rows3', 'bubbles', 'podium'].includes(ts));
+    if (['row', 'rows2', 'rows3', 'col'].includes(ts)) {  // 🃏 tarjetas (hacen juego con las de la barra de activación)
+      const cols = ts === 'row' ? n : ts === 'rows2' ? Math.ceil(n / 2) : ts === 'rows3' ? Math.ceil(n / 3) : 1;
+      box.innerHTML = `<div class="box">${h1}<div class="tcs${cols >= 4 ? ' vert' : ''}" style="--cols:${Math.max(1, cols)}">${list.map((d, i) => `<div class="tc" style="--c:${d.color}"><span class="rk">${i + 1}</span>${dnAv(d)}
+        <span class="tx"><span class="nm">${esc(d.name)}${wins(d)}</span><span class="pt">${dnFmt(d.points)}${goal(d)}</span></span></div>`).join('')}</div></div>`;
+      dnStyle(box, 'total'); return;
+    }
+    if (ts === 'bubbles') {  // 🫧 burbujas con su lugar
+      box.innerHTML = `<div class="box">${h1}<div class="tbubs">${list.map((d, i) => `<div class="tb" style="--c:${d.color}"><span class="avw">${dnAv(d)}<span class="rk">${i + 1}</span></span><span class="nm">${esc(d.name)}${wins(d)}</span><span class="pt">${dnFmt(d.points)}</span></div>`).join('')}</div></div>`;
+      dnStyle(box, 'total'); return;
+    }
+    if (ts === 'podium') {  // 🏆 podio: 1º al centro, 2º a la izquierda, 3º a la derecha; las demás abajo
+      const top3 = [list[1], list[0], list[2]], hs = [9, 13, 6.5], pl = [2, 1, 3];
+      box.innerHTML = `<div class="box">${h1}<div class="tpod">${top3.map((d, k) => d ? `<div style="--c:${d.color}">${dnAv(d)}<span class="nm">${esc(d.name)}${wins(d)}</span><span class="pt">${dnFmt(d.points)}</span><div class="col" style="height:calc(${hs[k]}vw * var(--dz))"><b>${pl[k]}</b></div></div>` : '<div></div>').join('')}</div>
+        ${n > 3 ? `<div class="trest">${list.slice(3).map((d, i) => `<span style="--c:${d.color}"><b>${i + 4}</b>${dnAv(d)}<span class="nm">${esc(d.name)}</span><span class="pt">${dnFmt(d.points)}</span></span>`).join('')}</div>` : ''}</div>`;
+      dnStyle(box, 'total'); return;
+    }
     box.innerHTML = `<div class="box">${DN.total_title ? `<h1>${esc(DN.total_title)}</h1>` : ''}${list.map((d, i) => `<div class="r" style="--c:${d.color}">${medal(i) ? `<span class="n md">${medal(i)}</span>` : `<span class="n">${i + 1}</span>`}${dnAv(d)}<div class="b"><span class="nm">${esc(d.name)}</span><span class="pt">${d.wins || DN.total_style === 'dynasty' ? `<span class="tr">🏆 ${d.wins || 0}</span>` : ''}${dnFmt(d.points)}${d.goal ? `<small> / ${dnFmt(d.goal)}</small>` : ''}</span></div></div>`).join('')}</div>`;
     dnStyle(box, 'total');
   }
@@ -966,6 +1118,23 @@
         <div class="tbox"${so.active || (so.ended && Date.now() + dnSkew < so.ended * 1000 + dnHold()) ? '' : ' style="visibility:hidden"'}><small>${tword}</small><span class="clk dsclk"></span></div>${stampS}</div>`;
       dnStyle(box, 'solo'); return;
     }
+    const ss = DN.solo_style || 'poster', ph = d.photo ? `<img src="${esc(d.photo)}" alt="">` : `<span class="noph">💃</span>`;
+    const tb = `<div class="tbox"${so.active || (so.ended && Date.now() + dnSkew < so.ended * 1000 + dnHold()) ? '' : ' style="visibility:hidden"'}><small>${tword}</small><span class="clk dsclk"></span></div>`;
+    const pg = `<span class="pg">${dnFmt(so.pts)} / ${dnFmt(so.goal)}</span>`, bar = `<div class="bar"><div class="fill" style="width:${pct}%"></div></div>`;
+    if (['plates', 'row', 'col'].includes(ss)) {  // 🔷 placa / 🃏 tarjeta (parada o acostada)
+      box.innerHTML = `<div class="sc ${ss}" style="--c:${d.color}"><div class="card"><div class="ph2">${ph}</div><div class="tx"><span class="nm big">${esc(d.name)}</span>${bar}${pg}${dnTop(d, 'solo')}</div></div>${tb}${stampS}</div>`;
+      dnStyle(box, 'solo'); return;
+    }
+    if (ss === 'bubbles') {  // 🫧 burbuja que se llena desde abajo
+      box.innerHTML = `<div class="sb" style="--c:${d.color}"><div class="bub" style="--p:${pct.toFixed(1)}">${ph}<i class="lq"></i><span class="pc">${Math.floor(pct)}%</span></div>
+        <div class="tx"><span class="nm big">${esc(d.name)}</span>${pg}${dnTop(d, 'solo')}</div>${tb}${stampS}</div>`;
+      dnStyle(box, 'solo'); return;
+    }
+    if (ss === 'podium') {  // 🏆 columna que sube hasta su meta
+      box.innerHTML = `<div class="sp" style="--c:${d.color}"><div class="ph2">${ph}</div><div class="tx"><span class="nm big">${esc(d.name)}</span>${pg}${dnTop(d, 'solo')}</div>
+        <div class="tube"><i style="height:${pct}%"></i><b>🎯</b></div>${tb}${stampS}</div>`;
+      dnStyle(box, 'solo'); return;
+    }
     box.innerHTML = `<div class="so" style="--c:${d.color}"><div class="ph">${d.photo ? `<img src="${esc(d.photo)}" alt="">` : `<span class="noph">💃</span>`}</div>
       <div class="mid"><div class="bar"><div class="fill" style="width:${pct}%"></div></div><span class="pg">${dnFmt(so.pts)} / ${dnFmt(so.goal)}</span><span class="nm big">${esc(d.name)}</span>${dnTop(d, 'solo')}</div>
       <div class="tbox"${so.active || (so.ended && Date.now() + dnSkew < so.ended * 1000 + dnHold()) ? '' : ' style="visibility:hidden"'}><small>${esc((cfg && cfg.lang) === 'en' ? 'TIME' : (cfg && cfg.lang) === 'pt' ? 'TEMPO' : 'TIEMPO')}</small><span class="clk dsclk"></span></div>
@@ -988,8 +1157,30 @@
     const stamp = ended ? `<div class="stamp">${(() => { const w = dnBy(res.winner); const L = (cfg && cfg.lang) || 'es'; return w ? (L === 'en' ? `${esc(w.name)} WINS!` : L === 'pt' ? `${esc(w.name)} GANHOU!` : `¡GANÓ ${esc(w.name)}!`) : (L === 'en' ? 'TIE!' : L === 'pt' ? 'EMPATE!' : '¡EMPATE!'); })()}</div>` : '';
     const mid = `<span class="mid"><span class="vs">VS</span>${(DN.battle && (DN.battle_end_ms || Date.now() + dnSkew < (DN.battle_go_ms || 0) + 1000)) || (ended && DN.battle_secs && res.at && Date.now() + dnSkew < res.at * 1000 + dnHold()) ? '<span class="bclk"></span>' : ''}</span>`;
     if (DN.bar_style === 'fighter') {  // 🥊 como juego de peleas: cada una con su barra de vida desde el centro
-      const side = (d, p, cls) => `<div class="side ${cls}" style="--c:${d.color}"><div class="row"><span class="nm">${esc(d.name)}</span>${dnGift(d.battle_gift_url, d.circle)}<span class="pt">${dnFmt(d.bpoints)}</span>${dnTop(d, 'battle')}</div><div class="hp"><i style="width:${Math.max(3, p * 100)}%"></i></div></div>`;
+      const side = (d, p, cls) => `<div class="side ${cls}" style="--c:${d.color}"><div class="row"><span class="nm">${esc(d.name)}</span>${dnGift(d.battle_gift_url, d.circle)}<span class="pt">${dnFmt(d.bpoints)}</span></div><div class="hp"><i style="width:${Math.max(3, p * 100)}%"></i></div>${dnTop(d, 'battle')}</div>`;
       box.innerHTML = `<div class="wrap"><div class="fgt"><span style="--c:${a.color}">${dnAv(a)}</span>${side(a, pa, 'l')}${mid}${side(b, 1 - pa, 'r')}<span style="--c:${b.color}">${dnAv(b)}</span></div>${stamp}</div>`;
+      dnStyle(box, 'bar'); return;
+    }
+    const bs = DN.bar_style || 'classic', gf = d => dnGift(d.battle_gift_url, d.circle);
+    const share = `<div class="bar thin"><div style="--c:${a.color};flex-grow:${Math.max(pa, 0.001)}"></div><div class="r" style="--c:${b.color};flex-grow:${Math.max(1 - pa, 0.001)}"></div></div>`;
+    if (bs === 'plates') {  // 🔷 placas inclinadas frente a frente
+      const pl = (d, cls) => `<div class="bpl ${cls}" style="--c:${d.color}"><div class="in">${dnAv(d)}<span class="tx"><span class="nm">${esc(d.name)}</span><span class="pt">${dnFmt(d.bpoints)}</span>${dnTop(d, 'battle')}</span>${gf(d)}</div></div>`;
+      box.innerHTML = `<div class="wrap"><div class="bpls">${pl(a, 'l')}${mid}${pl(b, 'r')}</div>${share}${stamp}</div>`;
+      dnStyle(box, 'bar'); return;
+    }
+    if (bs === 'row' || bs === 'col') {  // 🃏 tarjetas: lado a lado o una arriba de otra (con su parte de la barra)
+      const cd = (d, p) => `<div class="bcd" style="--c:${d.color}">${dnAv(d)}<span class="tx"><span class="nm">${esc(d.name)}</span><span class="pt">${dnFmt(d.bpoints)}</span>${dnTop(d, 'battle')}</span>${gf(d)}<i class="fl" style="width:${Math.round(p * 100)}%"></i></div>`;
+      box.innerHTML = `<div class="wrap"><div class="bcds ${bs}">${cd(a, pa)}${mid}${cd(b, 1 - pa)}</div>${bs === 'row' ? share : ''}${stamp}</div>`;
+      dnStyle(box, 'bar'); return;
+    }
+    if (bs === 'bubbles') {  // 🫧 dos burbujas con su avance alrededor
+      const bb = (d, p) => `<div class="bbb" style="--c:${d.color};--p:${(p * 100).toFixed(1)}"><span class="rg">${dnAv(d)}</span>${gf(d)}<span class="nm">${esc(d.name)}</span><span class="pt">${dnFmt(d.bpoints)}</span>${dnTop(d, 'battle')}</div>`;
+      box.innerHTML = `<div class="wrap"><div class="bbbs">${bb(a, pa)}${mid}${bb(b, 1 - pa)}</div>${stamp}</div>`;
+      dnStyle(box, 'bar'); return;
+    }
+    if (bs === 'podium') {  // 🏆 dos columnas: crece la que va ganando
+      const cl = (d, p) => `<div class="bpc" style="--c:${d.color}"><span class="pt">${dnFmt(d.bpoints)}</span>${gf(d)}<div class="col" style="height:calc(${(3 + 13 * p).toFixed(2)}vw * var(--dz))"></div><div class="base">${dnAv(d)}<span class="nm">${esc(d.name)}</span>${dnTop(d, 'battle')}</div></div>`;
+      box.innerHTML = `<div class="wrap"><div class="bpod">${cl(a, pa)}${mid}${cl(b, 1 - pa)}</div>${stamp}</div>`;
       dnStyle(box, 'bar'); return;
     }
     box.innerHTML = `<div class="wrap"><div class="tops"><div class="who" style="--c:${a.color}">${dnAv(a)}<span class="nm">${esc(a.name)}</span>${dnGift(a.battle_gift_url, a.circle)}${dnTop(a, 'battle')}</div>${mid}

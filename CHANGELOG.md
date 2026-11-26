@@ -1,5 +1,16 @@
 # Cambios de EC-Tok
 
+## 4.7.0
+- 🎨 **Estilos homologados**: Diamantes por bailarina, la Barra 1vs1 y el Baile individual ahora tienen los mismos estilos que la Barra de Activación (con los mismos nombres), para armar todo el live del mismo juego.
+  - 💎 Diamantes por bailarina: 17 estilos (Lista, Placas inclinadas, Tarjetas en 1, 2 o 3 renglones, Tarjetas en columna, Burbujas, Podio y los 9 temas).
+  - ⚔ Barra 1vs1: 16 estilos (Barra, Placas frente a frente, Tarjetas lado a lado, Tarjetas en columna, Burbujas, Podio, Pelea y los 9 temas).
+  - 🎤 Baile individual: 16 estilos (Póster, Placa, Tarjeta parada, Tarjeta acostada, Burbuja que se llena, Columna que sube, Anillo y los 9 temas).
+- 📐 **Barra de Activación** (estilos de barra: clásica, Neón, Deportivo, Minimalista y Fuego): la foto de cada chica va arriba, justo donde empieza su pedazo de barra, y sus regalos justo abajo.
+- 👑 El lugar del donador queda apartado en todos los estilos (aunque todavía no haya), así nada sube ni baja cuando aparece.
+- 🃏 Tarjetas en 1 renglón y estilos de tarjeta: con 4 o más por renglón, las tarjetas van paradas para que todo quepa; los estilos de tarjeta ponen hasta 4 chicas en un renglón.
+- 🔷 Placas: el donador va abajo de su placa y los números grandes ya no se cortan. 🏆 Podio: los regalos se ven aunque tenga 0.
+- 🎁 Con 2 o 3 regalos de activación, los iconos se acomodan sin encimarse.
+
 ## 4.6.0
 - ⏱ **Cuenta 5, 4, 3, 2, 1… ¡YA!** antes de que arranque cada reloj (juego de activación, batalla 1vs1 y baile individual), grande y en el lugar del reloj, para que la gente sepa cuándo empieza. En la batalla y el baile individual los regalos cuentan desde el ¡YA!
 - 🎁 **Hasta 3 regalos de activación por bailarina** (en su ➕). Cualquiera de los 3 le suma.
