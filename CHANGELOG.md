@@ -1,5 +1,10 @@
 # Cambios de EC-Tok
 
+## 4.7.1
+- 📐 **Las barras ya no cambian de tamaño durante el live** (Barra de Activación, Barra 1vs1 y Baile individual): la cuenta 5…1 se ve más grande sin agrandar la fuente, el lugar del reloj y del donador siempre está apartado, y los renglones de tarjetas se cuentan con todas las bailarinas del live (aunque alguna salga a descansar). Así su cuadro en LIVE Studio se ajusta una vez y nunca se corta.
+- 📏 **Mismo estilo = mismo tamaño**: si usas el mismo estilo en las tres (por ejemplo Placas inclinadas), las tres miden lo mismo de alto y de ancho, para que sus cuadros en LIVE Studio queden iguales.
+- 🃏 Baile individual «Tarjeta parada»: su TIEMPO va a un lado de la tarjeta.
+
 ## 4.7.0
 - 🎨 **Estilos homologados**: Diamantes por bailarina, la Barra 1vs1 y el Baile individual ahora tienen los mismos estilos que la Barra de Activación (con los mismos nombres), para armar todo el live del mismo juego.
   - 💎 Diamantes por bailarina: 17 estilos (Lista, Placas inclinadas, Tarjetas en 1, 2 o 3 renglones, Tarjetas en columna, Burbujas, Podio y los 9 temas).

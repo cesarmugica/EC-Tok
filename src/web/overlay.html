@@ -163,6 +163,7 @@
   .dz .gi { object-fit: contain; flex: none; }
   .dz .gi.circle { border-radius: 50%; background: rgba(0,0,0,.6); box-sizing: border-box; padding: calc(.55vw * var(--dz)); }
   /* cuadrícula de activación: barra (como los lives de baile) */
+  #dgrid, #dbar, #dsolo { box-sizing: border-box; }
   #dgrid { position: fixed; left: 0; right: 0; top: 0; padding: calc(1.2vw * var(--dz)) 2.5vw; }
   #dgrid .wrap { border-radius: calc(2vw * var(--dz)); padding: calc(1vw * var(--dz)) calc(1.4vw * var(--dz)); }
   #dgrid .tops, #dgrid .gifts { display: flex; }
@@ -199,9 +200,10 @@
   #dsolo .tdn { align-self: flex-start; margin: calc(.3vw * var(--dz)) 0 0 calc(1vw * var(--dz)); font-size: calc(2.3vw * var(--dz)); }
   #dsolo .tdn img { width: calc(3.6vw * var(--dz)); height: calc(3.6vw * var(--dz)); }
   /* ⏱ 5, 4, 3, 2, 1… ¡YA! antes de que arranque el reloj */
-  .dz .cd { display: inline-block; font-size: 1.7em; line-height: 1; padding: 0 .15em; }
+  /* la cuenta NO cambia el tamaño de la fuente: solo se ve más grande (scale), el lugar es el mismo del reloj */
+  .dz .cd { display: inline-block; scale: 1.25; }
   .dz .cdpop { animation: dcdpop .9s cubic-bezier(.2, 1.6, .4, 1) both; }
-  @keyframes dcdpop { 0% { scale: 2.2; opacity: 0; } 35% { scale: 1.1; opacity: 1; } 100% { scale: 1; opacity: 1; } }
+  @keyframes dcdpop { 0% { scale: 2.4; opacity: 0; } 35% { scale: 1.35; opacity: 1; } 100% { scale: 1.25; opacity: 1; } }
   /* cuadrícula de activación: tarjetas (en fila, 2 o 3 renglones, en columna) */
   #dgrid .cards { display: grid; grid-template-columns: repeat(var(--cols, 3), minmax(0, 1fr)); gap: calc(1.2vw * var(--dz)); }
   #dgrid .card { display: flex; align-items: center; gap: calc(1vw * var(--dz)); padding: calc(.8vw * var(--dz)) calc(1.2vw * var(--dz)); border-radius: calc(1.6vw * var(--dz));
@@ -302,7 +304,6 @@
   #dbar .bclk { margin-top: calc(.3vw * var(--dz)); font-weight: 900; font-style: italic; font-variant-numeric: tabular-nums; font-size: calc(3vw * var(--dz)); color: #111 !important; text-shadow: none !important;
     background: var(--cbg, linear-gradient(180deg, #ffe45c, #f5b900)); padding: 0 calc(1.2vw * var(--dz)); border-radius: var(--crad, calc(.5vw * var(--dz))); transform: skewX(var(--csk, -10deg));
     box-shadow: var(--cbd, 0 .3vw .8vw rgba(0,0,0,.4)); color: var(--cfc, #111) !important; text-shadow: var(--cts, none) !important; font-family: var(--dfont, var(--cfont, var(--tfont, inherit))); }
-  #dbar .bclk.cd { font-size: calc(4.6vw * var(--dz)); padding: 0 calc(1.6vw * var(--dz)); }
   #dbar .bclk.zero, #dsolo .clk.zero { animation: dblink .7s steps(2, start) infinite; }
   #dbar .bclk.low { background: linear-gradient(180deg, #ff6b78, #e0283a); color: #fff !important; }
   #dbar .wrap { position: relative; }
@@ -464,7 +465,7 @@
   #dsolo .sc .tx, #dsolo .sb .tx, #dsolo .sp .tx { flex: 1; min-width: 0; display: flex; flex-direction: column; }
   #dsolo .sc .bar, #dsolo .sc .bar { transform: none; border-radius: var(--rad0, 999px); margin: calc(.4vw * var(--dz)) 0; height: calc(3vw * var(--dz)); }
   #dsolo .sc .pg { margin-left: 0; }
-  #dsolo .sc.row { flex-direction: column; align-items: center; }
+  #dsolo .sc.row { justify-content: center; }
   #dsolo .sc.row .card { flex-direction: column; text-align: center; width: calc(40vw * var(--dz)); }
   #dsolo .sc.row .tx { width: 100%; align-items: center; } #dsolo .sc.row .tx .bar { width: 100%; }
   #dsolo .sc.plates .card { transform: skewX(-12deg); border-radius: calc(.8vw * var(--dz)); border: calc(.4vw * var(--dz)) solid rgba(255,255,255,.95);
@@ -985,7 +986,7 @@
   function dnTheme(box, th) { box.classList.remove(...DN_THEMES.map(x => 'th-' + x)); if (DN_THEMES.includes(th)) box.classList.add('th-' + th); }
   const dnLeader = list => { const top = Math.max(0, ...list.map(d => d.points)); return top > 0 ? (list.find(d => d.points === top) || {}).id : ''; };
   const dnAvC = (d, lead) => d.id === lead ? `<span class="crwrap">${dnAv(d)}<span class="crown">👑</span></span>` : dnAv(d);
-  const dnClockHtml = () => { const c = DN.clock || {}; return `<div class="dclkbox"><span class="clk dclk">${c.rounds && c.round ? `<span class="rtag">R${c.round}</span>` : ''}<span class="tm"></span></span></div>`; };
+  const dnClockHtml = off => { const c = DN.clock || {}; return `<div class="dclkbox"${off ? ' style="visibility:hidden"' : ''}><span class="clk dclk">${c.rounds && c.round ? `<span class="rtag">R${c.round}</span>` : ''}<span class="tm"></span></span></div>`; };
   // ⏱ antes de arrancar: 5, 4, 3, 2, 1… ¡YA! (en el lugar del reloj, más grande); null = ya corre el reloj
   function dnCount(goMs) {
     if (!goMs) return null;
@@ -1007,7 +1008,7 @@
     const now = Date.now() + dnSkew;
     document.querySelectorAll('#dbar .bclk').forEach(el => {
       const total = DN.battle_secs || 0, left = Math.min(total || 1e9, Math.max(0, ((DN.battle_end_ms || 0) - now) / 1000)), sec = Math.ceil(left - 0.001);
-      const cd = dnPut(el, DN.battle_end_ms ? `${Math.floor(sec / 60)}:${String(sec % 60).padStart(2, '0')}` : '', DN.battle ? dnCount(DN.battle_go_ms) : null);
+      const cd = dnPut(el, `${Math.floor(sec / 60)}:${String(sec % 60).padStart(2, '0')}`, DN.battle ? dnCount(DN.battle_go_ms) : null);
       el.classList.toggle('low', !cd && sec <= 10); el.classList.toggle('zero', !cd && sec <= 0);
     });
     document.querySelectorAll('.dsclk').forEach(el => {
@@ -1018,6 +1019,21 @@
     const c = DN.clock || {}, left = dnClockLeft(), sec = Math.ceil(left - 0.001), txt = `${Math.floor(sec / 60)}:${String(sec % 60).padStart(2, '0')}`;
     const ccd = c.running ? dnCount(c.go_ms) : null;
     document.querySelectorAll('.dclk').forEach(el => { const tm = el.querySelector('.tm') || el; const cd = dnPut(tm, txt, ccd); el.classList.toggle('low', !cd && sec > 0 && sec <= 10); el.classList.toggle('zero', !cd && sec <= 0); });
+  }
+  // 📐 la barra de activación, la 1vs1 y el baile individual con el MISMO estilo miden lo mismo (alto en vw, a tamaño 100 %),
+  // y ninguna cambia de tamaño durante el live (nunca se encoge): así su cuadro en LIVE Studio se ajusta una vez y no se corta
+  const DN_H = {'bar': 41.9, 'plates': 42.0, 'row': 55.6, 'rows2': 32.8, 'rows3': 44.7, 'col': 80.6, 'bubbles': 36.5, 'podium': 41.0, 'fighter': 17.0, 'ring': 39.7, 'neon': 41.9, 'glass': 41.9, 'gold': 41.8, 'sport': 41.9, 'minimal': 41.9, 'comic': 41.8, 'retro': 41.6, 'pastel': 41.9, 'fire': 41.8};
+  function dnFam(k) {
+    if (k === 'dgrid') { const l = DN.layout || 'bar'; return l.startsWith('t-') ? l.slice(2) : l; }
+    if (k === 'dbar') { const b = DN.bar_style || 'classic'; return b === 'classic' ? 'bar' : b; }
+    const so = DN.solo_style || 'poster'; return so === 'poster' ? 'bar' : so;
+  }
+  function dnFix(k) {
+    const box = $('#' + k); if (box.hidden) return;
+    const fam = dnFam(k), dz = (((DN.styles || {})[{dgrid: 'grid', dbar: 'bar', dsolo: 'solo'}[k]] || {}).size || 100) / 100;
+    const want = (DN_H[fam] || 0) * dz, now = box.scrollHeight / innerWidth * 100;
+    const keep = box.dataset.fam === fam ? +box.dataset.maxh || 0 : 0;  // cambió de estilo: se vuelve a medir
+    const h = Math.max(want, now, keep); box.dataset.fam = fam; box.dataset.maxh = h; box.style.minHeight = h + 'vw';
   }
   function drawDance() {
     if (!DN) return;
@@ -1033,13 +1049,15 @@
     if (which.includes('dbar') && vis.dbar) drawDBar();
     if (which.includes('dvs')) drawDVs(vis.dvs);
     if (which.includes('dsolo') && vis.dsolo) drawDSolo();
+    for (const k of ['dgrid', 'dbar', 'dsolo']) if (which.includes(k)) dnFix(k);
     clearInterval(dnClockTimer);
     if (document.querySelector('.dclk, .dsclk, #dbar .bclk')) { dnTickClocks(); dnClockTimer = setInterval(dnTickClocks, 200); }
   }
   function drawDGrid() {
     const box = $('#dgrid'), list = (DN.grid || []).map(dnBy).filter(Boolean), n = list.length;
     if (!n) { box.innerHTML = ''; return; }
-    const lead = dnLeader(list), clk = dnClockOn() ? dnClockHtml() : '';
+    // ⏱ el lugar del reloj siempre está (invisible si no corre): la fuente nunca cambia de tamaño
+    const lead = dnLeader(list), clk = dnClockHtml(!dnClockOn());
     const wins = d => d.wins ? `<span class="win">🏆 ${d.wins}</span>` : '';
     const lay = DN.layout || 'bar', th = lay.startsWith('t-') ? lay.slice(2) : '';
     // los estilos de tema usan la barra (neón, fuego, deportivo, minimalista) o tarjetas (cristal, dorado, cómic, retro, pastel)
@@ -1061,7 +1079,9 @@
         <div class="segs">${list.map(d => `<div style="--c:${d.color};flex-grow:${g(d)}"><span class="pt">${dnFmt(d.points)}</span></div>`).join('')}</div>
         <div class="gifts">${list.map(d => `<div style="flex-grow:${g(d)}">${dnGifts(d)}${dnTop(d, 'grid')}</div>`).join('')}</div>${clk}</div>`;
     } else {
-      const cols = struct === 'cards' ? (n <= 4 ? n : Math.ceil(n / 2)) : lay === 'row' ? n : lay === 'rows2' ? Math.ceil(n / 2) : lay === 'rows3' ? Math.ceil(n / 3) : 1;
+      // los renglones se cuentan con todas las bailarinas del live (aunque alguna salga a descansar): el tamaño no cambia
+      const nA = Math.max(n, (DN.dancers || []).filter(x => x.on).length);
+      const cols = struct === 'cards' ? (nA <= 4 ? nA : Math.ceil(nA / 2)) : lay === 'row' ? nA : lay === 'rows2' ? Math.ceil(nA / 2) : lay === 'rows3' ? Math.ceil(nA / 3) : 1;
       // 4 o más por renglón: la tarjeta va parada (foto arriba, nombre, puntos, regalos y donador abajo) para que todo quepa
       box.innerHTML = `<div class="wrap"><div class="cards${cols >= 4 ? ' vert' : ''}" style="--cols:${cols}">${list.map(d => `<div class="card" style="--c:${d.color}">${dnAvC(d, lead)}<span class="tx"><span class="nm">${esc(d.name)}${d.wins ? ` <small style="color:#ffd54a">🏆${d.wins}</small>` : ''}</span><span class="pt">${dnFmt(d.points)}</span>${dnTop(d, 'grid')}</span>${dnGifts(d)}</div>`).join('')}</div>${clk}</div>`;
     }
@@ -1155,7 +1175,8 @@
     const sum = a.bpoints + b.bpoints, pa = sum ? a.bpoints / sum : 0.5;
     dnTheme(box, DN.bar_style);
     const stamp = ended ? `<div class="stamp">${(() => { const w = dnBy(res.winner); const L = (cfg && cfg.lang) || 'es'; return w ? (L === 'en' ? `${esc(w.name)} WINS!` : L === 'pt' ? `${esc(w.name)} GANHOU!` : `¡GANÓ ${esc(w.name)}!`) : (L === 'en' ? 'TIE!' : L === 'pt' ? 'EMPATE!' : '¡EMPATE!'); })()}</div>` : '';
-    const mid = `<span class="mid"><span class="vs">VS</span>${(DN.battle && (DN.battle_end_ms || Date.now() + dnSkew < (DN.battle_go_ms || 0) + 1000)) || (ended && DN.battle_secs && res.at && Date.now() + dnSkew < res.at * 1000 + dnHold()) ? '<span class="bclk"></span>' : ''}</span>`;
+    const clkOn = (DN.battle && (DN.battle_end_ms || Date.now() + dnSkew < (DN.battle_go_ms || 0) + 1000)) || (ended && DN.battle_secs && res.at && Date.now() + dnSkew < res.at * 1000 + dnHold());
+    const mid = `<span class="mid"><span class="vs">VS</span><span class="bclk"${clkOn ? '' : ' style="visibility:hidden"'}>0:00</span></span>`;  // su lugar siempre está
     if (DN.bar_style === 'fighter') {  // 🥊 como juego de peleas: cada una con su barra de vida desde el centro
       const side = (d, p, cls) => `<div class="side ${cls}" style="--c:${d.color}"><div class="row"><span class="nm">${esc(d.name)}</span>${dnGift(d.battle_gift_url, d.circle)}<span class="pt">${dnFmt(d.bpoints)}</span></div><div class="hp"><i style="width:${Math.max(3, p * 100)}%"></i></div>${dnTop(d, 'battle')}</div>`;
       box.innerHTML = `<div class="wrap"><div class="fgt"><span style="--c:${a.color}">${dnAv(a)}</span>${side(a, pa, 'l')}${mid}${side(b, 1 - pa, 'r')}<span style="--c:${b.color}">${dnAv(b)}</span></div>${stamp}</div>`;
