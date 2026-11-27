@@ -1,5 +1,8 @@
 # Cambios de EC-Tok
 
+## 5.3.3
+- ✨ «Ya casi iniciamos» ahora **se desintegra** al quitarla (sola 5 s después de llegar a 0, con su tecla o con el botón): el título y el reloj se deshacen en polvo brillante que sube, las fotitos de la sala de espera salen volando y todo se desvanece (2 s). Antes desaparecía de golpe.
+
 ## 5.3.2
 - 👋 Sala de espera de «Ya casi iniciamos»: cuando ya no caben más fotitos (3 renglones), se va la del que llegó primero, así **el que acaba de llegar siempre se ve** (antes, pasando de ~3 renglones, los nuevos quedaban escondidos arriba).
 

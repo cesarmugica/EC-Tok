@@ -138,6 +138,16 @@
   @keyframes gopop { from { transform: scale(.2); opacity: 0; } to { transform: scale(1); opacity: 1; } }
   #soon .conf { position: absolute; top: -4vh; width: 1.2vh; height: 2.2vh; border-radius: .3vh; animation: conf linear forwards; }
   @keyframes conf { to { transform: translateY(115vh) rotate(720deg); } }
+  /* al quitarla: se desintegra (el contenido se deshace en partículas que suben) */
+  #soon.bye > :not(.bg):not(.bgdef):not(.dust) { animation: dissolve 1.5s ease-in forwards; }
+  #soon.bye .guests .gs { animation: gfly 1.3s ease-in forwards; }
+  #soon.bye { animation: soonout 2s ease-in forwards; }
+  @keyframes dissolve { 0% { filter: blur(0); opacity: 1; transform: none; } 60% { opacity: .6; } 100% { filter: blur(2.5vh); opacity: 0; transform: translateY(-4vh) scale(1.08); letter-spacing: .4em; } }
+  @keyframes gfly { to { transform: translate(var(--gx), -70vh) scale(.2) rotate(240deg); opacity: 0; } }
+  @keyframes soonout { 0%, 60% { opacity: 1; } 100% { opacity: 0; } }
+  #soon .dust { position: absolute; width: .9vh; height: .9vh; border-radius: 50%; background: var(--sa); box-shadow: 0 0 1.2vh var(--sa); pointer-events: none;
+    animation: dust var(--d) ease-out forwards; }
+  @keyframes dust { from { transform: translate(0, 0) scale(1); opacity: 1; } to { transform: translate(var(--dx), var(--dy)) scale(.2); opacity: 0; } }
   /* sala de espera: los que van llegando */
   #soon .guests { position: absolute; left: 0; right: 0; bottom: 3vh; display: flex; flex-wrap: wrap-reverse; justify-content: center; gap: 1vh; padding: 0 4vw;
     max-height: 24vh; overflow: hidden; }
@@ -1022,7 +1032,12 @@
     const box = $('#soon');
     if (!which.includes('soon')) { box.hidden = true; return; }
     cancelAnimationFrame(soonRaf);
-    if (!o || !o.on) { freeMedia(box); box.hidden = true; box.innerHTML = ''; soon = null; return; }
+    if (!o || !o.on) {
+      if (soon && !box.hidden && !box.classList.contains('bye')) { soonBye(box); return; }  // ✨ se desintegra
+      if (!box.classList.contains('bye')) { freeMedia(box); box.hidden = true; box.innerHTML = ''; }
+      soon = null; return;
+    }
+    if (box.classList.contains('bye')) { clearTimeout(soonByeT); box.classList.remove('bye'); soon = null; }
     const sig = x => [x.ends, x.file, x.style, x.text, x.sub, x.end_text].join('|'), same = soon && sig(soon) === sig(o);
     soon = o; soonSkew = o.now * 1000 - Date.now();
     box.style.setProperty('--sc', o.color || '#fff'); box.style.setProperty('--sa', o.accent || '#ff2d6f');
@@ -1083,6 +1098,21 @@
     while (wrap.children.length > 1 && (wrap.children.length > 40 || wrap.scrollHeight > wrap.clientHeight + 2)) wrap.firstChild.remove();
     const h = document.createElement('div'); h.className = 'hello'; h.innerHTML = soonTx().hello(esc(g.name || ''));
     box.querySelectorAll('.hello').forEach(x => x.remove()); h.style.bottom = `calc(${wrap.offsetHeight}px + 5vh)`; box.appendChild(h); setTimeout(() => h.remove(), 3100);
+  }
+  let soonByeT = 0;
+  function soonBye(box) {
+    soon = null; cancelAnimationFrame(soonRaf);
+    for (const g of box.querySelectorAll('.guests .gs')) g.style.setProperty('--gx', (Math.random() * 60 - 30) + 'vw');
+    // polvo que sale del centro (donde estaban el título y el reloj)
+    for (let i = 0; i < 140; i++) {
+      const d = document.createElement('i'); d.className = 'dust';
+      d.style.left = (25 + Math.random() * 50) + 'vw'; d.style.top = (30 + Math.random() * 35) + 'vh';
+      d.style.setProperty('--dx', (Math.random() * 40 - 20) + 'vw'); d.style.setProperty('--dy', -(15 + Math.random() * 45) + 'vh');
+      d.style.setProperty('--d', (1 + Math.random() * 1.2) + 's'); d.style.animationDelay = (Math.random() * .5) + 's';
+      box.appendChild(d);
+    }
+    box.classList.add('bye');
+    soonByeT = setTimeout(() => { freeMedia(box); box.hidden = true; box.innerHTML = ''; box.classList.remove('bye'); }, 2100);
   }
   function soonConfetti(box) {
     const colors = [getComputedStyle(box).getPropertyValue('--sa') || '#ff2d6f', '#ffd23f', '#3ee6ff', '#8b5cff', '#ffffff', '#4ade80'];
