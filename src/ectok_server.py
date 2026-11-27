@@ -31,7 +31,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, unquote, urlsplit
 
-APP_VERSION = "5.3.0"
+APP_VERSION = "5.3.1"
 ALERT_ONE_OF = ("gift", "follow", "share", "like", "gift_special")  # 4.8.6: alerta O animación en todas (la animación trae su letrero)
 
 try:  # lo genera windows/build.ps1
@@ -699,7 +699,8 @@ def clean_config(data: dict) -> dict:
                 if isinstance(soon.get(k), bool):
                     o[k] = soon[k]
             o["id"] = "soon"
-            o["key"] = _text(soon.get("key"), "", 4)
+            if "key" in soon:
+                o["key"] = _text(soon.get("key"), "", 4)
         assign_keys(a)
     top = data.get("top")
     if isinstance(top, dict):

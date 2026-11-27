@@ -832,4 +832,5 @@ T = {
 '🚀 Ya casi iniciamos': ('🚀 Starting soon', '🚀 Já vamos começar'),
 '«Ya regresamos» está en pantalla. Si pones «Ya casi iniciamos», se quita «Ya regresamos».\n\n¿Continuar?': ('“Be right back” is on screen. If you show “Starting soon”, “Be right back” is removed.\n\nContinue?', '«Já voltamos» está na tela. Se você colocar «Já vamos começar», «Já voltamos» sai.\n\nContinuar?'),
 '«Ya casi iniciamos» está en pantalla. Si pones «Ya regresamos», se quita «Ya casi iniciamos».\n\n¿Continuar?': ('“Starting soon” is on screen. If you show “Be right back”, “Starting soon” is removed.\n\nContinue?', '«Já vamos começar» está na tela. Se você colocar «Já voltamos», «Já vamos começar» sai.\n\nContinuar?'),
+'⚠ Activo, pero falta su fuente': ('⚠ On, but its source is missing', '⚠ Ativo, mas falta a fonte'),
 }

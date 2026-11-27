@@ -832,4 +832,5 @@ ZH = {
 '🚀 Ya casi iniciamos': '🚀 马上开始',
 '«Ya regresamos» está en pantalla. Si pones «Ya casi iniciamos», se quita «Ya regresamos».\n\n¿Continuar?': '“马上回来”正在屏幕上。如果显示“马上开始”，“马上回来”会被移除。\n\n继续吗？',
 '«Ya casi iniciamos» está en pantalla. Si pones «Ya regresamos», se quita «Ya casi iniciamos».\n\n¿Continuar?': '“马上开始”正在屏幕上。如果显示“马上回来”，“马上开始”会被移除。\n\n继续吗？',
+'⚠ Activo, pero falta su fuente': '⚠ 已打开，但缺少来源',
 }

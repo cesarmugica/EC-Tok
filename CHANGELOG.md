@@ -1,5 +1,9 @@
 # Cambios de EC-Tok
 
+## 5.3.1
+- 📐 Los botones de «Ya casi iniciamos» y «Ya regresamos» ahora miden lo mismo, igual que sus indicadores (👁 / 🙈 / ⚠), en 🔴 En vivo y en 🎬 Animaciones.
+- Arreglo: la tecla de «Ya casi iniciamos» ya no se borra al cambiar otra opción.
+
 ## 5.3.0
 - 🚀 **Nuevo: «Ya casi iniciamos»** (🎬 Animaciones), con su propia fuente a pantalla completa (🚀 en «Poner las alertas en tu live»):
   - **Reloj en reversa** de 0:05 hasta 60:00 (mm:ss.cc), 5 estilos (digital, neón, tarjetas que giran, anillo que se vacía, minimalista), tu color y tu acento.
