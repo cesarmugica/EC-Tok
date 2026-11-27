@@ -152,6 +152,7 @@ class Stats:
     def reset(self) -> None:
         self.started = time.time()
         self.likes = self.diamonds = self.follows = self.shares = self.gifts = self.comments = 0
+        self.viewers = 0  # 5.3.0: espectadores en este momento (para «Ya casi iniciamos»)
         self.donors: dict[str, dict] = {}
         self.likers: dict[str, dict] = {}
         self.gift_names: set[str] = set()
@@ -190,7 +191,7 @@ class Stats:
             donors = sorted(self.donors.values(), key=lambda d: d["diamonds"], reverse=True)[:top]
             likers = sorted(self.likers.values(), key=lambda d: d["likes"], reverse=True)[:10]
             return {"likes": self.likes, "diamonds": self.diamonds, "follows": self.follows, "shares": self.shares,
-                    "gifts": self.gifts, "comments": self.comments, "top": donors, "likers": likers, "started": self.started,
+                    "gifts": self.gifts, "comments": self.comments, "viewers": self.viewers, "top": donors, "likers": likers, "started": self.started,
                     "gift_names": sorted(self.gift_names)}
 
 
@@ -225,6 +226,9 @@ class Live:
 
     def push(self, event: dict) -> None:
         """Un evento del live (o de prueba): contarlo y mandarlo."""
+        if event.get("type") in ("join", "viewers"):  # 5.3.0: solo para «Ya casi iniciamos» (no van al feed ni al historial)
+            self.emit(event)
+            return
         self.stats.add(event)
         self.recent.append(event)
         self.emit({**event, "stats": self.stats.public(10)})  # los overlays de metas y top se actualizan con esto
@@ -469,6 +473,20 @@ class Live:
             if once(f"booster_{mult}", 8):
                 self.push(new_event("booster", multiplier=mult, user=_user(getattr(event, "user", None))))
 
+        async def viewers(event) -> None:  # 5.3.0: cuántos están viendo (para «Ya casi iniciamos»)
+            raw("RoomUserSeqEvent", event)
+            n = _get(event, "m_total", "total_user", "total", "viewer_count", default=0)
+            with contextlib.suppress(TypeError, ValueError):
+                self.stats.viewers = int(n or 0)
+                if once("viewers", 3):
+                    self.push(new_event("viewers", count=self.stats.viewers))
+
+        async def join(event) -> None:  # 5.3.0: alguien entró al live (sala de espera de «Ya casi iniciamos»)
+            raw("JoinEvent", event)
+            self.push(new_event("join", user=_user(getattr(event, "user", None))))
+
+        on("RoomUserSeqEvent", viewers)
+        on("JoinEvent", join)
         on("SubNotifyEvent", subscribe)
         for name in ("SuperFanEvent", "SuperFanJoinEvent"):
             on(name, superfan)

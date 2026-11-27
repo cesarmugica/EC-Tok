@@ -88,6 +88,66 @@
   #special .sp { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); max-width: 100vw; max-height: 100vh;
     object-fit: contain; animation: fade .35s ease both; }
   #special .sp.out { animation: fadeout .45s ease both; }
+  /* ---------- 🚀 ya casi iniciamos (5.3.0): pantalla completa con reloj en reversa ---------- */
+  #soon { position: fixed; inset: 0; z-index: 5; overflow: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 2.2vh; color: var(--sc); font-family: inherit; text-align: center; animation: fade .6s ease both; --sc: #fff; --sa: #ff2d6f; }
+  #soon .bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: -2; }
+  #soon .bgdef { position: absolute; inset: -20%; z-index: -2; background:
+      radial-gradient(40% 30% at 30% 30%, color-mix(in srgb, var(--sa) 70%, transparent), transparent 70%),
+      radial-gradient(45% 35% at 70% 70%, rgba(80, 120, 255, .55), transparent 70%),
+      radial-gradient(35% 30% at 70% 25%, rgba(0, 230, 220, .35), transparent 70%), #0c0a1c;
+    animation: soonbg 14s ease-in-out infinite alternate; filter: blur(2vh); }
+  @keyframes soonbg { to { transform: rotate(14deg) scale(1.15) translate(3%, -2%); } }
+  #soon.dim::before { content: ''; position: absolute; inset: 0; z-index: -1; background: radial-gradient(circle at 50% 45%, rgba(0,0,0,.25), rgba(0,0,0,.7)); }
+  #soon h1 { margin: 0 4vw; font-size: max(5.2vh, 30px); font-weight: 900; letter-spacing: .02em; text-shadow: 0 .4vh 2vh rgba(0,0,0,.6); }
+  #soon .sub { margin: 0 6vw; font-size: max(2.6vh, 16px); font-weight: 700; opacity: .9; text-shadow: 0 .3vh 1.4vh rgba(0,0,0,.6); }
+  #soon .clk { font-variant-numeric: tabular-nums; font-weight: 900; line-height: 1; transition: transform .4s ease, font-size .4s ease; }
+  #soon .clk .cs { font-size: .45em; opacity: .8; }
+  #soon .viewers { font-size: max(2.4vh, 15px); font-weight: 800; padding: .8vh 2.2vh; border-radius: 99px; background: rgba(0,0,0,.35);
+    border: 2px solid color-mix(in srgb, var(--sa) 60%, transparent); }
+  #soon .viewers b { color: var(--sa); }
+  /* estilos del reloj */
+  #soon.st-digital .clk { font-size: min(15vh, 22vw); text-shadow: 0 0 2vh color-mix(in srgb, var(--sa) 70%, transparent), 0 .5vh 2vh rgba(0,0,0,.6); }
+  #soon.st-neon .clk { font-size: min(15vh, 22vw); color: transparent; -webkit-text-stroke: .35vh var(--sc);
+    text-shadow: 0 0 1vh var(--sa), 0 0 3vh var(--sa), 0 0 6vh var(--sa); animation: neonflick 3s infinite; }
+  @keyframes neonflick { 0%, 92%, 100% { opacity: 1; } 94% { opacity: .55; } 96% { opacity: 1; } 97% { opacity: .7; } }
+  #soon.st-minimal .clk { font-size: min(13vh, 19vw); font-weight: 300; letter-spacing: .05em; }
+  #soon.st-flip .clk { display: flex; gap: 1vh; align-items: center; font-size: min(11vh, 15vw); }
+  #soon.st-flip .clk .d { display: inline-block; min-width: .72em; padding: .12em .08em; border-radius: .14em; background: linear-gradient(#2a2a36 50%, #1c1c26 50%);
+    box-shadow: 0 .6vh 2vh rgba(0,0,0,.5), inset 0 -.05em 0 color-mix(in srgb, var(--sa) 70%, transparent); }
+  #soon.st-flip .clk .d.tick { animation: flip .35s ease; }
+  @keyframes flip { 0% { transform: rotateX(0); } 50% { transform: rotateX(80deg); } 100% { transform: rotateX(0); } }
+  #soon.st-flip .clk .sep { opacity: .8; }
+  #soon.st-ring .ring { position: relative; width: min(42vh, 70vw); aspect-ratio: 1; display: grid; place-items: center; }
+  #soon.st-ring .ring svg { position: absolute; inset: 0; transform: rotate(-90deg); }
+  #soon.st-ring .ring .trk { stroke: rgba(255,255,255,.15); }
+  #soon.st-ring .ring .bar { stroke: var(--sa); transition: stroke-dashoffset .25s linear; }
+  #soon.st-ring .ring .glow { stroke: var(--sa); opacity: .35; stroke-width: 9; }
+  #soon.st-ring .clk { font-size: min(8vh, 13vw); }
+  /* últimos 10 segundos: números enormes que laten */
+  #soon .big { display: none; font-size: min(38vh, 60vw); font-weight: 900; line-height: 1; color: var(--sc);
+    text-shadow: 0 0 3vh var(--sa), 0 0 8vh var(--sa); }
+  #soon.final .big { display: block; }
+  #soon.final .clk, #soon.final .ring, #soon.final .sub { display: none; }
+  #soon .big.beat { animation: beat .9s ease-out; }
+  @keyframes beat { 0% { transform: scale(1.6); opacity: 0; } 25% { transform: scale(1); opacity: 1; } 100% { transform: scale(.85); opacity: .85; } }
+  #soon .go { display: none; font-size: min(10vh, 12vw); line-height: 1.1; font-weight: 900; color: var(--sc); text-shadow: 0 0 3vh var(--sa), 0 .6vh 2vh rgba(0,0,0,.6);
+    animation: gopop .7s cubic-bezier(.2, 1.6, .4, 1) both; margin: 0 4vw; }
+  #soon.done .go { display: block; }
+  #soon.done .clk, #soon.done .ring, #soon.done .big, #soon.done .sub { display: none; }
+  @keyframes gopop { from { transform: scale(.2); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  #soon .conf { position: absolute; top: -4vh; width: 1.2vh; height: 2.2vh; border-radius: .3vh; animation: conf linear forwards; }
+  @keyframes conf { to { transform: translateY(115vh) rotate(720deg); } }
+  /* sala de espera: los que van llegando */
+  #soon .guests { position: absolute; left: 0; right: 0; bottom: 3vh; display: flex; flex-wrap: wrap-reverse; justify-content: center; gap: 1vh; padding: 0 4vw;
+    max-height: 24vh; overflow: hidden; }
+  #soon .guests .gs { width: 6vh; height: 6vh; border-radius: 50%; border: .35vh solid var(--sa); background: #2a2440 center / cover no-repeat;
+    display: grid; place-items: center; font-weight: 900; font-size: 2.4vh; color: #fff; box-shadow: 0 .4vh 1.4vh rgba(0,0,0,.45);
+    animation: gpop .6s cubic-bezier(.2, 1.6, .4, 1) both; }
+  @keyframes gpop { from { transform: scale(0) translateY(4vh); } to { transform: scale(1); } }
+  #soon .hello { position: absolute; left: 50%; bottom: 29vh; transform: translateX(-50%); padding: 1vh 2.4vh; border-radius: 99px; white-space: nowrap;
+    background: rgba(0,0,0,.55); border: 2px solid var(--sa); font-size: max(2.2vh, 14px); font-weight: 800; animation: hello 3s ease both; }
+  @keyframes hello { 0% { opacity: 0; transform: translate(-50%, 2vh); } 12%, 80% { opacity: 1; transform: translate(-50%, 0); } 100% { opacity: 0; } }
   /* ---------- ya regresamos ---------- */
   #brb { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2vh;
     z-index: 4; animation: fade .6s ease both; }
@@ -633,6 +693,7 @@
 <body>
 <div id="alerts" class="top"></div>
 <div id="brb" hidden></div>
+<div id="soon" hidden></div>
 <div id="special"></div>
 <div id="anim"></div>
 <div id="goal" hidden></div>
@@ -935,6 +996,100 @@
       const retry = () => { if (!v.isConnected || !v.paused || tries++ >= 3) return; v.load(); v.play().catch(() => {}); setTimeout(retry, 3000); };
       v.addEventListener('error', () => setTimeout(retry, 1000));
       setTimeout(retry, 3000);
+    }
+  }
+
+  // ---------- 🚀 «Ya casi iniciamos» (5.3.0): su propia fuente (w=soon), a pantalla completa ----------
+  const SOON_TXT = {
+    es: {wait: n => `👀 <b>${n}</b> ${n === 1 ? 'persona esperando' : 'personas esperando'}`, hello: n => `👋 ¡Llegó ${n}!`},
+    en: {wait: n => `👀 <b>${n}</b> ${n === 1 ? 'person waiting' : 'people waiting'}`, hello: n => `👋 ${n} is here!`},
+    pt: {wait: n => `👀 <b>${n}</b> ${n === 1 ? 'pessoa esperando' : 'pessoas esperando'}`, hello: n => `👋 ${n} chegou!`},
+    zh: {wait: n => `👀 <b>${n}</b> 人在等待`, hello: n => `👋 ${n} 来了！`},
+  };
+  let soon = null, soonSkew = 0, soonRaf = 0, soonLast = '', soonDone = false, soonBeat = -1;
+  const soonTx = () => SOON_TXT[(cfg && cfg.lang) || 'es'] || SOON_TXT.es;
+  const pad = n => String(n).padStart(2, '0');
+  function soonClock(ms) {
+    const t = Math.max(0, ms), m = Math.floor(t / 60000), sec = Math.floor(t / 1000) % 60, cs = Math.floor(t / 10) % 100;
+    return [pad(m), pad(sec), pad(cs)];
+  }
+  function soonGuestEl(g) {
+    const el = document.createElement('div'); el.className = 'gs';
+    if (g.avatar) el.style.backgroundImage = `url("${String(g.avatar).replace(/"/g, '')}")`; else el.textContent = (g.name || '?').trim().charAt(0).toUpperCase();
+    el.title = g.name || ''; return el;
+  }
+  function showSoon(o) {
+    const box = $('#soon');
+    if (!which.includes('soon')) { box.hidden = true; return; }
+    cancelAnimationFrame(soonRaf);
+    if (!o || !o.on) { freeMedia(box); box.hidden = true; box.innerHTML = ''; soon = null; return; }
+    const sig = x => [x.ends, x.file, x.style, x.text, x.sub, x.end_text].join('|'), same = soon && sig(soon) === sig(o);
+    soon = o; soonSkew = o.now * 1000 - Date.now();
+    box.style.setProperty('--sc', o.color || '#fff'); box.style.setProperty('--sa', o.accent || '#ff2d6f');
+    if (!same) {
+      freeMedia(box); soonDone = false; soonBeat = -1; soonLast = '';
+      const src = o.file ? '/anim/' + encodeURIComponent(o.file) : '', isVid = /\.(webm|mp4|mov)$/i.test(o.file || '');
+      const bg = !src ? '<div class="bgdef"></div>' : isVid ? `<video class="bg" src="${src}" autoplay muted loop playsinline></video>` : `<img class="bg" src="${src}" alt="">`;
+      const ring = o.style === 'ring' ? '<div class="ring"><svg viewBox="0 0 100 100"><circle class="trk" cx="50" cy="50" r="46" fill="none" stroke-width="4"/><circle class="bar glow" cx="50" cy="50" r="46" fill="none" stroke-linecap="round" pathLength="100" stroke-dasharray="100"/><circle class="bar" cx="50" cy="50" r="46" fill="none" stroke-width="4" stroke-linecap="round" pathLength="100" stroke-dasharray="100"/></svg><div class="clk"></div></div>' : '<div class="clk"></div>';
+      box.innerHTML = `${bg}<h1>${esc(o.text || '')}</h1>${ring}<div class="big"></div><div class="go">${esc(o.end_text || '')}</div>${o.sub ? `<p class="sub">${esc(o.sub)}</p>` : ''}<div class="viewers" hidden></div><div class="guests"></div>`;
+    }
+    box.className = `st-${o.style || 'digital'}${o.dim ? ' dim' : ''}`;
+    if (!same) { const g = box.querySelector('.guests'); g.innerHTML = ''; if (o.guests) for (const x of o.guest_list || []) g.appendChild(soonGuestEl(x)); }
+    soonViewers(o.viewers_now);
+    box.hidden = false;
+    const total = ((o.minutes || 0) * 60 + (o.seconds || 0)) * 1000 || 1;
+    const tick = () => {
+      if (!soon) return;
+      const left = soon.ends * 1000 - (Date.now() + soonSkew);
+      if (left <= 0) {
+        if (!soonDone) { soonDone = true; box.classList.remove('final'); box.classList.add('done'); soonConfetti(box); }
+        return;
+      }
+      box.classList.remove('done'); soonDone = false;
+      const final = soon.big10 && left <= 10000;
+      box.classList.toggle('final', final);
+      if (final) {
+        const n = Math.ceil(left / 1000);
+        if (n !== soonBeat) { soonBeat = n; const b = box.querySelector('.big'); b.textContent = n; b.classList.remove('beat'); void b.offsetWidth; b.classList.add('beat'); }
+      } else {
+        const [m, s2, cs] = soonClock(left), key = m + s2 + cs, clk = box.querySelector('.clk');
+        if (key !== soonLast && clk) {
+          if (soon.style === 'flip') {
+            const digits = (m + ':' + s2).split('');
+            if (clk.children.length !== digits.length + 1) clk.innerHTML = digits.map(d => d === ':' ? '<span class="sep">:</span>' : '<span class="d"></span>').join('') + '<span class="cs"></span>';
+            let i = 0;
+            for (const el of clk.children) {
+              if (el.classList.contains('d')) { const d = digits.filter(x => x !== ':')[i++]; if (el.textContent !== d) { el.textContent = d; el.classList.remove('tick'); void el.offsetWidth; el.classList.add('tick'); } }
+              else if (el.classList.contains('cs')) el.textContent = '.' + cs;
+            }
+          } else clk.innerHTML = `${m}:${s2}<span class="cs">.${cs}</span>`;
+          soonLast = key;
+        }
+        for (const bar of box.querySelectorAll('.ring .bar')) bar.style.strokeDashoffset = String(100 - Math.max(0, Math.min(100, left / total * 100)));
+      }
+      soonRaf = requestAnimationFrame(tick);
+    };
+    tick();
+  }
+  function soonViewers(n) {
+    const el = $('#soon .viewers'); if (!el || !soon) return;
+    el.hidden = !(soon.viewers && n > 0); if (!el.hidden) el.innerHTML = soonTx().wait(n);
+  }
+  function soonArrive(g) {
+    const box = $('#soon'); if (!soon || box.hidden || !soon.guests) return;
+    const wrap = box.querySelector('.guests'); if (!wrap) return;
+    wrap.appendChild(soonGuestEl(g));
+    while (wrap.children.length > 40) wrap.firstChild.remove();
+    const h = document.createElement('div'); h.className = 'hello'; h.innerHTML = soonTx().hello(esc(g.name || ''));
+    box.querySelectorAll('.hello').forEach(x => x.remove()); h.style.bottom = `calc(${wrap.offsetHeight}px + 5vh)`; box.appendChild(h); setTimeout(() => h.remove(), 3100);
+  }
+  function soonConfetti(box) {
+    const colors = [getComputedStyle(box).getPropertyValue('--sa') || '#ff2d6f', '#ffd23f', '#3ee6ff', '#8b5cff', '#ffffff', '#4ade80'];
+    for (let i = 0; i < 90; i++) {
+      const c = document.createElement('i'); c.className = 'conf';
+      c.style.left = Math.random() * 100 + 'vw'; c.style.background = colors[i % colors.length];
+      c.style.animationDuration = (2.2 + Math.random() * 2.2) + 's'; c.style.animationDelay = (Math.random() * .8) + 's';
+      box.appendChild(c); setTimeout(() => c.remove(), 5500);
     }
   }
 
@@ -1319,9 +1474,12 @@
     if (ev.type === 'special_stop') { if (which.includes('special')) stopSpecial(); return; }
     if (ev.type === 'anim') { if (which.includes('anim')) playAnim(ev); return; }
     if (ev.type === 'brb') { showBrb(ev.brb); return; }
+    if (ev.type === 'soon') { showSoon(ev.soon); return; }
+    if (ev.type === 'soon_guest') { soonArrive(ev.guest); return; }
+    if (ev.type === 'soon_viewers') { soonViewers(ev.count); return; }
     if (ev.type === 'dance') { setDance(ev.dance); return; }
     if (ev.stats) stats = ev.stats;
-    if (ev.type === 'config') { cfg = ev.overlay; stats = ev.overlay.stats; applyStyle(); drawActions(); showBrb(cfg.brb); setDance(cfg.dance); }
+    if (ev.type === 'config') { cfg = ev.overlay; stats = ev.overlay.stats; applyStyle(); drawActions(); showBrb(cfg.brb); showSoon(cfg.soon); setDance(cfg.dance); }
     if (ev.type === 'stats_reset') { load(); return; }
     if (which.includes('alerts')) {
       const conf = wantAlert(ev); if (conf) { queue.push({ev, conf}); next(); }
@@ -1337,7 +1495,7 @@
     OV_VERSION = data.version || OV_VERSION;
     cfg = data; stats = data.stats; LOC = {en: 'en-US', pt: 'pt-BR', zh: 'zh-CN'}[data.lang] || 'es-MX'; likeMark = Math.floor(stats.likes / (cfg.alerts.like.every || 1)) * (cfg.alerts.like.every || 1);
     applyStyle();
-    showBrb(data.brb);
+    showBrb(data.brb); showSoon(data.soon);
     $('#goal').hidden = !which.includes('goal'); $('#top').hidden = !which.includes('top'); $('#likers').hidden = !which.includes('likes'); $('#alerts').hidden = !which.includes('alerts');
     $('#actions').hidden = !which.includes('actions');
     drawGoals(); drawTop(); drawActions(); setDance(data.dance);
@@ -1374,6 +1532,10 @@
       }).catch(() => { down = true; });
     }, 15000);
     // la fuente propia de «Ya regresamos» avisa que está abierta (las vistas previas de EC-Tok no cuentan)
+    if (which.includes('soon') && !isPreviewFrame) {  // 🚀 la fuente de «Ya casi iniciamos» avisa que está abierta
+      const here = () => fetch('/api/overlay?here=soon').catch(() => {});
+      here(); setInterval(here, 4000);
+    }
     if (which.includes('brb') && !isPreviewFrame) {
       const here = () => fetch('/api/overlay?here=brb').catch(() => {});
       here(); setInterval(here, 4000);

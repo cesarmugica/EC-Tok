@@ -31,7 +31,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, unquote, urlsplit
 
-APP_VERSION = "5.2.1"
+APP_VERSION = "5.3.0"
 ALERT_ONE_OF = ("gift", "follow", "share", "like", "gift_special")  # 4.8.6: alerta O animación en todas (la animación trae su letrero)
 
 try:  # lo genera windows/build.ps1
@@ -188,6 +188,10 @@ DEFAULT_CONFIG: dict = {
         "quick_seconds": 4,
         "quick_size": 70,
         "brb": {"id": "brb", "file": "cafe-ya-regreso.webp", "text": "Ya regresamos", "sub": "No te vayas 💖", "dim": True, "key": ""},
+        # 5.3.0 🚀 «Ya casi iniciamos»: pantalla completa con reloj en reversa (su propia fuente w=soon)
+        "soon": {"id": "soon", "file": "", "text": "Ya casi iniciamos", "sub": "Ponte cómodo, ya casi empezamos 💖", "minutes": 10, "seconds": 0,
+                 "style": "digital", "color": "#ffffff", "accent": "#ff2d6f", "dim": True, "end_text": "¡Ya empezamos!", "auto_off": False,
+                 "big10": True, "viewers": True, "guests": True, "key": ""},
         # Animaciones especiales: las del streamer (intro de batalla, etc.); solo se muestran cuando él las lanza.
         "special": [],
     },
@@ -273,7 +277,8 @@ def _scene_files() -> set:
 def assign_keys(a: dict) -> None:
     """Cada botón con una tecla distinta (Ctrl+Alt+tecla); los que no tienen, la siguiente libre."""
     used: set = set()
-    items = [*a.get("custom", []), *a.get("quick", []), *a.get("special", []), *([a["brb"]] if isinstance(a.get("brb"), dict) else [])]
+    items = [*a.get("custom", []), *a.get("quick", []), *a.get("special", []), *([a["brb"]] if isinstance(a.get("brb"), dict) else []),
+             *([a["soon"]] if isinstance(a.get("soon"), dict) else [])]
     for item in items:
         key = item.get("key") or ""
         if key not in HOTKEY_KEYS or key in used:
@@ -341,6 +346,11 @@ def load_config() -> dict:
             if "custom" not in (saved.get("anims") or {}):
                 _split_quick(cfg, saved)
             _keys_for_all(cfg, saved)
+            if not saved.get("soon_key"):  # 5.3.0: «Ya casi iniciamos» trae su tecla (la siguiente libre), una sola vez
+                cfg["soon_key"] = True
+                if not cfg["anims"]["soon"].get("key"):
+                    cfg["anims"]["soon"]["_auto"] = True
+                    assign_keys(cfg["anims"])
             _seed_console(cfg, saved)
             dance_fix_config(cfg)
             for k in ALERT_ONE_OF:  # 4.8.5: alerta O animación (la animación trae su letrero)
@@ -350,6 +360,8 @@ def load_config() -> dict:
             return cfg
     cfg = _merge(DEFAULT_CONFIG, {})
     dance_fix_config(cfg)
+    cfg["anims"]["soon"]["_auto"] = True
+    cfg["soon_key"] = True
     _keys_for_all(cfg, {})
     _seed_console(cfg, {})
     return cfg
@@ -446,6 +458,10 @@ DEFAULT_TEXTS: dict[tuple, dict[str, str]] = {
     ("top", "title"): {"es": "Top donadores", "en": "Top gifters", "pt": "Top doadores", "zh": "送礼榜"},
     ("likers", "title"): {"es": "Top likes", "en": "Top likers", "pt": "Top curtidas", "zh": "点赞榜"},
     ("anims", "brb", "text"): {"es": "Ya regresamos", "en": "Be right back", "pt": "Já voltamos", "zh": "马上回来"},
+    ("anims", "soon", "text"): {"es": "Ya casi iniciamos", "en": "Starting soon", "pt": "Já vamos começar", "zh": "马上开始"},
+    ("anims", "soon", "sub"): {"es": "Ponte cómodo, ya casi empezamos 💖", "en": "Get comfy, we're about to start 💖",
+                               "pt": "Fique à vontade, já vamos começar 💖", "zh": "找个舒服的位置，我们马上开始 💖"},
+    ("anims", "soon", "end_text"): {"es": "¡Ya empezamos!", "en": "Here we go!", "pt": "Começou!", "zh": "开始啦！"},
     ("anims", "brb", "sub"): {"es": "No te vayas 💖", "en": "Don't go anywhere 💖", "pt": "Não vá embora 💖", "zh": "别走开 💖"},
 }
 DEFAULT_LIST_TEXTS = {  # (lista, id, campo)
@@ -663,6 +679,27 @@ def clean_config(data: dict) -> dict:
             a["brb"]["key"] = _text(brb.get("key"), "", 4)
             if "key" not in brb:  # 2.5.3: «Ya regresamos» también trae su tecla; la siguiente libre
                 a["brb"]["_auto"] = True
+        soon = anims.get("soon")
+        if isinstance(soon, dict):
+            o = a["soon"]
+            o["file"] = Path(str(soon.get("file", o["file"]) or "")).name
+            for k, n in (("text", 60), ("sub", 120), ("end_text", 60)):
+                o[k] = _text(soon.get(k), o[k], n)
+            for k, lo, hi in (("minutes", 0, 60), ("seconds", 0, 59)):
+                with contextlib.suppress(TypeError, ValueError):
+                    o[k] = max(lo, min(hi, int(soon.get(k, o[k]))))
+            if o["minutes"] == 0 and o["seconds"] < 5:
+                o["seconds"] = 5
+            if soon.get("style") in SOON_STYLES:
+                o["style"] = soon["style"]
+            for k in ("color", "accent"):
+                if isinstance(soon.get(k), str) and re.fullmatch(r"#[0-9a-fA-F]{6}", soon[k]):
+                    o[k] = soon[k]
+            for k in ("dim", "auto_off", "big10", "viewers", "guests"):
+                if isinstance(soon.get(k), bool):
+                    o[k] = soon[k]
+            o["id"] = "soon"
+            o["key"] = _text(soon.get("key"), "", 4)
         assign_keys(a)
     top = data.get("top")
     if isinstance(top, dict):
@@ -1070,7 +1107,69 @@ threading.Thread(target=_brb_watch, daemon=True).start()
 
 def set_brb(on: bool) -> None:
     BRB["on"] = bool(on)
+    if on and SOON["on"]:
+        set_soon(False)  # 5.3.0: «Ya regresamos» y «Ya casi iniciamos» nunca a la vez
     BUS.emit(new_event("brb", brb=brb_payload()))
+
+
+# ---------- 🚀 «Ya casi iniciamos» (5.3.0) ----------
+SOON_STYLES = ("digital", "neon", "flip", "ring", "minimal")
+SOON = {"on": False, "ends": 0.0, "guests": [], "seen": set()}
+SOON_SEEN = {"t": 0.0}
+
+
+def soon_own() -> bool:
+    return BUS.count("overlay-soon") > 0 or time.time() - SOON_SEEN["t"] < 12
+
+
+def soon_payload() -> dict:
+    """Lo que necesita la fuente: la configuración, cuándo llega a 0 y la sala de espera."""
+    return {**CONFIG["anims"]["soon"], "on": SOON["on"], "ends": SOON["ends"], "now": time.time(), "own": soon_own(),
+            "viewers_now": LIVE.stats.viewers, "guest_list": SOON["guests"][-40:]}
+
+
+def set_soon(on: bool) -> None:
+    o = CONFIG["anims"]["soon"]
+    SOON["on"] = bool(on)
+    if on:
+        SOON["ends"] = time.time() + o["minutes"] * 60 + o["seconds"]
+        SOON["guests"], SOON["seen"] = [], set()
+        if BRB["on"]:
+            BRB["on"] = False  # 5.3.0: nunca a la vez
+            BUS.emit(new_event("brb", brb=brb_payload()))
+    BUS.emit(new_event("soon", soon=soon_payload()))
+
+
+def soon_guest(user: dict | None) -> None:
+    """Alguien llegó (entró, dio like, comentó…): a la sala de espera, una sola vez."""
+    if not SOON["on"] or not user or not CONFIG["anims"]["soon"].get("guests"):
+        return
+    key = user.get("id") or user.get("name")
+    if not key or user.get("name") == "Alguien" or key in SOON["seen"]:
+        return
+    SOON["seen"].add(key)
+    guest = {"name": user.get("name", ""), "avatar": user.get("avatar", "")}
+    SOON["guests"].append(guest)
+    del SOON["guests"][:-60]
+    BUS.emit(new_event("soon_guest", guest=guest))
+
+
+def _soon_watch() -> None:
+    """Quitarla sola al llegar a 0 (si así se configuró) y avisar si su fuente aparece o desaparece."""
+    last_own = None
+    while True:
+        time.sleep(1)
+        o = CONFIG["anims"]["soon"]
+        if SOON["on"] and o.get("auto_off") and time.time() > SOON["ends"] + 5:
+            set_soon(False)
+        own = soon_own()
+        if own != last_own:
+            if last_own is not None:
+                BUS.emit(new_event("soon", soon=soon_payload()))
+            last_own = own
+
+
+threading.Thread(target=_soon_watch, daemon=True).start()
 
 
 def fire_button(kind: str, item_id: str, preview: bool = False) -> str:
@@ -1078,6 +1177,9 @@ def fire_button(kind: str, item_id: str, preview: bool = False) -> str:
     a = CONFIG["anims"]
     if kind == "brb":  # la tecla de «Ya regresamos» lo pone y lo quita
         set_brb(not BRB["on"])
+        return ""
+    if kind == "soon":  # 🚀 la tecla de «Ya casi iniciamos» la pone y la quita
+        set_soon(not SOON["on"])
         return ""
     if kind == "dance":  # 💃 live de baile
         err = dance_action(item_id)
@@ -1165,8 +1267,8 @@ class Hotkeys:
         self.problems = {}
         a = CONFIG["anims"]
         hid = 1
-        for kind in ("custom", "quick", "special", "brb"):
-            for item in ([a["brb"]] if kind == "brb" else a.get(kind, [])):
+        for kind in ("custom", "quick", "special", "brb", "soon"):
+            for item in ([a[kind]] if kind in ("brb", "soon") else a.get(kind, [])):
                 key = item.get("key") or ""
                 if key not in HOTKEY_KEYS:
                     continue
@@ -1361,6 +1463,16 @@ def _is_special(event: dict) -> bool:
 
 
 def live_emit(event: dict) -> None:
+    kind = event.get("type")
+    if kind == "join":  # 5.3.0: solo para la sala de espera de «Ya casi iniciamos»
+        soon_guest(event.get("user"))
+        return
+    if kind == "viewers":
+        if SOON["on"]:
+            BUS.emit(new_event("soon_viewers", count=event.get("count", 0)))
+        return
+    if kind in ("gift", "follow", "share", "like", "comment") and SOON["on"]:
+        soon_guest(event.get("user"))
     if event.get("type") == "gift" and isinstance(event.get("gift"), dict):
         event["gift"]["label"] = gift_label(event["gift"].get("name", ""))  # 🤝 «Community Gift» → «Regalo de la Comunidad»
     if _is_special(event):
@@ -1494,6 +1606,7 @@ class Simulator:
     def _run(self, gen: int) -> None:
         due = [time.time() + 0.3 + i * 0.15 for i in range(len(self.items))]
         script = DanceScript(self.dance) if getattr(self, "dance", None) else None
+        join_at, joined = time.time() + 1, 0  # 🚀 con «Ya casi iniciamos» puesto: gente que va llegando y espectadores
         while True:
             with self.lock:
                 if gen != self.gen or not self.running:
@@ -1515,6 +1628,12 @@ class Simulator:
                         LIVE.push(ev)
                     with self.lock:
                         self.sent[item["kind"]] = self.sent.get(item["kind"], 0) + item["count"]
+            if SOON["on"] and now >= join_at:
+                join_at, joined = now + random.uniform(1.2, 3.0), joined + 1
+                name = f"{random.choice(ectok_live.TEST_USERS)} {joined}"
+                LIVE.push(new_event("join", user={"id": f"sim{joined}", "name": name, "avatar": ""}, sim=True))
+                LIVE.stats.viewers = joined + random.randint(0, 3)
+                LIVE.push(new_event("viewers", count=LIVE.stats.viewers, sim=True))
             if script:
                 n = script.step()
                 if n:
@@ -2323,7 +2442,8 @@ def clean_dance(new: dict, cur: dict) -> dict:
 def dance_fix_keys(cfg: dict) -> None:
     """Una tecla, un solo botón: las del live de baile no pueden repetir las de las animaciones."""
     a = cfg["anims"]
-    used = {i.get("key") for i in [*a.get("custom", []), *a.get("quick", []), *a.get("special", []), a.get("brb") or {}] if i.get("key")}
+    used = {i.get("key") for i in [*a.get("custom", []), *a.get("quick", []), *a.get("special", []), a.get("brb") or {}, a.get("soon") or {}]
+            if i.get("key")}
     for k in DANCE_KEYS:
         v = cfg["dance"]["keys"].get(k, "")
         if v and (v in used or v not in HOTKEY_KEYS):
@@ -2343,7 +2463,7 @@ def overlay_actions() -> dict:
 def overlay_payload() -> dict:
     """Lo que necesitan los overlays: estilos, alertas, metas y el estado del live."""
     return {"style": CONFIG["style"], "alerts": CONFIG["alerts"], "goals": CONFIG["goals"], "top": CONFIG["top"], "likers": CONFIG["likers"],
-            "actions": overlay_actions(), "stats": LIVE.stats.public(CONFIG["top"]["count"]), "brb": brb_payload(),
+            "actions": overlay_actions(), "stats": LIVE.stats.public(CONFIG["top"]["count"]), "brb": brb_payload(), "soon": soon_payload(),
             "audio": CONFIG["audio"], "lang": CONFIG["language"], "version": APP_VERSION, "dance": dance_payload()}
 
 
@@ -2883,13 +3003,17 @@ class Handler(BaseHTTPRequestHandler):
             self.send_json({"console": CONFIG["console"], "audio": CONFIG["audio"], "lang": ui_lang(), "version": APP_VERSION})
         elif path == "/api/info":
             LAST_PING = time.time()
-            self.send_json({"version": APP_VERSION, "build_date": BUILD_DATE, "config": CONFIG, "brb": BRB, "aliases": aliases_payload(),
+            self.send_json({"version": APP_VERSION, "build_date": BUILD_DATE, "config": CONFIG, "brb": BRB, "soon": soon_payload(), "aliases": aliases_payload(),
                             "animations": list_animations(), "sound_bank": sound_bank(), "my_sounds": my_sounds(),
                             "live": LIVE.public(CONFIG["top"]["count"]), "port": self.port,
                             "recent": list(LIVE.recent)[-60:]})
         elif path == "/api/overlay":
             if query.get("here") == ["brb"]:  # la fuente propia de «Ya regresamos» avisa que está abierta
                 BRB_SEEN["t"] = time.time()
+                self.send_json({"ok": True})
+                return
+            if query.get("here") == ["soon"]:  # 🚀 la fuente de «Ya casi iniciamos» avisa que está abierta
+                SOON_SEEN["t"] = time.time()
                 self.send_json({"ok": True})
                 return
             if query.get("ping") == ["1"]:  # 4.9.0: el vigilante de las fuentes solo pregunta la versión
@@ -3188,6 +3312,9 @@ class Handler(BaseHTTPRequestHandler):
         elif path == "/api/brb":
             set_brb(bool(data.get("on")))
             self.send_json({"ok": True, "brb": BRB})
+        elif path == "/api/soon":
+            set_soon(bool(data.get("on")))
+            self.send_json({"ok": True, "soon": soon_payload()})
         elif path == "/api/anims/open":
             open_in_explorer(ANIM_USER)
             self.send_json({"ok": True})

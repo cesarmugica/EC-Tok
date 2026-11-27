@@ -1,5 +1,16 @@
 # Cambios de EC-Tok
 
+## 5.3.0
+- 🚀 **Nuevo: «Ya casi iniciamos»** (🎬 Animaciones), con su propia fuente a pantalla completa (🚀 en «Poner las alertas en tu live»):
+  - **Reloj en reversa** de 0:05 hasta 60:00 (mm:ss.cc), 5 estilos (digital, neón, tarjetas que giran, anillo que se vacía, minimalista), tu color y tu acento.
+  - **Fondo**: el animado de EC-Tok o cualquier animación/video del banco o tuyo (sin transparencia, a pantalla completa).
+  - **Últimos 10 segundos en grande** (laten), y al llegar a 0 tu mensaje («¡Ya empezamos!») con confeti; opcional: quitarla sola 5 s después.
+  - **👀 Cuántas personas están esperando** (los espectadores del live) y **👋 sala de espera**: las fotitos de los que van llegando, con «¡Llegó…!».
+  - Su tecla **Ctrl+Alt+…** para ponerla y quitarla, y vista previa en la ventana.
+- 🔁 «Ya casi iniciamos» y «☕ Ya regresamos» **nunca a la vez**: al poner uno se quita el otro (EC-Tok avisa antes).
+- 👁 En la ventana ahora se ve si **«Ya regresamos» y «Ya casi iniciamos» se están mostrando** en tu live (y si falta agregar su fuente en LIVE Studio).
+- 🧪 En el Entorno de prueba, con «Ya casi iniciamos» puesto, llegan invitados de prueba y sube el contador de espectadores.
+
 ## 5.2.1
 - 🤝 El **Community Gift** ahora sale con su nombre en el idioma de tu live: «Regalo de la Comunidad», «Community Gift», «Presente da Comunidade» o «社区礼物» (en alertas, letreros de animaciones, voz y en el feed de 🔴 En vivo). TikTok lo sigue mandando como «Community Gift», así que las reglas lo reconocen igual.
 
