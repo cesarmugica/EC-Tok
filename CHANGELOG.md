@@ -1,5 +1,8 @@
 # Cambios de EC-Tok
 
+## 5.3.2
+- 👋 Sala de espera de «Ya casi iniciamos»: cuando ya no caben más fotitos (3 renglones), se va la del que llegó primero, así **el que acaba de llegar siempre se ve** (antes, pasando de ~3 renglones, los nuevos quedaban escondidos arriba).
+
 ## 5.3.1
 - 📐 Los botones de «Ya casi iniciamos» y «Ya regresamos» ahora miden lo mismo, igual que sus indicadores (👁 / 🙈 / ⚠), en 🔴 En vivo y en 🎬 Animaciones.
 - Arreglo: la tecla de «Ya casi iniciamos» ya no se borra al cambiar otra opción.

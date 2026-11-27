@@ -1079,7 +1079,8 @@
     const box = $('#soon'); if (!soon || box.hidden || !soon.guests) return;
     const wrap = box.querySelector('.guests'); if (!wrap) return;
     wrap.appendChild(soonGuestEl(g));
-    while (wrap.children.length > 40) wrap.firstChild.remove();
+    // si ya no caben (máx. 3 renglones), se va el que llegó primero: el nuevo siempre se ve
+    while (wrap.children.length > 1 && (wrap.children.length > 40 || wrap.scrollHeight > wrap.clientHeight + 2)) wrap.firstChild.remove();
     const h = document.createElement('div'); h.className = 'hello'; h.innerHTML = soonTx().hello(esc(g.name || ''));
     box.querySelectorAll('.hello').forEach(x => x.remove()); h.style.bottom = `calc(${wrap.offsetHeight}px + 5vh)`; box.appendChild(h); setTimeout(() => h.remove(), 3100);
   }
