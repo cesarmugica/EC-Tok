@@ -1,5 +1,8 @@
 # Cambios de EC-Tok
 
+## 5.1.2
+- 🎉 El evento del cofre ahora se llama **«Cofre del tesoro»** (antes decía «Regalo de la comunidad (cofre)», que era un error: el regalo de la comunidad es un regalo normal de 1 moneda de cada live y ya se cuenta como cualquier regalo, con su imagen de ese live).
+
 ## 5.1.1
 - 💜 Nueva en el Staff EC-Tok: **@soumariaac** (en el pie de página, junto a @deysyzoneu.u, @imuxoficial y @laurely_blog).
 
