@@ -31,7 +31,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, unquote, urlsplit
 
-APP_VERSION = "5.2.0"
+APP_VERSION = "5.2.1"
 ALERT_ONE_OF = ("gift", "follow", "share", "like", "gift_special")  # 4.8.6: alerta O animación en todas (la animación trae su letrero)
 
 try:  # lo genera windows/build.ps1
@@ -982,6 +982,14 @@ SIGN_DEFAULTS = {
     "envelope": {"es": "¡Gracias por el cofre, {user}!", "en": "Thanks for the treasure chest, {user}!", "pt": "Obrigado pelo baú, {user}!", "zh": "谢谢你的宝箱，{user}！"},
     "": {"es": "¡Gracias!", "en": "Thank you!", "pt": "Obrigado!", "zh": "谢谢！"},
 }
+GIFT_LABELS = {"community gift": {"es": "Regalo de la Comunidad", "pt": "Presente da Comunidade", "zh": "社区礼物"}}  # 5.2.1
+
+
+def gift_label(name: str, lang: str | None = None) -> str:
+    """El nombre del regalo como lo dice tu live (TikTok manda el nombre oficial en inglés)."""
+    return GIFT_LABELS.get(_norm(name or ""), {}).get(lang or CONFIG["language"], name)
+
+
 GIFT_NAMES_ES = {"heart me": "Quiéreme", "rose": "Rosa", "lion": "León", "universe": "Universo", "galaxy": "Galaxia",
                  "finger heart": "Corazón con los dedos", "ice cream cone": "Helado", "doughnut": "Dona", "perfume": "Perfume",
                  "money gun": "Pistola de dinero", "tiktok": "TikTok"}
@@ -994,7 +1002,7 @@ def sign_text(template: str, ev: dict | None, show_name: bool = True) -> str:
     kind = ev.get("type", "")
     text = template.strip() or SIGN_DEFAULTS.get(kind if kind in SIGN_DEFAULTS else "", SIGN_DEFAULTS[""])[lang]
     gift = ev.get("gift") or {}
-    gname = gift.get("name", "")
+    gname = gift_label(gift.get("name", ""), lang)
     if lang == "es":
         gname = GIFT_NAMES_ES.get(_norm(gname), gname)
     likes = ev.get("milestone") or LIVE.stats.likes
@@ -1353,6 +1361,8 @@ def _is_special(event: dict) -> bool:
 
 
 def live_emit(event: dict) -> None:
+    if event.get("type") == "gift" and isinstance(event.get("gift"), dict):
+        event["gift"]["label"] = gift_label(event["gift"].get("name", ""))  # 🤝 «Community Gift» → «Regalo de la Comunidad»
     if _is_special(event):
         event["special"] = True  # ⭐ el overlay le pone su alerta propia
     BUS.emit(event)

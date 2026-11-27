@@ -1,5 +1,8 @@
 # Cambios de EC-Tok
 
+## 5.2.1
+- 🤝 El **Community Gift** ahora sale con su nombre en el idioma de tu live: «Regalo de la Comunidad», «Community Gift», «Presente da Comunidade» o «社区礼物» (en alertas, letreros de animaciones, voz y en el feed de 🔴 En vivo). TikTok lo sigue mandando como «Community Gift», así que las reglas lo reconocen igual.
+
 ## 5.2.0
 - 🤝 Nuevo disparador **«Community Gift (regalo de la comunidad)»** en 🎬 Animaciones y 🔊 Sonidos: el regalo especial de cada live (1 moneda; mismo nombre, imagen distinta en cada live). Le gana a «Regalo de N 💎 o más» y a «Cualquier regalo»; solo un «Regalo especial» con ese mismo nombre le gana.
 - Botón **«🤝 Community Gift»** en «Probar:» de Animaciones, y aparece en el Entorno de prueba si lo usas.

@@ -667,7 +667,7 @@
   }
   function fill(tpl, ev) {
     const g = ev.gift || {};
-    const vals = {user: `<span class="u">${esc(ev.user ? ev.user.name : '')}</span>`, gift: `<span class="g">${esc(g.name || '')}</span>`,
+    const vals = {user: `<span class="u">${esc(ev.user ? ev.user.name : '')}</span>`, gift: `<span class="g">${esc(g.label || g.name || '')}</span>`,
       count: esc(g.count || ''), diamonds: esc(g.total || ''), likes: esc((ev.likes_total || 0).toLocaleString(LOC))};
     return esc(tpl).replace(/\{(user|gift|count|diamonds|likes)\}/g, (_, k) => vals[k]);
   }

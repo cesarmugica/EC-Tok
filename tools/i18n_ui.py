@@ -805,5 +805,5 @@ T = {
 '📺 Idioma de tu live': ('📺 Your LIVE language', '📺 Idioma da sua live'),
 'Lo que ve tu público: alertas, letreros de las animaciones, voz, top y relojes.': ('What your audience sees: alerts, animation signs, voice, top lists and timers.', 'O que o seu público vê: alertas, placas das animações, voz, top e relógios.'),
 '¿Cambiar el idioma de tu live a {0}?\n\nLas alertas, letreros, voz y botones que vienen de fábrica pasan a {0}. Los textos que escribiste tú NO cambian, y la ventana de EC-Tok se queda en su idioma.': ('Change your LIVE language to {0}?\n\nThe built-in alerts, signs, voice and buttons switch to {0}. The texts you wrote yourself do NOT change, and the EC-Tok window stays in its language.', 'Mudar o idioma da sua live para {0}?\n\nOs alertas, placas, voz e botões de fábrica passam para {0}. Os textos que você escreveu NÃO mudam, e a janela do EC-Tok fica no idioma dela.'),
-'🤝 Community Gift (regalo de la comunidad)': ('🤝 Community Gift', '🤝 Community Gift (presente da comunidade)'),
+'🤝 Regalo de la Comunidad': ('🤝 Community Gift', '🤝 Presente da Comunidade'),
 }
