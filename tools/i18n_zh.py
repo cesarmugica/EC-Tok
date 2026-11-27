@@ -805,4 +805,5 @@ ZH = {
 '📺 Idioma de tu live': '📺 直播语言',
 'Lo que ve tu público: alertas, letreros de las animaciones, voz, top y relojes.': '观众看到的内容：提醒、动画牌子、语音、排行榜和计时器。',
 '¿Cambiar el idioma de tu live a {0}?\n\nLas alertas, letreros, voz y botones que vienen de fábrica pasan a {0}. Los textos que escribiste tú NO cambian, y la ventana de EC-Tok se queda en su idioma.': '把直播语言改成 {0}？\n\n自带的提醒、牌子、语音和按钮会改成 {0}。你自己写的文字不会改变，EC-Tok 窗口保持原来的语言。',
+'🤝 Community Gift (regalo de la comunidad)': '🤝 Community Gift（社区礼物）',
 }

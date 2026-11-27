@@ -31,7 +31,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, unquote, urlsplit
 
-APP_VERSION = "5.1.2"
+APP_VERSION = "5.2.0"
 ALERT_ONE_OF = ("gift", "follow", "share", "like", "gift_special")  # 4.8.6: alerta O animación en todas (la animación trae su letrero)
 
 try:  # lo genera windows/build.ps1
@@ -467,6 +467,7 @@ def _list_for(cfg: dict, name: str) -> list:
 
 
 LANGS = ("es", "en", "pt", "zh")
+COMMUNITY_GIFT = "Community Gift"  # 5.2.0: el regalo de la comunidad (1 moneda; mismo nombre, imagen distinta en cada live)
 
 
 def ui_lang() -> str:
@@ -581,7 +582,7 @@ def clean_config(data: dict) -> dict:
     if isinstance(data.get("sounds"), list):
         rules = []
         for rule in data["sounds"][:100]:
-            if not isinstance(rule, dict) or rule.get("trigger") not in ("any_gift", "gift", "min_diamonds", "follow", "share", "likes"):
+            if not isinstance(rule, dict) or rule.get("trigger") not in ("any_gift", "gift", "community", "min_diamonds", "follow", "share", "likes"):
                 continue
             file = Path(str(rule.get("file") or "")).name
             rules.append({"id": _text(rule.get("id"), uuid.uuid4().hex[:8], 20), "on": rule.get("on") is not False,
@@ -618,7 +619,7 @@ def clean_config(data: dict) -> dict:
     anims = data.get("anims")
     if isinstance(anims, dict):
         a = cfg["anims"]
-        triggers = ("any_gift", "gift", "min_diamonds", "follow", "share", "likes", "user_likes", "subscribe", "superfan", "envelope",
+        triggers = ("any_gift", "gift", "community", "min_diamonds", "follow", "share", "likes", "user_likes", "subscribe", "superfan", "envelope",
                     "battle_start", "battle_end", "booster")
         if isinstance(anims.get("rules"), list):
             rules = []
@@ -1262,7 +1263,8 @@ def anims_for(ev: dict) -> list[dict]:
         by_min = sorted([r for r in rules if r["trigger"] == "min_diamonds" and gift["total"] >= r["min_diamonds"]],
                         key=lambda r: r["min_diamonds"], reverse=True)
         anyg = [r for r in rules if r["trigger"] == "any_gift"]
-        chosen = (exact or by_min or anyg)[:1]
+        comm = [r for r in rules if r["trigger"] == "community" and same_gift(COMMUNITY_GIFT, gift["name"])]
+        chosen = (exact or comm or by_min or anyg)[:1]
     elif kind in ("follow", "share", "subscribe", "superfan", "envelope"):
         chosen = [r for r in rules if r["trigger"] == kind][:1]
     elif kind == "battle":

@@ -1,5 +1,9 @@
 # Cambios de EC-Tok
 
+## 5.2.0
+- 🤝 Nuevo disparador **«Community Gift (regalo de la comunidad)»** en 🎬 Animaciones y 🔊 Sonidos: el regalo especial de cada live (1 moneda; mismo nombre, imagen distinta en cada live). Le gana a «Regalo de N 💎 o más» y a «Cualquier regalo»; solo un «Regalo especial» con ese mismo nombre le gana.
+- Botón **«🤝 Community Gift»** en «Probar:» de Animaciones, y aparece en el Entorno de prueba si lo usas.
+
 ## 5.1.2
 - 🎉 El evento del cofre ahora se llama **«Cofre del tesoro»** (antes decía «Regalo de la comunidad (cofre)», que era un error: el regalo de la comunidad es un regalo normal de 1 moneda de cada live y ya se cuenta como cualquier regalo, con su imagen de ese live).
 
